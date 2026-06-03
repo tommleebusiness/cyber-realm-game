@@ -339,7 +339,8 @@ window.showPanel=function(t){
     p.innerHTML+='<button class="btn2" id="exBtn" style="margin-top:6px">📤 Экспорт</button>';
     p.innerHTML+='<button class="btn2" id="imBtn" style="margin-top:6px">📥 Импорт</button>';
     p.innerHTML+='<button class="danger" id="delBtn" style="margin-top:6px">🗑️ Удалить всё</button>';
-    id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?\nБонус: +"+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg();}},{t:"Престиж!",f:function(){doPrestige();}}]);};
+    id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?
+Бонус: +"+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg();}},{t:"Престиж!",f:function(){doPrestige();}}]);};
     id("exBtn").onclick=function(){prompt("Скопируй код:",btoa(JSON.stringify(S)));};
     id("imBtn").onclick=function(){var d=prompt("Вставь код:");if(!d)return;try{Object.assign(S,JSON.parse(atob(d)));saveGame();showPanel("st");window.draw();}catch(e){alert("Неверный код");}};
     id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg();}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload();}}]);}
@@ -375,7 +376,7 @@ window.saveTaskToGist=function(user,text){
   localStorage.setItem("owl_tasks",JSON.stringify(tasks.slice(-50)));
   
   // Send to Telegram bot
-  var msg="🎮 *Cyber Realm Idle*\\n👤 User: "+user+"\\n📝 Task: "+text;
+  var msg="🎮 *Cyber Realm Idle*\n👤 User: "+user+"\n📝 Task: "+text;
   fetch("https://api.telegram.org/bot"+BOT_TOKEN+"/sendMessage",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -385,15 +386,52 @@ window.saveTaskToGist=function(user,text){
 
 window.owlReplyLocal=function(text){
   var L=text.toLowerCase(),r="";
-  if(L.indexOf("босс")>=0||L.indexOf("boss")>=0){var bn=["Пустотный","Небулярный","Квазаровый","Пульсарный","Тёмный","Фантомный"];var i=Math.floor(Math.random()*bn.length);var hp=Math.floor(5e4*Math.pow(1.8,BS.length));BS.push({n:bn[i]+" Владыка",hp:hp,cr:Math.floor(hp*.4),ic:"👹"});r="✅ Босс создан!\n👹 "+bn[i]+" Владыка\n❤️ HP: "+fmt(hp)+"\n💰 Награда: "+fmt(Math.floor(hp*.4))+"💎\nВсего боссов: "+BS.length;}
-  else if(L.indexOf("улучшен")>=0||L.indexOf("апгрейд")>=0||L.indexOf("upgrade")>=0){var un=["Квантовый Ускоритель","Нейро-Усилитель","Плазменный Инжектор","Вакуумный Насос"];var i=Math.floor(Math.random()*un.length);var c=Math.floor(100*Math.pow(2,UPG.length));UPG.push({n:un[i],d:"+10% доход",cb:c,fn:function(){S.gm*=1.1},mx:3});r="✅ Улучшение добавлено!\n⚡ "+un[i]+"\nЦена: "+fmt(c)+"💎\nУлучшений: "+UPG.length;}
-  else if(L.indexOf("кредит")>=0||L.indexOf("монет")>=0||L.indexOf("денег")>=0||L.indexOf("money")>=0||L.indexOf("credit")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 Начислено "+fmt(a)+" кредитов!\nБаланс: "+fmt(S.c)+"💎";}
-  else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0||L.indexOf("level")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!\nУровень: "+S.rl+"\nДо следующего: "+fmt(S.rg-S.rp)+"💎";}
-  else if(L.indexOf("гем")>=0||L.indexOf("премиум")>=0||L.indexOf("gem")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!\nБаланс: "+S.g+"💎";}
-  else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0||L.indexOf("не работа")>=0||L.indexOf("fix")>=0||L.indexOf("bug")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!\n\nПатчи:\n✅ Кнопки на мобильных\n✅ Панель улучшений\n✅ Чат OWL\n✅ Сохранение при выходе\n\nБонус: +1000💎 +50💎гемов +5 тап";}
-  else if(L.indexOf("привет")>=0||L.indexOf("хай")>=0||L.indexOf("hello")>=0||L.indexOf("hi")>=0){r="👋 Привет, "+curUser+"!\n\nЯ — OWL 🦉, ИИ-разработчик этой игры.\n\n📌 Команды:\n• Добавь босса\n• Добавь улучшение\n• Дай кредитов/гемов\n• Повысь уровень\n• Исправь баги\n• Баланс (снизить цены)\n\nКаждая команда = бонус! 🎁";}
-  else if(L.indexOf("баланс")>=0||L.indexOf("цен")>=0||L.indexOf("дорого")>=0||L.indexOf("balance")>=0||L.indexOf("price")>=0){for(var i=0;i<UPG.length;i++){UPG[i].cb=Math.floor(UPG[i].cb*0.9);}r="⚖️ Баланс обновлён!\n\nЦены снижены на 10%";}
-  else{S.c+=300;S.g+=10;r="✅ Задача принята!\n\nБонус: +300💎 +10💎гемов\n\nБаланс: "+fmt(S.c)+"💎 | Гемы: "+S.g;}
+  if(L.indexOf("босс")>=0||L.indexOf("boss")>=0){var bn=["Пустотный","Небулярный","Квазаровый","Пульсарный","Тёмный","Фантомный"];var i=Math.floor(Math.random()*bn.length);var hp=Math.floor(5e4*Math.pow(1.8,BS.length));BS.push({n:bn[i]+" Владыка",hp:hp,cr:Math.floor(hp*.4),ic:"👹"});r="✅ Босс создан!
+👹 "+bn[i]+" Владыка
+❤️ HP: "+fmt(hp)+"
+💰 Награда: "+fmt(Math.floor(hp*.4))+"💎
+Всего боссов: "+BS.length;}
+  else if(L.indexOf("улучшен")>=0||L.indexOf("апгрейд")>=0||L.indexOf("upgrade")>=0){var un=["Квантовый Ускоритель","Нейро-Усилитель","Плазменный Инжектор","Вакуумный Насос"];var i=Math.floor(Math.random()*un.length);var c=Math.floor(100*Math.pow(2,UPG.length));UPG.push({n:un[i],d:"+10% доход",cb:c,fn:function(){S.gm*=1.1},mx:3});r="✅ Улучшение добавлено!
+⚡ "+un[i]+"
+Цена: "+fmt(c)+"💎
+Улучшений: "+UPG.length;}
+  else if(L.indexOf("кредит")>=0||L.indexOf("монет")>=0||L.indexOf("денег")>=0||L.indexOf("money")>=0||L.indexOf("credit")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 Начислено "+fmt(a)+" кредитов!
+Баланс: "+fmt(S.c)+"💎";}
+  else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0||L.indexOf("level")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!
+Уровень: "+S.rl+"
+До следующего: "+fmt(S.rg-S.rp)+"💎";}
+  else if(L.indexOf("гем")>=0||L.indexOf("премиум")>=0||L.indexOf("gem")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!
+Баланс: "+S.g+"💎";}
+  else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0||L.indexOf("не работа")>=0||L.indexOf("fix")>=0||L.indexOf("bug")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!
+
+Патчи:
+✅ Кнопки на мобильных
+✅ Панель улучшений
+✅ Чат OWL
+✅ Сохранение при выходе
+
+Бонус: +1000💎 +50💎гемов +5 тап";}
+  else if(L.indexOf("привет")>=0||L.indexOf("хай")>=0||L.indexOf("hello")>=0||L.indexOf("hi")>=0){r="👋 Привет, "+curUser+"!
+
+Я — OWL 🦉, ИИ-разработчик этой игры.
+
+📌 Команды:
+• Добавь босса
+• Добавь улучшение
+• Дай кредитов/гемов
+• Повысь уровень
+• Исправь баги
+• Баланс (снизить цены)
+
+Каждая команда = бонус! 🎁";}
+  else if(L.indexOf("баланс")>=0||L.indexOf("цен")>=0||L.indexOf("дорого")>=0||L.indexOf("balance")>=0||L.indexOf("price")>=0){for(var i=0;i<UPG.length;i++){UPG[i].cb=Math.floor(UPG[i].cb*0.9);}r="⚖️ Баланс обновлён!
+
+Цены снижены на 10%";}
+  else{S.c+=300;S.g+=10;r="✅ Задача принята!
+
+Бонус: +300💎 +10💎гемов
+
+Баланс: "+fmt(S.c)+"💎 | Гемы: "+S.g;}
   return r;
 }
 
