@@ -177,12 +177,13 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
   <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
 </div>
 
-<script>"use strict";
+<script>
+"use strict";
 
 var curUser=null,users={};
-try{users=JSON.parse(localStorage.getItem("cr_users")||"{}");}catch(e){}
-window.saveUsers=function(){localStorage.setItem("cr_users",JSON.stringify(users));}
-window.h=function(p){var hv=0;for(var i=0;i<p.length;i++){hv=((hv<<5)-hv)+p.charCodeAt(i);hv|=0;}return hv.toString(36);}
+try{users=JSON.parse(localStorage.getItem("cr_users")||"{}");}catch(e){};
+window.saveUsers=function(){localStorage.setItem("cr_users",JSON.stringify(users));};
+window.h=function(p){var hv=0;for(var i=0;i<p.length;i++){hv=((hv<<5)-hv)+p.charCodeAt(i);hv|=0;}return hv.toString(36);};
 window.id=function(s){return document.getElementById(s);};
 
 window.showScreen=function(s){
@@ -258,7 +259,7 @@ var ACHS=[
   {id:"a12",n:"Легенда",ck:function(){return S.pr>=5}}
 ];
 
-window.getCPS=function(){return Math.floor(S.ps*S.gm);}
+window.getCPS=function(){return Math.floor(S.ps*S.gm);};
 window.fmt=function(n){if(n>=1e12)return(n/1e12).toFixed(1)+"T";if(n>=1e9)return(n/1e9).toFixed(1)+"B";if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e4)return(n/1e3).toFixed(1)+"K";return Math.floor(n);}
 
 window.tap=function(){
@@ -272,21 +273,21 @@ window.tap=function(){
   chkAch();window.draw();
 }
 
-window.spawnBoss=function(){var i=Math.min(Math.floor(S.rl/5),BS.length-1);S.cb=BS[i];S.bh=S.cb.hp;id("bfight").classList.add("show");id("bfs").textContent=S.cb.ic;id("bfn").textContent=S.cb.n;updateBossHP();}
-window.winBoss=function(){var r=Math.floor(S.cb.cr*S.gm);S.c+=r;S.bs++;flyText("+ "+fmt(r));S.cb=null;S.bh=0;id("bfight").classList.remove("show");chkAch();window.draw();}
+window.spawnBoss=function(){var i=Math.min(Math.floor(S.rl/5),BS.length-1);S.cb=BS[i];S.bh=S.cb.hp;id("bfight").classList.add("show");id("bfs").textContent=S.cb.ic;id("bfn").textContent=S.cb.n;updateBossHP();};
+window.winBoss=function(){var r=Math.floor(S.cb.cr*S.gm);S.c+=r;S.bs++;flyText("+ "+fmt(r));S.cb=null;S.bh=0;id("bfight").classList.remove("show");chkAch();window.draw();};
 window.updateBossHP=function(){var pct=Math.max(0,(S.bh/S.cb.hp)*100);id("bf-hp").style.width=pct+"%";id("bf-text").textContent="HP: "+fmt(S.bh)+" / "+fmt(S.cb.hp);}
 id("bf-atk").onclick=function(){var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;var d=document.createElement("div");d.className="fdmg";d.textContent="-"+fmt(v);d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";id("bfight").appendChild(d);setTimeout(function(){d.remove();},800);if(S.bh<=0)winBoss();else updateBossHP();while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3;}window.draw();};
-window.chkAch=function(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=10;}}}
+window.chkAch=function(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=10;}}};
 window.flyText=function(t){var p=document.createElement("div");p.className="pt";p.textContent=t;p.style.left=(30+Math.random()*40)+"%";p.style.top="40%";id("parts").appendChild(p);setTimeout(function(){p.remove();},800);}
 
 id("tpbtn").addEventListener("touchstart",function(e){e.preventDefault();tap();},{passive:false});
 id("tpbtn").addEventListener("mousedown",function(e){e.preventDefault();tap();});
 
-window.initNewGame=function(){S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0};}
+window.initNewGame=function(){S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0};};
 window.loadGame=function(){
   if(!curUser)return;
   try{var sv=JSON.parse(localStorage.getItem("cr_saves")||"{}");var d=sv[curUser];if(d){var v=JSON.parse(d);for(var k in v)S[k]=v[k];}}catch(e){}
-}
+};
 window.saveGame=function(){
   if(!curUser)return;
   var sv={};try{sv=JSON.parse(localStorage.getItem("cr_saves")||"{}");}catch(e){}
@@ -316,17 +317,17 @@ window.showPanel=function(t){
       p.innerHTML+='<div class="card'+(ok?" can":"")+(mx?" done":"")+'" data-i="'+i+'"><div class="h"><span class="nm">'+u.n+'</span><span class="lv">'+o+'/'+u.mx+'</span></div><div class="d">'+u.d+'</div><div class="c">'+(mx?"МАКС":fmt(cost)+" 💎")+'</div></div>';
     }
     p.querySelectorAll(".card").forEach(function(el){
-      el.onclick=function(){if(el.classList.contains("done"))return;var i=parseInt(el.dataset.i),u=UPG[i],o=S.up[i]||0,cost=Math.floor(u.cb*Math.pow(1.15,o));if(S.c<cost)return;S.c-=cost;S.up[i]=o+1;u.fn();chkAch();showPanel("up");window.draw();};
+      el.onclick=function(){if(el.classList.contains("done"))return;var i=parseInt(el.dataset.i),u=UPG[i],o=S.up[i]||0,cost=Math.floor(u.cb*Math.pow(1.15,o));if(S.c<cost)return;S.c-=cost;S.up[i]=o+1;u.fn();chkAch();showPanel("up");window.draw();}
     });
   } else if(t==="bo"){
     id("panT").textContent="👹 Боссы";
     if(!S.cb){
       p.innerHTML='<div style="color:#777;font-size:11px;margin:8px 0">Доберись до Рейм ур.5+</div><button class="atk-btn" id="sb">⚔️ Призвать босса</button>';
-      id("sb").onclick=function(){spawnBoss();id("panel").classList.remove("show");};
+      id("sb").onclick=function(){spawnBoss();id("panel").classList.remove("show");}
     } else {
       var pct=Math.max(0,(S.bh/S.cb.hp)*100);
       p.innerHTML='<div class="boss"><div class="bn">'+S.cb.ic+" "+S.cb.n+'</div><div class="hp"><div class="hp-f" style="width:'+pct+'%"></div></div><div class="boss st"><span>HP: '+fmt(S.bh)+" / "+fmt(S.cb.hp)+'</span><span>'+pct.toFixed(0)+'%</span></div><div class="rw">Награда: '+fmt(S.cb.cr)+' 💎</div></div><button class="atk-btn" id="ab">⚔️ АТАКОВАТЬ</button>';
-      id("ab").onclick=function(){var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;if(S.bh<=0)winBoss();else showPanel("bo");window.draw();};
+      id("ab").onclick=function(){var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;if(S.bh<=0)winBoss();else showPanel("bo");window.draw();}
     }
   } else if(t==="ac"){
     id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
@@ -343,7 +344,7 @@ window.showPanel=function(t){
 Бонус: +"+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg();}},{t:"Престиж!",f:function(){doPrestige();}}]);};
     id("exBtn").onclick=function(){prompt("Скопируй код:",btoa(JSON.stringify(S)));};
     id("imBtn").onclick=function(){var d=prompt("Вставь код:");if(!d)return;try{Object.assign(S,JSON.parse(atob(d)));saveGame();showPanel("st");window.draw();}catch(e){alert("Неверный код");}};
-    id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg();}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload();}}]);};
+    id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg();}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload();}}]);}
   }
 }
 
@@ -356,13 +357,13 @@ window.doPrestige=function(){
   hdlg();id("panel").classList.remove("show");window.draw();
 }
 
-window.dlg=function(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").innerHTML="";for(var i=0;i<bs.length;i++){var b=document.createElement("button");b.textContent=bs[i].t;b.onclick=bs[i].f;id("ovb").appendChild(b);}id("ov").classList.add("show");}
+window.dlg=function(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").innerHTML="";for(var i=0;i<bs.length;i++){var b=document.createElement("button");b.textContent=bs[i].t;b.onclick=bs[i].f;id("ovb").appendChild(b);}id("ov").classList.add("show");};
 window.hdlg=function(){id("ov").classList.remove("show");}
 
 // ============ CHAT ============
 var chatTab="g",chatMsgs=[];
-try{chatMsgs=JSON.parse(localStorage.getItem("cr_chat")||"[]");}catch(e){}
-window.saveChat=function(){localStorage.setItem("cr_chat",JSON.stringify(chatMsgs.slice(-200)));}
+try{chatMsgs=JSON.parse(localStorage.getItem("cr_chat")||"[]");}catch(e){};
+window.saveChat=function(){localStorage.setItem("cr_chat",JSON.stringify(chatMsgs.slice(-200)));};
 window.addChatMsg=function(author,text){chatMsgs.push({a:author,t:text,ts:Date.now()});saveChat();renderChat();}
 
 // Send task to Telegram (OWL bot)
@@ -480,7 +481,7 @@ setInterval(function(){
 
 var lastUser=localStorage.getItem("cr_lastUser");
 if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();}
-else{showScreen("login");}
+else{showScreen("login");};
 window.draw();</script>
 </body>
 </html>
