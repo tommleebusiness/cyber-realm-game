@@ -251,6 +251,10 @@ id("chtabs").addEventListener("click",function(e){
 });
 
 id("tch").onclick=function(){showScreen("chat");renderChat();};
+id("tup").onclick=function(){showScreen("up");};
+id("tbo").onclick=function(){showScreen("bo");};
+id("tst").onclick=function(){showScreen("st");};
+id("tgame").onclick=function(){showScreen("game");};
 
 window.addEventListener("beforeunload",function(){saveGame();});
 setInterval(function(){saveGame();},30000);
