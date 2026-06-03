@@ -177,8 +177,7 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
   <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
 </div>
 
-<script>
-use strict;
+<script>"use strict";
 
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}");}catch(e){};
@@ -482,7 +481,6 @@ setInterval(function(){
 var lastUser=localStorage.getItem("cr_lastUser");
 if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();}
 else{showScreen("login");};
-window.draw();
-</script>
+window.draw();</script>
 </body>
 </html>
