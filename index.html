@@ -178,6 +178,7 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
 </div>
 
 <script>
+
 'use strict';
 
 var curUser=null,users={};
@@ -483,6 +484,7 @@ var lastUser=localStorage.getItem("cr_lastUser");
 if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();}
 else{showScreen("login");};
 window.draw();
+
 </script>
 </body>
 </html>
