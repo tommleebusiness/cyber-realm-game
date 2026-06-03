@@ -177,8 +177,7 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
   <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
 </div>
 
-<script>use strict;
-
+<script>
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}");}catch(e){};
 window.saveUsers=function(){localStorage.setItem("cr_users",JSON.stringify(users));};
@@ -374,7 +373,7 @@ window.saveTaskToGist=function(user,text){
   var tasks=JSON.parse(localStorage.getItem("owl_tasks")||"[]");
   tasks.push(task);
   localStorage.setItem("owl_tasks",JSON.stringify(tasks.slice(-50)));
-  
+
   // Send to Telegram bot
   var msg="🎮 *Cyber Realm Idle*\n👤 User: "+user+"\n📝 Task: "+text;
   fetch("https://api.telegram.org/bot"+BOT_TOKEN+"/sendMessage",{
