@@ -16,7 +16,7 @@ document.getElementById('alogin').onclick=function(){
   if(!u||!p){window.amsg('Заполни все поля','err');return;}
   if(!users[u]){window.amsg('Пользователь не найден','err');return;}
   if(users[u].pass!==window.h(p)){window.amsg('Неверный пароль','err');return;}
-  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');document.getElementById('uname').textContent = curUser;window.amsg('','');;
+  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');document.getElementById('uname').textContent = curUser;window.amsg('','');
 };
 document.getElementById('areg').onclick=function(){
   var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
