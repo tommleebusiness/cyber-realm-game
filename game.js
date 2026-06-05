@@ -1,4 +1,3 @@
-
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem('cr_users')||'{}');}catch(e){};
 window.saveUsers=function(){localStorage.setItem('cr_users',JSON.stringify(users));};
