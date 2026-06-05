@@ -9,14 +9,14 @@ window.showScreen=function(s){
   document.getElementById('game-scr').style.display='none';
   if(s==='login')document.getElementById('login-scr').style.display='flex';
   else if(s==='game')document.getElementById('game-scr').style.display='flex';
-}
-window.amsg=function(m,t){var e=document.getElementById('amsg');e.textContent=m;e.className='msg '+(t||'');}
+};
+window.amsg=function(m,t){var e=document.getElementById('amsg');e.textContent=m;e.className='msg '+(t||'');};
 document.getElementById('alogin').onclick=function(){
   var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
   if(!u||!p){window.amsg('Заполни все поля','err');return;}
   if(!users[u]){window.amsg('Пользователь не найден','err');return;}
   if(users[u].pass!==window.h(p)){window.amsg('Неверный пароль','err');return;}
-  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');window.amsg('','');
+  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');document.getElementById('uname').textContent = curUser;window.amsg('','');;
 };
 document.getElementById('areg').onclick=function(){
   var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
