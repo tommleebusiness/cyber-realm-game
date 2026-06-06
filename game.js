@@ -4,10 +4,15 @@ window.saveUsers=function(){localStorage.setItem('cr_users',JSON.stringify(users
 window.h=function(p){var hv=0;for(var i=0;i<p.length;i++){hv=((hv<<5)-hv)+p.charCodeAt(i);hv|=0;}return hv.toString(36);};
 window.id=function(s){return document.getElementById(s);};
 window.showScreen=function(s){
-  document.getElementById('login-scr').style.display='none';
-  document.getElementById('game-scr').style.display='none';
-  if(s==='login')document.getElementById('login-scr').style.display='flex';
-  else if(s==='game')document.getElementById('game-scr').style.display='flex';
+  var login=document.getElementById('login-scr');
+  var game=document.getElementById('game-scr');
+  if(s==='login'){
+    login.classList.remove('hide');
+    game.classList.add('hide');
+  }else if(s==='game'){
+    login.classList.add('hide');
+    game.classList.remove('hide');
+  }
 };
 window.amsg=function(m,t){var e=document.getElementById('amsg');e.textContent=m;e.className='msg '+(t||'');};
 document.getElementById('alogin').onclick=function(){
