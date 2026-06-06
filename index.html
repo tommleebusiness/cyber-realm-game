@@ -358,10 +358,8 @@ function showPanel(t){
     var rows=[["Пользователь",curUser],["Тапов",fmt(S.cl)],["Всего кредитов",fmt(S.ct)],["Рейм уровень",S.rl],["Боссов убито",S.bs],["Престиж",S.pr],["Гемы",S.g],["Сила тапа",fmt(S.cp)],["Доход/сек",fmt(getCPS())]];
     for(var i=0;i<rows.length;i++){p.innerHTML+='<div class="strow"><span class="sl">'+rows[i][0]+'</span><span class="sv">'+rows[i][1]+"</span></div>"}
     p.innerHTML+='<button class="btn" id="prBtn" style="margin-top:10px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000">🌟 Престиж</button>';
-    p.innerHTML+='<button class="btn2" id="exChatBtn" style="margin-top:6px">📋 Экспорт чата</button>';
     p.innerHTML+='<button class="danger" id="delBtn" style="margin-top:6px">🗑️ Удалить всё</button>';
     id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?\nБонус: "+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg()}},{t:"Престиж!",f:function(){doPrestige()}}])};
-    id("exChatBtn").onclick=function(){var data=localStorage.getItem("cr_chat")||"[]";var blob=new Blob([data],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="cyber-realm-chat-"+curUser+".json";a.click();URL.revokeObjectURL(url)};
     id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg()}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload()}}])}
   }
 }
@@ -379,39 +377,14 @@ function dlg(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").i
 function hdlg(){id("ov").style.display="none"}
 
 // Chat + Gist sync (read-only, no token needed for public gist)
-var chatTab="g",chatMsgs=[],CHAT_REPO="tommleebusiness/cyber-realm-game",CHAT_TOKEN="github_pat_11B6XGSCQ0ydSgHIJeC"+"UgN_JwN7BNo2TCspx598Yi7cyjcZ5C"+"8GKOUpUIjvghCxFE2BY67PWNTtIWOcmeh",CHAT_FILE="chat.json",lastGistCheck=0;
+var chatTab="g",chatMsgs=[],GIST_ID="7502e17364c15c93b31be4ce89599535",lastGistCheck=0;
 try{chatMsgs=JSON.parse(localStorage.getItem("cr_chat")||"[]")}catch(e){}
 function saveChat(){localStorage.setItem("cr_chat",JSON.stringify(chatMsgs.slice(-200)))}
 function addChatMsg(a,t){chatMsgs.push({a:a,t:t,ts:Date.now()});saveChat();renderChat()}
 
-// Chat sync via GitHub repo Contents API
-function chatRead(){
-  return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
-    headers:{Authorization:"Bearer "+CHAT_TOKEN,Accept:"application/vnd.github.raw+json"}
-  }).then(function(r){if(r.status===404)return{messages:[]};return r.json()}).catch(function(){return{messages:[]}})
-}
-function chatWrite(data){
-  return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
-    headers:{Authorization:"Bearer "+CHAT_TOKEN}
-  }).then(function(r){return r.json()}).then(function(existing){
-    var sha=existing.sha||"";
-    return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
-      method:"PUT",
-      headers:{Authorization:"Bearer "+CHAT_TOKEN,"Content-Type":"application/json"},
-      body:JSON.stringify({message:"chat update",content:btoa(unescape(encodeURIComponent(JSON.stringify(data)))),sha:sha})
-    })
-  }).catch(function(){})
-}
-function gistReadMsgs(){return chatRead().then(function(d){return d.messages||[]})}
-
-// Send message to repo
-function sendToGist(text){
-  chatRead().then(function(data){
-    if(!data.messages)data.messages=[];
-    data.messages.push({a:curUser,t:text,ts:Date.now()});
-    return chatWrite(data);
-  }).catch(function(){})
-}
+// Read messages from public Gist (no auth needed)
+function gistGetPublic(){return fetch("https://api.github.com/gists/"+GIST_ID).then(function(r){return r.json()})}
+function gistReadMsgs(){return gistGetPublic().then(function(g){try{return JSON.parse(g.files.chat_messages.json.content).messages||[]}catch(e){return[]}})}
 
 // Check for OWL replies from Gist (polling)
 function checkGistReplies(){
@@ -462,7 +435,6 @@ id("chat-send").onclick=function(){
   if(!text)return;id("chat-in").value="";
   addChatMsg(curUser,text);
   if(chatTab==="o"){
-    sendToGist(text);
     id("chowli").style.display="block";
     // Local OWL reply
     setTimeout(function(){
