@@ -9,8 +9,8 @@
 <title>Cyber Realm Idle v6</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{height:100%;display:flex;flex-direction:column}
-body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,sans-serif;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;display:flex;flex-direction:column;flex:1}
+html{height:100%}
+body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100%;overflow:hidden;touch-action:manipulation;user-select:none;display:flex;flex-direction:column}
 #login-scr{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,255,.08),transparent 70%)}
 #login-scr h1{font-size:2em;letter-spacing:4px;text-shadow:0 0 20px #0ff;margin-bottom:8px}
 #login-scr .sub{color:#0f0;font-size:.9em;margin-bottom:20px}
@@ -104,6 +104,22 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
 .overlay-box p{color:#888;font-size:12px;margin-bottom:15px;line-height:1.5}
 .overlay-box button{background:#0ff;border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:3px}
 .danger{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3);color:#f44;padding:6px;border-radius:4px;font-size:11px;cursor:pointer;margin-top:6px;width:100%}
+@media(max-width:480px){
+  header h1{font-size:12px;letter-spacing:2px}
+  header{padding:6px 8px}
+  .res{font-size:10px;padding:4px}
+  #tpbtn{width:130px;height:130px}
+  footer .tab{padding:8px 2px;font-size:10px}
+  #tpinfo{font-size:12px}
+  #tcps{font-size:9px}
+  .card{padding:8px}
+  .card .nm{font-size:12px}
+  .fld input{font-size:16px;padding:12px}
+  .btn,.btn2{font-size:15px;padding:12px}
+}
+@media(min-width:800px){
+  #tpbtn{width:180px;height:180px}
+}
 </style>
 </head>
 <body>
@@ -145,6 +161,7 @@ footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
     <div class="tab" id="tup"><div style="font-size:16px">⬆️</div><div>Улучш.</div></div>
     <div class="tab" id="tbo"><div style="font-size:16px">👹</div><div>Боссы</div></div>
     <div class="tab" id="tch"><div style="font-size:16px">💬</div><div>Чат</div></div>
+    <div class="tab" id="tdt"><div style="font-size:16px">💎</div><div>Донат</div></div>
     <div class="tab" id="tst"><div style="font-size:16px">📊</div><div>Стат.</div></div>
   </footer>
 </div>
@@ -199,7 +216,7 @@ function showScreen(s){
   if(s==="login"){id("login-scr").style.display="flex"}
   else if(s==="game"){id("game-scr").style.display="flex"}
   else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
-  else if(s==="up"||s==="bo"||s==="ac"||s==="st"){id("game-scr").style.display="flex";showPanel(s)}
+  else if(s==="up"||s==="bo"||s==="ac"||s==="st"||s==="dt"){id("game-scr").style.display="flex";showPanel(s)}
 }
 
 function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
@@ -226,7 +243,7 @@ id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
 
-var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0};
+var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false};
 var UPG=[
   {n:"Нейро-Связь",d:"+1 тап",cb:10,fn:function(){S.cp+=1},mx:100},
   {n:"Лазерный Фокус",d:"+5 тапов",cb:100,fn:function(){S.cp+=5},mx:50},
@@ -361,6 +378,45 @@ function showPanel(t){
     p.innerHTML+='<button class="danger" id="delBtn" style="margin-top:6px">🗑️ Удалить всё</button>';
     id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?\nБонус: "+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg()}},{t:"Престиж!",f:function(){doPrestige()}}])};
     id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg()}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload()}}])}
+  } else if(t==="dt"){
+    id("panT").textContent="💎 Поддержать игру";
+    p.innerHTML='<div style="text-align:center;padding:15px 10px">';
+    p.innerHTML+='<div style="font-size:48px;margin-bottom:10px">💎</div>';
+    p.innerHTML+='<div style="color:#ffd700;font-size:16px;font-weight:bold;margin-bottom:8px">Премиум гемы</div>';
+    p.innerHTML+='<div style="color:#888;font-size:12px;margin-bottom:15px">Поддержите разработку и получите эксклюзивные бонусы!</div>';
+    var packs=[{name:"Стартовый",gems:100,price:"1$",bonus:""},{name:"Продвинутый",gems:500,price:"5$",bonus:"+50% бонус"},{name:"VIP",gems:1200,price:"10$",bonus:"+100% бонус"},{name:"Легенда",gems:3000,price:"25$",bonus:"+200% бонус"}];
+    for(var i=0;i<packs.length;i++){
+      var pk=packs[i],total=pk.gems;
+      if(i===1)total=Math.floor(pk.gems*1.5);
+      if(i===2)total=pk.gems*2;
+      if(i===3)total=pk.gems*3;
+      p.innerHTML+='<div class="card" style="text-align:left;margin-bottom:8px;background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,100,0,.06));border-color:rgba(255,215,0,.3)" data-pack="'+i+'"><div class="h"><span class="nm" style="color:#ffd700">'+pk.name+'</span><span style="color:#ffd700;font-size:11px">'+pk.price+'</span></div><div style="color:#0f0;font-size:13px;font-weight:bold">'+total+' 💎 '+(pk.bonus?'<span style="color:#ffd700;font-size:10px">'+pk.bonus+'</span>':'')+'</div></div>';
+    }
+    p.innerHTML+='<div style="color:#555;font-size:10px;margin-top:10px">* Покупка симулируется. Гемы начисляются мгновенно.</div>';
+    p.innerHTML+='<button class="btn" id="supBtn" style="margin-top:12px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000">💖 Я уже поддержал (бонус)</button>';
+    p.innerHTML+='</div>';
+    var packCards=p.querySelectorAll(".card[data-pack]");
+    for(var i=0;i<packCards.length;i++){
+      packCards[i].onclick=function(){
+        var idx=parseInt(ga(this,"data-pack")),pk=packs[idx],total=pk.gems;
+        if(idx===1)total=Math.floor(pk.gems*1.5);
+        if(idx===2)total=pk.gems*2;
+        if(idx===3)total=pk.gems*3;
+        S.g+=total;
+        if(!S.donated){S.donated=true;S.gm*=1.1;}
+        draw();
+        dlg("✅ Спасибо!","Вы получили "+total+" 💎!\n\nБонус: постоянный x1.1 к всему доходу",[{t:"Отлично!",f:function(){hdlg()}}]);
+      }
+    }
+    id("supBtn").onclick=function(){
+      if(!S.donated){
+        S.donated=true;S.g+=50;S.gm*=1.1;
+        draw();
+        dlg("💖 Спасибо за поддержку!","+50 💎 бонус\nПостоянный x1.1 к доходу",[{t:"Отлично!",f:function(){hdlg()}}]);
+      }else{
+        dlg("ℹ️ Вы уже поддержали игру","Ваш бонус активен: x1.1 к доходу",[{t:"OK",f:function(){hdlg()}}]);
+      }
+    }
   }
 }
 
@@ -398,7 +454,7 @@ function chatWrite(data){
       headers:{Authorization:"Bearer "+CHAT_TOKEN,"Content-Type":"application/json"},
       body:JSON.stringify({message:"chat update",content:btoa(unescape(encodeURIComponent(JSON.stringify(data)))),sha:sha})
     })
-  }).catch(function(){})
+  }).then(function(r){return r.json()}).catch(function(e){console.log("chatWrite err:",e)})
 }
 function gistReadMsgs(){return chatRead().then(function(d){return d.messages||[]})}
 
@@ -495,6 +551,7 @@ id("tup").onclick=function(){showScreen("up")}
 id("tbo").onclick=function(){showScreen("bo")}
 id("tch").onclick=function(){showScreen("chat")}
 id("tst").onclick=function(){showScreen("st")};
+id("tdt").onclick=function(){showScreen("dt")};
 
 window.addEventListener("beforeunload",function(){saveGame()});
 setInterval(function(){saveGame()},30000);
