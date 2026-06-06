@@ -261,7 +261,7 @@ id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
 
-var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0};
+var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0,autoClick:0};
 var UPG=[
   {n:"Нейро-Связь",d:"+1 тап",cb:10,fn:function(){S.cp+=1},mx:100},
   {n:"Лазерный Фокус",d:"+5 тапов",cb:100,fn:function(){S.cp+=5},mx:50},
@@ -272,7 +272,11 @@ var UPG=[
   {n:"Квантовая Ферма",d:"+50/с",cb:5000,fn:function(){S.ps+=50},mx:15},
   {n:"Тёмная Материя",d:"+200/с",cb:25000,fn:function(){S.ps+=200},mx:10},
   {n:"Компрессор",d:"x1.5 всё",cb:250,fn:function(){S.gm*=1.5},mx:5},
-  {n:"Энтропия",d:"x2 всё",cb:2500,fn:function(){S.gm*=2},mx:3}
+  {n:"Энтропия",d:"x2 всё",cb:2500,fn:function(){S.gm*=2},mx:3},
+  {n:"🤖 Авто-Кликер",d:"+1 клик/с",cb:500,fn:function(){S.autoClick+=1},mx:50},
+  {n:"🤖 Рой Ботов",d:"+5 кликов/с",cb:2500,fn:function(){S.autoClick+=5},mx:30},
+  {n:"🤖 ИЯ-Ядро",d:"+25 кликов/с",cb:15000,fn:function(){S.autoClick+=25},mx:20},
+  {n:"🤖 Квантовый Рой",d:"+100 кликов/с",cb:100000,fn:function(){S.autoClick+=100},mx:10}
 ];
 var BS=[
   {n:"Глитч-Фантом",hp:100,cr:50,ic:"👻"},
@@ -307,6 +311,10 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
   id("tpinfo").textContent="+"+fmt(v);
   var btn=id("tpbtn");btn.style.transform="scale(.85)";setTimeout(function(){btn.style.transform=""},80);
+  // Sound
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var osc=ctx.createOscillator();var gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=800+Math.random()*400;gain.gain.value=0.1;osc.start();osc.stop(ctx.currentTime+0.05)}catch(e){}
+  // Particles
+  for(var i=0;i<3;i++){var part=document.createElement("div");part.style.cssText="position:absolute;width:6px;height:6px;border-radius:50%;background:#0ff;pointer-events:none;z-index:100;left:50%;top:50%;";part.style.transform="translate("+(Math.random()*100-50)+"px,"+(Math.random()*100-50)+"px)";part.style.transition="all .4s ease-out";id("tapz").appendChild(part);requestAnimationFrame(function(){part.style.opacity="0";part.style.transform="translate("+(Math.random()*200-100)+"px,"+(Math.random()*200-100)+"px) scale(0)"});setTimeout(function(){if(part.parentNode)part.parentNode.removeChild(part)},400)}
   if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
   if(!S.cb&&S.rl>=5&&Math.random()<0.02)spawnBoss();
@@ -444,7 +452,21 @@ function doPrestige(){
   S.pr++;S.pp+=pts;S.c=0;S.ct=0;S.n=0;S.d=0;S.e=0;S.cl=0;
   S.cp=1+S.pp*0.1;S.ps=0;S.gm=1;S.dm=1;S.ns=0;S.ds=0;S.es=0;
   S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;
-  hdlg();id("panel").style.display="none";draw()
+  // Prestige milestones
+  var milestones=[{pr:1,bonus:"x1.1 к тапу",fn:function(){S.cp*=1.1}},{pr:3,bonus:"x1.2 к доходу",fn:function(){S.gm*=1.2}},{pr:5,bonus:"+10% гемов за боссов",fn:function(){S.gemBonus=(S.gemBonus||0)+0.1}},{pr:10,bonus:"x1.5 ко всему",fn:function(){S.gm*=1.5}},{pr:25,bonus:"x2 ко всему",fn:function(){S.gm*=2}}];
+  var unlocked=[];
+  for(var i=0;i<milestones.length;i++){
+    if(S.pr>=milestones[i].pr&&!S["ms"+milestones[i].pr]){
+      S["ms"+milestones[i].pr]=true;
+      milestones[i].fn();
+      unlocked.push(milestones[i].bonus);
+    }
+  }
+  var msg="Престиж завершён!\nОчки: "+pts;
+  if(unlocked.length>0)msg+="\n\n🏆 Новые разблокировки:\n"+unlocked.join("\n");
+  hdlg();id("panel").style.display="none";
+  setTimeout(function(){dlg("🌟 Престиж "+S.pr,msg,[{t:"Отлично!",f:function(){hdlg()}}])},300);
+  draw()
 }
 
 function dlg(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").innerHTML="";for(var i=0;i<bs.length;i++){var b=document.createElement("button");b.textContent=bs[i].t;b.onclick=bs[i].f;id("ovb").appendChild(b)}id("ov").style.display="flex"}
@@ -575,6 +597,7 @@ window.addEventListener("beforeunload",function(){saveGame()});
 setInterval(function(){saveGame()},30000);
 setInterval(function(){
   if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
+  if(S.autoClick>0){var ac=Math.floor(S.autoClick*S.gm);S.c+=ac;S.ct+=ac;S.rp+=ac}
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
   draw()
 },1000);
