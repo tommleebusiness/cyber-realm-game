@@ -219,6 +219,24 @@ function showScreen(s){
   else if(s==="up"||s==="bo"||s==="ac"||s==="st"||s==="dt"){id("game-scr").style.display="flex";showPanel(s)}
 }
 
+// Daily rewards
+function checkDailyReward(){
+  var now=Math.floor(Date.now()/86400000);
+  var last=S.lastDaily||0;
+  var streak=S.dailyStreak||0;
+  if(now>last){
+    if(now===last+1){streak++}else{streak=1};
+    S.lastDaily=now;
+    S.dailyStreak=streak;
+    var rewards=[{day:1,credits:100,gems:5},{day:2,credits:250,gems:10},{day:3,credits:500,gems:20},{day:4,credits:1000,gems:35},{day:5,credits:2000,gems:50},{day:6,credits:5000,gems:75},{day:7,credits:10000,gems:100}];
+    var reward=rewards[Math.min(streak-1,rewards.length-1)];
+    S.c+=reward.credits;S.g+=reward.gems;S.ct+=reward.credits;
+    setTimeout(function(){
+      dlg("🎁 Ежедневная награда!","День "+streak+" подряд!\n\n+"+fmt(reward.credits)+" 💎\n+"+reward.gems+" 💎 гемов",[{t:"Отлично!",f:function(){hdlg()}}]);
+    },500);
+  }
+}
+
 function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
 id("alogin").onclick=function(){
@@ -226,7 +244,7 @@ id("alogin").onclick=function(){
   if(!u||!p){amsg("Заполни все поля","err");return}
   if(!users[u]){amsg("Пользователь не найден","err");return}
   if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
-  curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();showScreen("game");amsg("","")
+  curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();showScreen("game");amsg("","")
 };
 
 id("areg").onclick=function(){
@@ -243,7 +261,7 @@ id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
 
-var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false};
+var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0};
 var UPG=[
   {n:"Нейро-Связь",d:"+1 тап",cb:10,fn:function(){S.cp+=1},mx:100},
   {n:"Лазерный Фокус",d:"+5 тапов",cb:100,fn:function(){S.cp+=5},mx:50},
