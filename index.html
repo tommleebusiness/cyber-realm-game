@@ -341,7 +341,7 @@ function flyText(t){var p=document.createElement("div");p.className="pt";p.textC
 id("tpbtn").addEventListener("touchstart",function(e){e.preventDefault();tap()},{passive:false});
 id("tpbtn").addEventListener("mousedown",function(e){e.preventDefault();tap()});
 
-function initNewGame(){S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0}}
+function initNewGame(){S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0,autoClick:0,gemBonus:0,ms1:false,ms3:false,ms5:false,ms10:false,ms25:false,tutorialStep:0,theme:"dark"}}
 function loadGame(){
   if(!curUser)return;
   try{var sv=JSON.parse(localStorage.getItem("cr_saves")||"{}");var d=sv[curUser];if(d){var v=JSON.parse(d);for(var k in v)S[k]=v[k]}}catch(e){}
@@ -606,6 +606,89 @@ var lastUser=localStorage.getItem("cr_lastUser");
 if(lastUser&&users[lastUser]){curUser=lastUser;loadGame()}
 else{showScreen("login")}
 draw();
+
+// Tutorial system
+function showTutorial(){
+  if(S.tutorialStep>=5)return;
+  var steps=[
+    {title:"👋 Добро пожаловать!",text:"Нажимай на кнопку ⚡ чтобы зарабатывать кредиты!",target:"tpbtn"},
+    {title:"⬆️ Улучшения",text:"Покупай апгрейды чтобы увеличить доход!",target:"tup"},
+    {title:"👹 Боссы",text:"Сражайся с боссами за награды!",target:"tbo"},
+    {title:"💬 Чат OWL",text:"Пиши мне — я помогу и дам бонусы!",target:"tch"},
+    {title:"💎 Поддержка",text:"Поддержи игру и получи бонусы!",target:"tdt"}
+  ];
+  var step=steps[S.tutorialStep];
+  if(!step)return;
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px";
+  ov.innerHTML='<div style="background:#0d1025;border:2px solid #0ff;border-radius:12px;padding:20px;max-width:300px;text-align:center"><div style="color:#0ff;font-size:16px;font-weight:bold;margin-bottom:10px">'+step.title+'</div><div style="color:#888;font-size:13px;margin-bottom:15px">'+step.text+'</div><button style="background:#0ff;border:none;color:#000;padding:8px 20px;border-radius:4px;font-size:13px;font-weight:bold;cursor:pointer" id="tutNext">Далее</button></div>';
+  document.body.appendChild(ov);
+  document.getElementById("tutNext").onclick=function(){
+    S.tutorialStep++;
+    ov.remove();
+    saveGame();
+    if(S.tutorialStep<5)showTutorial();
+  };
+}
+
+// Leaderboard
+function showLeaderboard(){
+  var allSaves={};
+  try{allSaves=JSON.parse(localStorage.getItem("cr_saves")||"{}")}catch(e){}
+  var players=[];
+  for(var u in allSaves){
+    try{var d=JSON.parse(allSaves[u]);players.push({name:u,credits:d.ct||0,prestige:d.pr||0,bosses:d.bs||0})}catch(e){}
+  }
+  players.sort(function(a,b){return b.credits-a.credits});
+  var html='<div style="text-align:center;padding:10px"><div style="color:#ffd700;font-size:14px;font-weight:bold;margin-bottom:10px">🏆 Таблица лидеров</div>';
+  for(var i=0;i<Math.min(10,players.length);i++){
+    var p=players[i];
+    html+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px"><span style="color:#ffd700">'+(i+1)+'. '+p.name+'</span><span style="color:#0ff">'+fmt(p.credits)+' 💎 | П'+p.pr+'</span></div>';
+  }
+  if(players.length===0)html+='<div style="color:#555;font-size:11px">Пока нет игроков</div>';
+  html+='<button style="margin-top:10px;background:#0ff;border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer" id="lbClose">Закрыть</button></div>';
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center";
+  ov.innerHTML=html;
+  document.body.appendChild(ov);
+  document.getElementById("lbClose").onclick=function(){ov.remove()};
+}
+
+// Theme
+function applyTheme(){
+  if(S.theme==="light"){
+    document.body.style.background="#f0f0f0";
+    document.body.style.color="#222";
+  }else{
+    document.body.style.background="#050510";
+    document.body.style.color="#0ff";
+  }
+}
+
+// Show tutorial on first login
+if(curUser&&S.tutorialStep<5){
+  setTimeout(function(){showTutorial()},1000);
+}
+
+// Add leaderboard button to stats panel
+var origShowPanel=showPanel;
+showPanel=function(t){
+  origShowPanel(t);
+  if(t==="st"){
+    var p=id("pc");
+    p.innerHTML+='<button class="btn2" id="lbBtn" style="margin-top:6px">🏆 Лидерборд</button>';
+    p.innerHTML+='<button class="btn2" id="themeBtn" style="margin-top:6px">'+(S.theme==="dark"?"☀️ Светлая":"🌙 Тёмная")+' тема</button>';
+    document.getElementById("lbBtn").onclick=function(){showLeaderboard()};
+    document.getElementById("themeBtn").onclick=function(){
+      S.theme=S.theme==="dark"?"light":"dark";
+      applyTheme();
+      saveGame();
+      showPanel("st");
+    };
+  }
+};
+
+applyTheme();
 </script>
 </body>
 </html>
