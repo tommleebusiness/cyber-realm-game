@@ -1,0 +1,46 @@
+{
+  "inbounds": [
+    {
+      "port": 1081,
+      "protocol": "socks",
+      "settings": {}
+    },
+    {
+      "port": 1082,
+      "protocol": "http",
+      "settings": {}
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "amsterdam.furkbalancer.net",
+            "port": 443,
+            "users": [
+              {
+                "id": "f9a22b86-1e3f-46cd-b518-b7fe5eca6945",
+                "encryption": "none",
+                "flow": ""
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "amsterdam.furkbalancer.net",
+          "fingerprint": "chrome"
+        },
+        "wsSettings": {
+          "path": "/vlEss",
+          "headers": {}
+        }
+      }
+    }
+  ]
+}

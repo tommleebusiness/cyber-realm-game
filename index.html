@@ -344,6 +344,7 @@ footer .tab:active .tab-icon{transform:scale(1.2)}
       <button id="tpbtn"><span>НАЖМИ</span></button>
       <div id="tpinfo"></div>
       <div id="tcps">в сек: 0 | тапов: 0</div>
+      <div id="event-bar" style="display:none;font-size:10px;color:#ffd700;text-align:center;margin:4px 0;text-shadow:0 0 6px rgba(255,215,0,.5);"></div>
       <div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
     </div>
   </div>
@@ -356,6 +357,7 @@ footer .tab:active .tab-icon{transform:scale(1.2)}
     <div class="tab" id="tst"><span class="tab-icon">📊</span><div>Стат.</div></div>
     <div class="tab" id="tlb"><span class="tab-icon">🏆</span><div>Топ</div></div>
     <div class="tab" id="tqu"><span class="tab-icon">🎯</span><div>Квесты</div></div>
+    <div class="tab" id="tcf"><span class="tab-icon">🔧</span><div>Крафт</div></div>
   </footer>
 </div>
 
@@ -422,7 +424,7 @@ function showScreen(s){
   if(s==="login")id("login-scr").style.display="flex";
   else if(s==="game")id("game-scr").style.display="flex";
   else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
-  else if(s==="up"||s==="bo"||s==="ac"||s==="qu"||s==="st"||s==="dt"||s==="lb"){id("game-scr").style.display="flex";showPanel(s)}
+  else if(s==="up"||s==="bo"||s==="ac"||s==="qu"||s==="cf"||s==="st"||s==="dt"||s==="lb"){id("game-scr").style.display="flex";showPanel(s)}
 }
 
 // === DAILY REWARD ===
@@ -548,7 +550,7 @@ id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
 
 // === GAME STATE ===
-var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0,autoClick:0,combo:0,comboMax:0,lastTapTime:0,luck:1,gemBonus:0,ms1:false,ms3:false,ms5:false,ms10:false,ms25:false};
+var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0,donated:false,lastDaily:0,dailyStreak:0,autoClick:0,combo:0,comboMax:0,lastTapTime:0,luck:1,gemBonus:0,ms1:false,ms3:false,ms5:false,ms10:false,ms25:false,craftItems:[],activeEvent:null,eventTimer:0,totalPlayTime:0,bestCombo:0};
 var audioCtx=null;
 
 var UPG=[
@@ -693,10 +695,10 @@ function tap(){
   // Level up
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
 
-  // Random boss spawn
-  if(!S.cb&&S.rl>=5&&Math.random()<0.02+S.luck*0.02){
+  // Random boss spawn (rare: ~0.5% base, scales with realm level)
+  if(!S.cb&&S.rl>=5&&Math.random()<0.005+Math.min(S.rl*0.001,0.015)){
     var r=Math.min(Math.floor(S.rl/5),BS.length-1);
-    if(Math.random()<0.05+S.luck*0.02){
+    if(Math.random()<0.02){
       var rare=BS.filter(function(b){return b.rare});
       if(rare.length>0){var rb=rare[Math.floor(Math.random()*rare.length)];S.cb=rb;S.bh=rb.hp;showBossFight(rb,true);chkAch();draw();return}
     }
@@ -785,6 +787,48 @@ function chkQuests(){
   }
 }
 
+// === CRAFTING SYSTEM ===
+var CRAFT_RECIPES=[
+  {id:"c1",n:"Нано-Модуль",d:"+5 тап навсегда",cost:{credits:500,gems:5},fn:function(){S.cp+=5}},
+  {id:"c2",n:"Кристалл Скорости",d:"+2/с навсегда",cost:{credits:2000,gems:10},fn:function(){S.ps+=2}},
+  {id:"c3",n:"Ядро Удачи",d:"+20% дроп навсегда",cost:{credits:5000,gems:20},fn:function(){S.luck+=0.2}},
+  {id:"c4",n:"Квантовый Усилитель",d:"x2 тап навсегда",cost:{credits:25000,gems:50},fn:function(){S.cp*=2}},
+  {id:"c5",n:"Тёмная Энергия",d:"+100/с навсегда",cost:{credits:100000,gems:100},fn:function(){S.ps+=100}},
+  {id:"c6",n:"Бесконечность",d:"x10 всё!",cost:{credits:1000000,gems:500},fn:function(){S.gm*=10;S.luck+=1}}
+];
+
+// === RANDOM EVENTS ===
+var GAME_EVENTS=[
+  {id:"e1",n:"Золотой Дождь",d:"x3 кредиты на 30 сек!",duration:30,fn:function(){S.gm*=3}},
+  {id:"e2",n:"Комбо-Февер",d:"x5 комбо на 20 сек!",duration:20,fn:function(){S.comboMax+=20}},
+  {id:"e3",n:"Удачный Час",d:"+100% удача на 60 сек!",duration:60,fn:function(){S.luck+=1}},
+  {id:"e4",n:"Нано-Всплеск",d:"+50/с на 45 сек!",duration:45,fn:function(){S.ps+=50}},
+  {id:"e5",n:"Престиж-Буст",d:"x2 престиж-очки навсегда",duration:0,fn:function(){S.pp+=Math.max(1,S.pp)}}
+];
+
+function triggerRandomEvent(){
+  if(S.activeEvent)return;
+  var e=GAME_EVENTS[Math.floor(Math.random()*GAME_EVENTS.length)];
+  S.activeEvent=e;
+  S.eventTimer=e.duration;
+  e.fn();
+  dlg("⚡ Событие!",e.n+"\n\n"+e.d,[{t:"Отлично!",f:function(){hdlg()}}]);
+  draw();
+}
+
+function tickEvents(){
+  if(S.activeEvent){
+    S.eventTimer--;
+    if(S.eventTimer<=0){
+      S.activeEvent=null;
+    }
+  }
+  // Random event chance: ~1% per minute of play
+  if(!S.activeEvent&&Math.random()<0.0002){
+    triggerRandomEvent();
+  }
+}
+
 // === ACHIEVEMENTS ===
 function chkAch(){
   for(var i=0;i<ACHS.length;i++){
@@ -830,7 +874,10 @@ function draw(){
   id("prog-fi").style.width=pct+"%";
   var rn=["Цифровой Нексус","Неоновая Сеть","Квантовое Ядро","Кибер-Улей","Тёмная Матрица","Пустотный Сектор","Бесконечный Цикл","Омега-Царство","Альфа-Сингулярность","Кибер-Эдем","Нейросеть","Фантомная Зона","Бинарный Шторм","Хромовая Пустота","Океан Данных","Пустотное Ядро"];
   id("prog-t").textContent="Рейм ур."+S.rl+" — "+rn[Math.min(S.rl-1,rn.length-1)];
-  id("uname").textContent=curUser||""
+  id("uname").textContent=curUser||"";
+  var eb=id("event-bar");
+  if(S.activeEvent){eb.style.display="block";eb.textContent="⚡ "+S.activeEvent.n+" ("+S.eventTimer+"с)"}
+  else{eb.style.display="none"}
 }
 
 // === PANEL ===
@@ -869,6 +916,16 @@ function showPanel(t){
     p.innerHTML='<div style="text-align:center;padding:15px 10px"><div style="font-size:40px;margin-bottom:8px">💎</div><div style="color:#ffd700;font-size:15px;font-weight:bold;margin-bottom:6px">Крипто-донат</div><div style="color:#888;font-size:11px;margin-bottom:12px">Поддержите разработку на любой EVM-сети</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;margin-bottom:8px;text-align:left"><div style="color:#ffd700;font-size:11px;font-weight:bold;margin-bottom:4px">📍 Адрес:</div><div style="color:#0ff;font-size:10px;word-break:break-all;background:rgba(0,255,255,.05);padding:6px;border-radius:4px;cursor:pointer" id="donateAddr">'+addr+'</div></div><div style="color:#888;font-size:10px;margin-bottom:10px">🔷 ETH • 🟡 BSC • 🟣 MATIC<br>🔵 BASE • 🔴 ARB • 🟢 OP</div><button class="btn" id="copyAddrBtn" style="margin-bottom:8px;background:linear-gradient(135deg,#0ff,#4af);color:#000">📋 Копировать адрес</button><div style="color:#555;font-size:9px">Спасибо за поддержку! 💖</div></div>';
     id("donateAddr").onclick=function(){navigator.clipboard.writeText(addr);dlg("✅ Скопировано!","Адрес скопирован",[{t:"OK",f:function(){hdlg()}}])};
     id("copyAddrBtn").onclick=function(){navigator.clipboard.writeText(addr);dlg("✅ Скопировано!","Адрес скопирован",[{t:"OK",f:function(){hdlg()}}])};
+  } else if(t==="cf"){
+    id("panT").textContent="🔧 Крафт";
+    for(var i=0;i<CRAFT_RECIPES.length;i++){
+      var c=CRAFT_RECIPES[i],canAfford=S.c>=c.cost.credits&&S.gems>=c.cost.gems;
+      var cls=canAfford?' can':'';
+      var costStr=canAfford?c.cost.credits+' кред':'Нужно: '+fmt(c.cost.credits)+' кред';
+      p.innerHTML+='<div class="card"+cls+"" data-cidx=""+i+""><div class="h"><span class="nm">"+c.n+"</span><span class="lv">"+c.cost.gems+" гемов</span></div><div class="d">"+c.d+"</div><div class="c">"+costStr+"</div></div>';
+    }
+    var ccards=p.querySelectorAll(".card");
+    for(var i=0;i<ccards.length;i++){ccards[i].onclick=function(){var idx=parseInt(ga(this,"data-cidx")),r=CRAFT_RECIPES[idx];if(S.c<r.cost.credits||S.gems<r.cost.gems)return;S.c-=r.cost.credits;S.gems-=r.cost.gems;r.fn();chkAch();chkQuests();showPanel("cf");saveGame();draw()}}
   } else if(t==="lb"){
     id("panT").textContent="🏆 Топ игроков";
     renderLeaderboard("credits");
@@ -1109,6 +1166,7 @@ id("tdt").onclick=function(){showScreen("dt")};
 id("tst").onclick=function(){showScreen("st")};
 id("tlb").onclick=function(){showScreen("lb")};
 id("tqu").onclick=function(){showScreen("qu")};
+id("tcf").onclick=function(){showScreen("cf")};
 
 // === GAME LOOP ===
 window.addEventListener("beforeunload",function(){saveGame()});
@@ -1117,7 +1175,7 @@ setInterval(function(){
   if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
   if(S.autoClick>0){var ac=Math.floor(S.autoClick*S.gm);S.c+=ac;S.ct+=ac;S.rp+=ac}
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
-  draw()
+  tickEvents();draw()
 },1000);
 setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000)S.combo=0;draw()},2000);
 
@@ -1161,7 +1219,7 @@ window.addEventListener("beforeinstallprompt",function(e){
 });
 
 // === VERSION & UPDATE NOTIFICATIONS ===
-var GAME_VERSION="9.4";
+var GAME_VERSION="9.5";
 var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
 if(LAST_SEEN_VERSION!==GAME_VERSION){
   localStorage.setItem("cr_lastVersion",GAME_VERSION);
