@@ -900,7 +900,7 @@ function showPanel(t){
     id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
     for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🔲")+'</span><div class="inf"><div class="an">'+a.n+'</div></div><span class="ar">'+(done?"Получено":"💎10")+"</span></div>"}
   } else if(t==="qu"){
-    id("panT").textContent="🎯 Квests ("+completedQuests.length+"/"+QUESTS.length+")";
+    id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
     for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i],done=completedQuests.indexOf(q.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🎯")+'</span><div class="inf"><div class="an">'+q.n+'</div><div style="color:#777;font-size:9px">'+q.d+'</div></div><span class="ar">'+(done?"Done":"+"+fmt(q.reward.credits)+"💎")+"</span></div>"}
   } else if(t==="st"){
     id("panT").textContent="📊 Статистика";
