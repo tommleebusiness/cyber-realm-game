@@ -1,0 +1,14 @@
+node_modules/
+generate-icons.html
+test_game.js
+server.js
+package.json
+package-lock.json
+.bubblewrap/
+android-sdk/
+declare/
+declare/.bubblewrap/
+android-sdk/
+*.pyc
+__pycache__/
+data/users.db
