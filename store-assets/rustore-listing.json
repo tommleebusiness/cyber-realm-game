@@ -1,0 +1,38 @@
+{
+  "app": {
+    "package_name": "com.cyberrealm.idle",
+    "title": "Cyber Realm Idle",
+    "title_en": "Cyber Realm Idle",
+    "version": "9.0.0",
+    "version_code": 9,
+    "min_sdk": 26,
+    "target_sdk": 34,
+    "category": "Игры",
+    "subcategory": "Казуальные",
+    "content_rating": "0+",
+    "price": "Бесплатно"
+  },
+  "description": {
+    "short": "Футуристическая Idle игра — тапай, улучшай, побеждай боссов!",
+    "full": "⚡ CYBER REALM IDLE ⚡\n\nФутуристическая Idle игра в киберпанк-стиле. Тапай по экрану, зарабатывай кредиты, покупай улучшения, сражайся с боссами!\n\n🎮 ОСОБЕННОСТИ:\n• Простой геймплей — тапай и развивайся\n• 17 улучшений\n• 11 уникальных боссов\n• Система комбо и удачи\n• 18 достижений\n• Престиж-система\n• Ежедневные награды\n• Лидерборд\n• OWL чат с ИИ\n• Офлайн-режим\n• Без рекламы"
+  },
+  "developer": {
+    "name": "OWL",
+    "email": "cyberrealm@owl.dev",
+    "website": "https://tommleebusiness.github.io/cyber-realm-game/"
+  },
+  "requirements": {
+    "android_min": "8.0",
+    "ram_mb": 128,
+    "storage_mb": 50
+  },
+  "screenshots": [
+    "screenshot1-main.png",
+    "screenshot2-upgrades.png",
+    "screenshot3-boss.png",
+    "screenshot4-chat.png",
+    "screenshot5-leaderboard.png"
+  ],
+  "icon": "icon-512.png",
+  "privacy_policy": "https://tommleebusiness.github.io/cyber-realm-game/privacy-policy.html"
+}
