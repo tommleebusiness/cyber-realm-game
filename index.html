@@ -642,11 +642,12 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
 
   // Combo display
+  var cd=id("combo-display");
   if(S.combo>=5){
-    var cd=id("combo-display");
-    cd.textContent="⚡ COMBO x"+S.combo+"!";
+    cd.textContent="⚡ COMBO x"+comboBonus.toFixed(1)+"!";
     cd.className="show";
-    setTimeout(function(){cd.className=""},1500);
+  } else {
+    cd.className="";
   }
 
   var comboText=S.combo>1?" x"+comboBonus+" ⚡":"";
