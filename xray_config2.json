@@ -1,0 +1,36 @@
+{
+  "inbounds": [
+    {
+      "port": 1083,
+      "protocol": "http",
+      "settings": {}
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "144.31.30.69",
+            "port": 443,
+            "users": [
+              {
+                "id": "f9a22b86-1e3f-46cd-b518-b7fe5eca6945",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "eh.vk.com",
+          "fingerprint": "firefox"
+        }
+      }
+    }
+  ]
+}

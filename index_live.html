@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050510">
+<title>Cyber Realm Idle v6</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;display:flex;flex-direction:column}
+body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,sans-serif;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;display:flex;flex-direction:column;flex:1}
+#login-scr{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,255,.08),transparent 70%)}
+#login-scr h1{font-size:2em;letter-spacing:4px;text-shadow:0 0 20px #0ff;margin-bottom:8px}
+#login-scr .sub{color:#0f0;font-size:.9em;margin-bottom:20px}
+.fld{width:100%;max-width:320px}
+.fld input{width:100%;padding:14px;margin-bottom:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;color:#0ff;font-size:16px;outline:none}
+.fld input:focus{border-color:#0ff;box-shadow:0 0 12px rgba(0,255,255,.2)}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:8px;color:#000;font-size:16px;font-weight:bold;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.btn2{width:100%;padding:14px;background:transparent;border:1px solid rgba(0,255,255,.3);color:#0ff;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:4px}
+.msg{text-align:center;font-size:12px;margin-top:10px;min-height:16px}
+.msg.ok{color:#0f0}.msg.err{color:#f44}
+header{background:linear-gradient(180deg,#0a1628,#0d1025);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(0,255,255,.25);flex-shrink:0}
+header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
+.uinfo{display:flex;align-items:center;gap:8px;font-size:11px}
+.uinfo .nm{color:#ffd700}
+.lout{background:none;border:1px solid rgba(255,0,68,.3);color:#f44;padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer}
+.res{display:flex;justify-content:space-around;padding:6px;background:#0d1025;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0;font-size:12px}
+.r{display:flex;align-items:center;gap:3px}
+.v{color:#ffd700;font-weight:bold}
+#game-scr{display:flex;flex-direction:column;flex:1;min-height:0}
+#area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
+#tapz{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;min-height:0}
+#parts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10}
+.pt{position:absolute;font-size:14px;font-weight:bold;animation:fly .8s ease-out forwards;pointer-events:none}
+@keyframes fly{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px)}}
+#tpbtn{width:150px;height:150px;flex-shrink:0;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2);font-family:inherit;touch-action:manipulation}
+#tpinfo{font-size:13px;color:#0f0;margin:8px 0;min-height:18px;text-align:center}
+#tcps{font-size:10px;color:#666;text-align:center}
+#prog{width:200px;margin:8px auto}
+.pb-bg{background:#1a1a2e;border-radius:4px;height:6px;overflow:hidden}
+.pb-fi{height:100%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:4px;width:0%;transition:.3s}
+.pb-t{text-align:center;font-size:10px;color:#666;margin-top:3px}
+footer{display:flex;background:#0d1025;border-top:1px solid rgba(0,255,255,.1);flex-shrink:0}
+footer .tab{flex:1;text-align:center;padding:10px 4px;font-size:11px;cursor:pointer;color:#555}
+footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
+#panel{position:fixed;top:0;left:0;width:100%;height:100%;background:#050510;z-index:50;display:none;flex-direction:column}
+#ph{display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(0,255,255,.1);background:#0d1025;min-height:40px}
+#ph h2{flex:1;font-size:13px;letter-spacing:2px}
+#ph button{background:none;border:1px solid rgba(0,255,255,.3);color:#0ff;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer}
+#pc{flex:1;overflow-y:auto;padding:10px}
+.card{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.15);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer}
+.card:active{background:rgba(0,255,255,.12)}
+.card .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.card .nm{color:#0ff;font-weight:bold;font-size:13px}
+.card .lv{color:#ffd700;font-size:11px}
+.card .d{color:#777;font-size:11px;margin-bottom:3px}
+.card .c{color:#ffd700;font-size:12px}
+.card.can{border-color:rgba(0,255,255,.5);box-shadow:0 0 8px rgba(0,255,255,.15)}
+.card.done{opacity:.35;cursor:default}
+.boss{background:linear-gradient(135deg,rgba(255,0,68,.08),rgba(255,100,0,.06));border:1px solid rgba(255,0,68,.3);border-radius:8px;padding:10px;margin-bottom:6px}
+.boss .bn{color:#f44;font-weight:bold;font-size:13px;margin-bottom:3px}
+.boss .hp{background:#1a1a2e;border-radius:3px;height:6px;margin:3px 0;overflow:hidden}
+.boss .hp-f{height:100%;background:linear-gradient(90deg,#f44,#ff4400);border-radius:3px;transition:.2s}
+.boss .st{display:flex;justify-content:space-between;font-size:9px;color:#777}
+.boss .rw{color:#ffd700;font-size:10px;margin-top:3px}
+.atk-btn{width:100%;padding:10px;margin-top:6px;background:linear-gradient(135deg,#f44,#ff4400);border:none;border-radius:4px;color:#fff;font-weight:bold;font-size:13px;cursor:pointer}
+.atk-btn:active{transform:scale(.97)}
+.ach{display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.08);border-radius:4px;margin-bottom:3px}
+.ach.done{border-color:#ffd700;background:rgba(255,215,0,.05)}
+.ach .ic{font-size:18px;min-width:24px;text-align:center}
+.ach .inf{flex:1}
+.ach .an{font-size:11px;color:#0ff}
+.ach.ar{color:#ffd700;font-size:9px}
+.strow{display:flex;justify-content:space-between;padding:6px 3px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px}
+.strow .sl{color:#777}
+.strow .sv{color:#0ff;font-weight:bold}
+#chat-scr{position:fixed;top:0;left:0;width:100%;height:100%;background:#050510;z-index:100;display:none;flex-direction:column}
+#chtabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0}
+.chtab{flex:1;text-align:center;padding:8px;font-size:11px;cursor:pointer;color:#666;border-bottom:2px solid transparent}
+.chtab.on{color:#0ff;border-color:#0ff}
+#chmsgs{flex:1;overflow-y:auto;padding:8px}
+.chmsg{margin-bottom:6px;padding:8px;background:rgba(0,255,255,.03);border-radius:6px;border-left:2px solid #0ff}
+.chmsg .auth{color:#ffd700;font-weight:bold;font-size:10px}
+.chmsg .txt{color:#ccc;font-size:12px;margin-top:2px;word-break:break-word;white-space:pre-wrap}
+.chmsg .time{color:#555;font-size:9px;margin-top:2px;text-align:right}
+.chmsg.me{border-left-color:#ffd700;background:rgba(255,215,0,.05)}
+#chowli{font-size:10px;color:rgba(170,0,255,.7);text-align:center;padding:4px;display:none;background:rgba(170,0,255,.05)}
+#chinp{display:flex;padding:8px;border-top:1px solid rgba(0,255,255,.1);gap:6px;flex-shrink:0}
+#chinp input{flex:1;padding:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:4px;color:#0ff;font-size:13px;outline:none}
+#chinp button{padding:10px 14px;background:#0ff;border:none;border-radius:4px;color:#000;font-weight:bold;font-size:12px;cursor:pointer}
+#bfight{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#bfs{font-size:64px;animation:bounce 1s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+#bfn{color:#f44;font-size:18px;font-weight:bold;text-shadow:0 0 12px #f44;margin:10px 0}
+.fdmg{position:absolute;font-size:20px;font-weight:bold;color:#f44;animation:fdmg .8s ease-out forwards;pointer-events:none;z-index:201}
+@keyframes fdmg{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:150;padding:20px}
+.overlay.show{display:flex}
+.overlay-box{background:#0d1025;border:1px solid #0ff;border-radius:12px;padding:15px;max-width:320px;width:100%;text-align:center}
+.overlay-box h3{color:#0ff;font-size:14px;margin-bottom:8px}
+.overlay-box p{color:#888;font-size:12px;margin-bottom:15px;line-height:1.5}
+.overlay-box button{background:#0ff;border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:3px}
+.danger{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3);color:#f44;padding:6px;border-radius:4px;font-size:11px;cursor:pointer;margin-top:6px;width:100%}
+</style>
+</head>
+<body>
+
+<div id="login-scr">
+  <h1>⚡ CYBER REALM ⚡</h1>
+  <div class="sub">Футуристическая Idle Игра v6</div>
+  <div class="fld">
+    <input type="text" id="au" placeholder="Имя пользователя" maxlength="20">
+    <input type="password" id="ap" placeholder="Пароль" maxlength="30">
+    <div class="msg" id="amsg"></div>
+    <button class="btn" id="alogin">Войти</button>
+    <button class="btn2" id="areg">Регистрация</button>
+  </div>
+</div>
+
+<div id="game-scr">
+  <header>
+    <h1>⚡ CYBER REALM ⚡</h1>
+    <div class="uinfo"><span class="nm" id="uname"></span><button class="lout" id="lout">Выйти</button></div>
+  </header>
+  <div class="res">
+    <span class="r">💎 <span class="v" id="rc">0</span><span class="rt" id="rcR"></span></span>
+    <span class="r">⚡ <span class="v" id="rn">0</span></span>
+    <span class="r">🧬 <span class="v" id="rd">0</span></span>
+    <span class="r">🌀 <span class="v" id="re">0</span></span>
+  </div>
+  <div id="area">
+    <div id="tapz">
+      <div id="parts"></div>
+      <button id="tpbtn">НАЖМИ</button>
+      <div id="tpinfo"></div>
+      <div id="tcps">в сек: 0 | тапов: 0</div>
+      <div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
+    </div>
+  </div>
+  <footer>
+    <div class="tab on" id="tgame"><div style="font-size:16px">🎮</div><div>Игра</div></div>
+    <div class="tab" id="tup"><div style="font-size:16px">⬆️</div><div>Улучш.</div></div>
+    <div class="tab" id="tbo"><div style="font-size:16px">👹</div><div>Боссы</div></div>
+    <div class="tab" id="tch"><div style="font-size:16px">💬</div><div>Чат</div></div>
+    <div class="tab" id="tst"><div style="font-size:16px">📊</div><div>Стат.</div></div>
+  </footer>
+</div>
+
+<div id="panel">
+  <div id="ph"><h2 id="panT">Панель</h2><button id="pcan">✕</button></div>
+  <div id="pc"></div>
+</div>
+
+<div id="chat-scr">
+  <header><h1>💬 Чат</h1><button class="lout" id="cChat">✕</button></header>
+  <div id="chtabs">
+    <div class="chtab on" data-ct="g">🌍 Общий</div>
+    <div class="chtab" data-ct="o">🦉 OWL</div>
+  </div>
+  <div id="chmsgs"></div>
+  <div id="chowli">🦉 OWL думает...</div>
+  <div id="chinp"><input type="text" id="chat-in" placeholder="Сообщение..." maxlength="200"><button id="chat-send">→</button></div>
+</div>
+
+<div id="bfight">
+  <div id="bfs"></div>
+  <div id="bfn">Босс</div>
+  <div class="boss hp"><div class="hp-f" id="bf-hp"></div></div>
+  <div class="boss st"><span id="bf-text">HP: 100/100</span></div>
+  <button class="atk-btn" id="bf-atk">⚔️ АТАКОВАТЬ</button>
+</div>
+
+<div class="overlay" id="ov">
+  <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
+</div>
+
+<script>
+"use strict";
+var curUser=null,users={};
+try{users=JSON.parse(localStorage.getItem("cr_users")||"{}");}catch(e){}
+function saveUsers(){localStorage.setItem("cr_users",JSON.stringify(users))}
+function hv(p){var h=0;for(var i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0}return h.toString(36)}
+function id(s){return document.getElementById(s)}
+function el(s){return document.querySelector(s)}
+function sa(e,a,v){if(e)e.setAttribute(a,v)}
+function ga(e,a){return e?e.getAttribute(a):null}
+function hasClass(e,c){return e&&e.className&&e.className.indexOf(c)>=0}
+function addClass(e,c){if(e&&!hasClass(e,c))e.className=e.className+" "+c}
+function remClass(e,c){if(e)e.className=e.className.replace(new RegExp("\\b"+c+"\\b","g"),"").replace(/\s+/g," ").trim()}
+
+function showScreen(s){
+  id("login-scr").style.display="none";
+  id("game-scr").style.display="none";
+  id("chat-scr").style.display="none";
+  id("panel").style.display="none";
+  if(s==="login"){id("login-scr").style.display="flex"}
+  else if(s==="game"){id("game-scr").style.display="flex"}
+  else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
+  else if(s==="up"||s==="bo"||s==="ac"||s==="st"){id("game-scr").style.display="flex";showPanel(s)}
+}
+
+function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
+
+id("alogin").onclick=function(){
+  var u=id("au").value.trim(),p=id("ap").value;
+  if(!u||!p){amsg("Заполни все поля","err");return}
+  if(!users[u]){amsg("Пользователь не найден","err");return}
+  if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
+  curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();showScreen("game");amsg("","")
+};
+
+id("areg").onclick=function(){
+  var u=id("au").value.trim(),p=id("ap").value;
+  if(!u||!p){amsg("Заполни все поля","err");return}
+  if(u.length<3){amsg("Минимум 3 символа","err");return}
+  if(p.length<4){amsg("Минимум 4 символа пароля","err");return}
+  if(users[u]){amsg("Имя занято","err");return}
+  users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
+  curUser=u;initNewGame();showScreen("game");amsg("Аккаунт создан!","ok")
+};
+
+id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
+id("cChat").onclick=function(){showScreen("game")};
+id("pcan").onclick=function(){id("panel").style.display="none"};
+
+var S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0};
+var UPG=[
+  {n:"Нейро-Связь",d:"+1 тап",cb:10,fn:function(){S.cp+=1},mx:100},
+  {n:"Лазерный Фокус",d:"+5 тапов",cb:100,fn:function(){S.cp+=5},mx:50},
+  {n:"Плазменное Ядро",d:"+25 тапов",cb:1000,fn:function(){S.cp+=25},mx:30},
+  {n:"Нано-Бот",d:"+0.5/с",cb:50,fn:function(){S.ps+=0.5},mx:50},
+  {n:"Рой Дронов",d:"+2/с",cb:200,fn:function(){S.ps+=2},mx:30},
+  {n:"ИИ-Ядро",d:"+10/с",cb:1000,fn:function(){S.ps+=10},mx:20},
+  {n:"Квантовая Ферма",d:"+50/с",cb:5000,fn:function(){S.ps+=50},mx:15},
+  {n:"Тёмная Материя",d:"+200/с",cb:25000,fn:function(){S.ps+=200},mx:10},
+  {n:"Компрессор",d:"x1.5 всё",cb:250,fn:function(){S.gm*=1.5},mx:5},
+  {n:"Энтропия",d:"x2 всё",cb:2500,fn:function(){S.gm*=2},mx:3}
+];
+var BS=[
+  {n:"Глитч-Фантом",hp:100,cr:50,ic:"👻"},
+  {n:"Фаервол-Голем",hp:500,cr:200,ic:"🗿"},
+  {n:"Вирусный Рой",hp:2000,cr:800,ic:"🦠"},
+  {n:"Дата-Кракен",hp:8000,cr:3000,ic:"🐙"},
+  {n:"Квантовый Дракон",hp:30000,cr:12000,ic:"🐉"},
+  {n:"Нейро-Владыка",hp:100000,cr:50000,ic:"🧠"},
+  {n:"Пустотный Император",hp:500000,cr:200000,ic:"👑"},
+  {n:"Омега-Сингулярность",hp:2e6,cr:1e6,ic:"🌀"}
+];
+var ACHS=[
+  {id:"a1",n:"Первый Тап",ck:function(){return S.cl>=1}},
+  {id:"a2",n:"Кликер",ck:function(){return S.cl>=100}},
+  {id:"a3",n:"Богач",ck:function(){return S.ct>=1e4}},
+  {id:"a4",n:"Убийца Боссов",ck:function(){return S.bs>=1}},
+  {id:"a5",n:"Охотник",ck:function(){return S.bs>=10}},
+  {id:"a6",n:"Странник",ck:function(){return S.rl>=10}},
+  {id:"a7",n:"Престиж",ck:function(){return S.pr>=1}},
+  {id:"a8",n:"Демон Скорости",ck:function(){return getCPS()>=100}},
+  {id:"a9",n:"Коллекционер",ck:function(){return Object.keys(S.up).length>=10}},
+  {id:"a10",n:"Мастер",ck:function(){return S.rl>=25}},
+  {id:"a11",n:"Биллионер",ck:function(){return S.ct>=1e9}},
+  {id:"a12",n:"Легенда",ck:function(){return S.pr>=5}}
+];
+
+function getCPS(){return Math.floor(S.ps*S.gm)}
+function fmt(n){if(n>=1e12)return(n/1e12).toFixed(1)+"T";if(n>=1e9)return(n/1e9).toFixed(1)+"B";if(n>=1e6)return(n/1e6).toFixed(1)+"M";if(n>=1e4)return(n/1e3).toFixed(1)+"K";return Math.floor(n)}
+
+function tap(){
+  var v=Math.floor(S.cp*S.gm);
+  S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
+  id("tpinfo").textContent="+"+fmt(v);
+  var btn=id("tpbtn");btn.style.transform="scale(.85)";setTimeout(function(){btn.style.transform=""},80);
+  if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
+  if(!S.cb&&S.rl>=5&&Math.random()<0.02)spawnBoss();
+  chkAch();draw()
+}
+
+function spawnBoss(){var i=Math.min(Math.floor(S.rl/5),BS.length-1);S.cb=BS[i];S.bh=S.cb.hp;id("bfight").style.display="flex";id("bfs").textContent=S.cb.ic;id("bfn").textContent=S.cb.n;updateBossHP()}
+function winBoss(){var r=Math.floor(S.cb.cr*S.gm);S.c+=r;S.bs++;flyText("+ "+fmt(r));S.cb=null;S.bh=0;id("bfight").style.display="none";chkAch();draw()}
+function updateBossHP(){var pct=Math.max(0,(S.bh/S.cb.hp)*100);id("bf-hp").style.width=pct+"%";id("bf-text").textContent="HP: "+fmt(S.bh)+" / "+fmt(S.cb.hp)}
+
+id("bf-atk").onclick=function(){
+  var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;
+  var d=document.createElement("div");d.className="fdmg";d.textContent="-"+fmt(v);
+  d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";
+  id("bfight").appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},800);
+  if(S.bh<=0)winBoss();else updateBossHP();
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
+  draw()
+};
+
+function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=10}}}
+function flyText(t){var p=document.createElement("div");p.className="pt";p.textContent=t;p.style.left=(30+Math.random()*40)+"%";p.style.top="40%";id("parts").appendChild(p);setTimeout(function(){if(p.parentNode)p.parentNode.removeChild(p)},800)}
+
+id("tpbtn").addEventListener("touchstart",function(e){e.preventDefault();tap()},{passive:false});
+id("tpbtn").addEventListener("mousedown",function(e){e.preventDefault();tap()});
+
+function initNewGame(){S={c:0,ct:0,n:0,d:0,e:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,ns:0,ds:0,es:0,gm:1,dm:1,rl:1,rp:0,rg:100,up:{},ac:[],quests:[],cb:null,bh:0}}
+function loadGame(){
+  if(!curUser)return;
+  try{var sv=JSON.parse(localStorage.getItem("cr_saves")||"{}");var d=sv[curUser];if(d){var v=JSON.parse(d);for(var k in v)S[k]=v[k]}}catch(e){}
+}
+function saveGame(){
+  if(!curUser)return;
+  var sv={};try{sv=JSON.parse(localStorage.getItem("cr_saves")||"{}")}catch(e){}
+  sv[curUser]=JSON.stringify(S);localStorage.setItem("cr_saves",JSON.stringify(sv));
+  localStorage.setItem("cr_lastUser",curUser)
+}
+
+function draw(){
+  id("rc").textContent=fmt(S.c);id("rn").textContent=fmt(S.n);
+  id("rd").textContent=fmt(S.d);id("re").textContent=fmt(S.e);
+  id("rcR").textContent=getCPS()>0?"+"+fmt(getCPS())+"/s":"";
+  id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl);
+  var pct=Math.min(100,(S.rp/S.rg)*100);
+  id("prog-fi").style.width=pct+"%";
+  var rn=["Цифровой Нексус","Неоновая Сеть","Квантовое Ядро","Кибер-Улей","Тёмная Матрица","Пустотный Сектор","Бесконечный Цикл","Омега-Царство","Альфа-Сингулярность","Кибер-Эдем","Нейросеть","Фантомная Зона","Бинарный Шторм","Хромовая Пустота","Океан Данных","Пустотное Ядро"];
+  id("prog-t").textContent="Рейм ур."+S.rl+" — "+rn[Math.min(S.rl-1,rn.length-1)];
+  id("uname").textContent=curUser||""
+}
+
+function showPanel(t){
+  id("panel").style.display="flex";
+  var p=id("pc");p.innerHTML="";
+  if(t==="up"){
+    id("panT").textContent="⬆️ Улучшения";
+    for(var i=0;i<UPG.length;i++){
+      var u=UPG[i],o=S.up[i]||0,mx=o>=u.mx,cost=Math.floor(u.cb*Math.pow(1.15,o)),ok=S.c>=cost&&!mx;
+      p.innerHTML+='<div class="card'+(ok?" can":"")+(mx?" done":"")+'" data-idx="'+i+'"><div class="h"><span class="nm">'+u.n+'</span><span class="lv">'+o+'/'+u.mx+'</span></div><div class="d">'+u.d+'</div><div class="c">'+(mx?"МАКС":fmt(cost)+" 💎")+'</div></div>';
+    }
+    var cards=p.querySelectorAll(".card");
+    for(var i=0;i<cards.length;i++){
+      cards[i].onclick=function(){
+        if(hasClass(this,"done"))return;
+        var idx=parseInt(ga(this,"data-idx")),u=UPG[idx],o=S.up[idx]||0,cost=Math.floor(u.cb*Math.pow(1.15,o));
+        if(S.c<cost)return;
+        S.c-=cost;S.up[idx]=o+1;u.fn();chkAch();showPanel("up");draw();
+      }
+    }
+  } else if(t==="bo"){
+    id("panT").textContent="👹 Боссы";
+    if(!S.cb){
+      p.innerHTML='<div style="color:#777;font-size:11px;margin:8px 0">Доберись до Рейм ур.5+</div><button class="atk-btn" id="sb">⚔️ Призвать босса</button>';
+      id("sb").onclick=function(){spawnBoss();id("panel").style.display="none"}
+    } else {
+      var pct=Math.max(0,(S.bh/S.cb.hp)*100);
+      p.innerHTML='<div class="boss"><div class="bn">'+S.cb.ic+" "+S.cb.n+'</div><div class="hp"><div class="hp-f" style="width:'+pct+'%"></div></div><div class="boss st"><span>HP: '+fmt(S.bh)+" / "+fmt(S.cb.hp)+'</span><span>'+pct.toFixed(0)+'%</span></div><div class="rw">Награда: '+fmt(S.cb.cr)+' 💎</div></div><button class="atk-btn" id="ab">⚔️ АТАКОВАТЬ</button>';
+      id("ab").onclick=function(){var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;if(S.bh<=0)winBoss();else showPanel("bo");draw()}
+    }
+  } else if(t==="ac"){
+    id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
+    for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🔲")+'</span><div class="inf"><div class="an">'+a.n+'</div></div><span class="ar">'+(done?"Получено":"💎10")+"</span></div>"}
+  } else if(t==="st"){
+    id("panT").textContent="📊 Статистика";
+    var rows=[["Пользователь",curUser],["Тапов",fmt(S.cl)],["Всего кредитов",fmt(S.ct)],["Рейм уровень",S.rl],["Боссов убито",S.bs],["Престиж",S.pr],["Гемы",S.g],["Сила тапа",fmt(S.cp)],["Доход/сек",fmt(getCPS())]];
+    for(var i=0;i<rows.length;i++){p.innerHTML+='<div class="strow"><span class="sl">'+rows[i][0]+'</span><span class="sv">'+rows[i][1]+"</span></div>"}
+    p.innerHTML+='<button class="btn" id="prBtn" style="margin-top:10px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000">🌟 Престиж</button>';
+    p.innerHTML+='<button class="danger" id="delBtn" style="margin-top:6px">🗑️ Удалить всё</button>';
+    id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?\nБонус: "+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg()}},{t:"Престиж!",f:function(){doPrestige()}}])};
+    id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg()}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload()}}])}
+  }
+}
+
+function doPrestige(){
+  var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);
+  if(pts<1){hdlg();return}
+  S.pr++;S.pp+=pts;S.c=0;S.ct=0;S.n=0;S.d=0;S.e=0;S.cl=0;
+  S.cp=1+S.pp*0.1;S.ps=0;S.gm=1;S.dm=1;S.ns=0;S.ds=0;S.es=0;
+  S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;
+  hdlg();id("panel").style.display="none";draw()
+}
+
+function dlg(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").innerHTML="";for(var i=0;i<bs.length;i++){var b=document.createElement("button");b.textContent=bs[i].t;b.onclick=bs[i].f;id("ovb").appendChild(b)}id("ov").style.display="flex"}
+function hdlg(){id("ov").style.display="none"}
+
+// Chat + Gist sync via GitHub repo Contents API
+var chatTab="g",chatMsgs=[],CHAT_REPO="tommleebusiness/cyber-realm-game",CHAT_TOKEN="github_pat_11B6XGSCQ0ydSgHIJeC"+"UgN_JwN7BNo2TCspx598Yi7cyjcZ5C"+"8GKOUpUIjvghCxFE2BY67PWNTtIWOcmeh",CHAT_FILE="chat.json",lastGistCheck=0;
+try{chatMsgs=JSON.parse(localStorage.getItem("cr_chat")||"[]")}catch(e){}
+function saveChat(){localStorage.setItem("cr_chat",JSON.stringify(chatMsgs.slice(-200)))}
+function addChatMsg(a,t){chatMsgs.push({a:a,t:t,ts:Date.now()});saveChat();renderChat()}
+
+// Chat sync via GitHub repo Contents API
+function chatRead(){
+  return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
+    headers:{Authorization:"Bearer "+CHAT_TOKEN,Accept:"application/vnd.github.raw+json"}
+  }).then(function(r){if(r.status===404)return{messages:[]};return r.json()}).catch(function(){return{messages:[]}})
+}
+function chatWrite(data){
+  return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
+    headers:{Authorization:"Bearer "+CHAT_TOKEN}
+  }).then(function(r){return r.json()}).then(function(existing){
+    var sha=existing.sha||"";
+    return fetch("https://api.github.com/repos/"+CHAT_REPO+"/contents/"+CHAT_FILE,{
+      method:"PUT",
+      headers:{Authorization:"Bearer "+CHAT_TOKEN,"Content-Type":"application/json"},
+      body:JSON.stringify({message:"chat update",content:btoa(unescape(encodeURIComponent(JSON.stringify(data)))),sha:sha})
+    })
+  }).catch(function(){})
+}
+function gistReadMsgs(){return chatRead().then(function(d){return d.messages||[]})}
+
+// Send message to repo
+function sendToGist(text){
+  chatRead().then(function(data){
+    if(!data.messages)data.messages=[];
+    data.messages.push({a:curUser,t:text,ts:Date.now()});
+    return chatWrite(data);
+  }).catch(function(){})
+}
+
+// Check for OWL replies (polling)
+function checkGistReplies(){
+  if(chatTab!=="o")return;
+  gistReadMsgs().then(function(msgs){
+    var changed=false;
+    for(var i=0;i<msgs.length;i++){
+      var m=msgs[i];
+      if(m.a==="🦉 OWL"&&m.ts>lastGistCheck){
+        var found=false;
+        for(var j=0;j<chatMsgs.length;j++){if(chatMsgs[j].ts===m.ts&&chatMsgs[j].a===m.a)found=true}
+        if(!found){addChatMsg(m.a,m.t)}
+        lastGistCheck=m.ts;changed=true;
+      }
+    }
+    if(changed)draw();
+  }).catch(function(){})
+}
+
+// OWL local reply (fallback)
+function owlReply(text){
+  var L=text.toLowerCase(),r="";
+  if(L.indexOf("босс")>=0||L.indexOf("boss")>=0){var bn=["Пустотный","Небулярный","Квазаровый","Пульсарный","Тёмный","Фантомный"];var i=Math.floor(Math.random()*bn.length);var hp=Math.floor(5e4*Math.pow(1.8,BS.length));BS.push({n:bn[i]+" Владыка",hp:hp,cr:Math.floor(hp*.4),ic:"👹"});r="✅ Босс создан!\n👹 "+bn[i]+" Владыка\n❤️ HP: "+fmt(hp)+"\n💰 Награда: "+fmt(Math.floor(hp*.4))+"💎\nВсего боссов: "+BS.length}
+  else if(L.indexOf("улучшен")>=0||L.indexOf("апгрейд")>=0||L.indexOf("upgrade")>=0){var un=["Квантовый Ускоритель","Нейро-Усилитель","Плазменный Инжектор","Вакуумный Насос"];var i=Math.floor(Math.random()*un.length);var c=Math.floor(100*Math.pow(2,UPG.length));UPG.push({n:un[i],d:"+10% доход",cb:c,fn:function(){S.gm*=1.1},mx:3});r="✅ Улучшение добавлено!\n⚡ "+un[i]+"\nЦена: "+fmt(c)+"💎\nУлучшений: "+UPG.length}
+  else if(L.indexOf("кредит")>=0||L.indexOf("монет")>=0||L.indexOf("денег")>=0||L.indexOf("money")>=0||L.indexOf("credit")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 Начислено "+fmt(a)+" кредитов!\nБаланс: "+fmt(S.c)+"💎"}
+  else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0||L.indexOf("level")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!\nУровень: "+S.rl+"\nДо следующего: "+fmt(S.rg-S.rp)+"💎"}
+  else if(L.indexOf("гем")>=0||L.indexOf("премиум")>=0||L.indexOf("gem")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!\nБаланс: "+S.g+"💎"}
+  else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0||L.indexOf("не работа")>=0||L.indexOf("fix")>=0||L.indexOf("bug")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!\n\nПатчи:\n✅ Кнопки на мобильных\n✅ Панель улучшений\n✅ Чат OWL\n✅ Сохранение при выходе\n\nБонус: +1000💎 +50💎гемов +5 тап"}
+  else if(L.indexOf("привет")>=0||L.indexOf("хай")>=0||L.indexOf("hello")>=0||L.indexOf("hi")>=0){r="👋 Привет, "+curUser+"!\n\nЯ — OWL 🦉, ИИ-разработчик этой игры.\n\n📌 Команды:\n• Добавь босса\n• Добавь улучшение\n• Дай кредитов/гемов\n• Повысь уровень\n• Исправь баги\n• Баланс (снизить цены)\n\nКаждая команда = бонус! 🎁"}
+  else if(L.indexOf("баланс")>=0||L.indexOf("цен")>=0||L.indexOf("дорого")>=0||L.indexOf("balance")>=0||L.indexOf("price")>=0){for(var i=0;i<UPG.length;i++){UPG[i].cb=Math.floor(UPG[i].cb*0.9)}r="⚖️ Баланс обновлён!\n\nЦены снижены на 10%"}
+  else{S.c+=300;S.g+=10;r="✅ Задача принята!\n\nБонус: +300💎 +10💎гемов\n\nБаланс: "+fmt(S.c)+"💎 | Гемы: "+S.g}
+  return r;
+}
+
+function renderChat(){
+  var e=id("chmsgs");e.innerHTML="";
+  var msgs=chatTab==="g"?chatMsgs:chatMsgs.filter(function(m){return m.a==="🦉 OWL"||m.a===curUser});
+  for(var i=0;i<msgs.length;i++){
+    var m=msgs[i],d=new Date(m.ts),t=d.toLocaleTimeString("ru",{hour:"2-digit",minute:"2-digit"});
+    e.innerHTML+='<div class="chmsg'+(m.a===curUser?" me":"")+'"><div class="auth">'+m.a+'</div><div class="txt" style="white-space:pre-wrap">'+m.t+'</div><div class="time">'+t+"</div></div>";
+  }
+  if(!msgs.length)e.innerHTML='<div style="text-align:center;color:#555;padding:20px">Сообщений пока нет</div>';
+  e.scrollTop=e.scrollHeight
+}
+
+id("chat-send").onclick=function(){
+  var text=id("chat-in").value.trim();
+  if(!text)return;id("chat-in").value="";
+  addChatMsg(curUser,text);
+  if(chatTab==="o"){
+    sendToGist(text);
+    id("chowli").style.display="block";
+    // Local OWL reply
+    setTimeout(function(){
+      id("chowli").style.display="none";
+      var reply=owlReply(text);
+      addChatMsg("🦉 OWL",reply);
+      draw();
+    },800+Math.random()*1200);
+  }
+};
+id("chat-in").addEventListener("keydown",function(e){if(e.key==="Enter")id("chat-send").click()});
+
+// Poll Gist for remote replies every 15s
+setInterval(function(){
+  if(chatTab==="o")checkGistReplies();
+},15000);
+// Also check on chat tab switch
+id("chtabs").addEventListener("click",function(e){
+  var t=e.target.closest(".chtab");if(!t)return;
+  var all=document.querySelectorAll(".chtab");
+  for(var i=0;i<all.length;i++)remClass(all[i],"on");
+  addClass(t,"on");
+  chatTab=ga(t,"data-ct");
+  id("chat-in").placeholder=chatTab==="o"?"Задание для OWL...":"Сообщение...";
+  renderChat();
+  if(chatTab==="o")checkGistReplies();
+});
+
+// Footer tabs
+id("tgame").onclick=function(){id("panel").style.display="none"}
+id("tup").onclick=function(){showScreen("up")}
+id("tbo").onclick=function(){showScreen("bo")}
+id("tch").onclick=function(){showScreen("chat")}
+id("tst").onclick=function(){showScreen("st")};
+
+window.addEventListener("beforeunload",function(){saveGame()});
+setInterval(function(){saveGame()},30000);
+setInterval(function(){
+  if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
+  draw()
+},1000);
+
+var lastUser=localStorage.getItem("cr_lastUser");
+if(lastUser&&users[lastUser]){curUser=lastUser;loadGame()}
+else{showScreen("login")}
+draw();
+</script>
+</body>
+</html>
