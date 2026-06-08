@@ -533,7 +533,7 @@ id("alogin").onclick=function(){
   if(!users[u]){amsg("Пользователь не найден","err");return}
   if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
   curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();showScreen("game");amsg("","");
-  dbLogin(u,p);
+  try{dbLogin(u,p)}catch(e){}
 };
 id("areg").onclick=function(){
   var u=id("au").value.trim(),p=id("ap").value;
@@ -543,7 +543,7 @@ id("areg").onclick=function(){
   if(users[u]){amsg("Имя занято","err");return}
   users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
   curUser=u;initNewGame();showScreen("game");amsg("Аккаунт создан!","ok");
-  dbRegister(u,p);
+  try{dbRegister(u,p)}catch(e){}
 };
 id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
