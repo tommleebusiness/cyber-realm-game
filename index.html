@@ -489,22 +489,21 @@ function dbRegister(username,password){
 
 function dbLogin(username,password){
   dbReq("/login","POST",{username:username,password:password},function(s,t){
-    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=d.user_id;dbStartSync()}}catch(e){}}
+    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=username;dbStartSync()}}catch(e){}}
   });
 }
 
 function dbSave(){
   if(!dbUserId)return;
   dbReq("/save","POST",{user_id:dbUserId,stats:{
-    credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
+    credits:S.c,total_credits:S.ct,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
     prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
     tap_power:S.cp,cps:getCPS()
-  }});
+  },achievements:S.ac,quests_completed:completedQuests,upgrades:S.up});
 }
 
 function dbAchievement(achId,achName){
-  if(!dbUserId)return;
-  dbReq("/achievement","POST",{user_id:dbUserId,achievement_id:achId,achievement_name:achName});
+  // Achievements are synced via dbSave
 }
 
 function dbChat(message,isDev){
