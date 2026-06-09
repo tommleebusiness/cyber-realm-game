@@ -13,7 +13,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<title>Cyber Realm Idle</title>
+<title>Cyber Realm Idle v9</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;overflow:hidden}
@@ -446,7 +446,7 @@ function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
 // === DATABASE SYNC ===
 var DB_URL="http://127.0.0.1:8765/api";
-var TG_BOT_TOKEN="8603295219:***";
+var TG_BOT_TOKEN="8603295219:AAFj5cgwzp69Wo9dVM0hfPxJ2UDQYlxKr7A";
 var TG_CHAT_ID="7819200201";
 var dbUserId=null;
 var dbSyncTimer=null;
@@ -498,11 +498,8 @@ function dbSave(){
   dbReq("/save","POST",{user_id:dbUserId,stats:{
     credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
     prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
-    g:S.g, ct:S.ct, lastDaily:S.lastDaily, dailyStreak:S.dailyStreak,
     tap_power:S.cp,cps:getCPS()
-  }},function(s,t){
-    if(s===200){try{var d=JSON.parse(t);if(d.ok){/* saved */}}catch(e){}}
-  });
+  }});
 }
 
 function dbAchievement(achId,achName){
@@ -696,24 +693,7 @@ function tap(){
   if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
 
   // Level up
-  var levelsGained = 0;
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3; levelsGained++;}
-  if(levelsGained > 0){
-    // Show level up notification
-    var notify = document.createElement('div');
-    notify.textContent = 'РЕЙМ ПОВЫШЕН! Уровень ' + S.rl;
-    notify.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,255,255,.2);border:1px solid #0ff;border-radius:8px;padding:8px 16px;font-size:14px;color:#0ff;z-index:1000;pointer-events:none;animation:notifyUp .5s ease-out forwards';
-    notify.innerHTML = 'РЕЙМ ПОВЫШЕН! Уровень <span style="color:#ffd700">' + S.rl + '</span>';
-    document.body.appendChild(notify);
-    setTimeout(function(){if(notify.parentNode)notify.parentNode.removeChild(notify)},1500);
-    // Add CSS animation if not already present
-    if(!document.getElementById('notify-style')){
-      var style = document.createElement('style');
-      style.id = 'notify-style';
-      style.textContent = '@keyframes notifyUp{0%{opacity:0;transform:translateX(-50%) translateY(-20px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}';
-      document.head.appendChild(style);
-    }
-  }
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
 
   // Random boss spawn (rare: ~0.5% base, scales with realm level)
   if(!S.cb&&S.rl>=5&&Math.random()<0.005+Math.min(S.rl*0.001,0.015)){
@@ -1240,7 +1220,6 @@ window.addEventListener("beforeinstallprompt",function(e){
 
 // === VERSION & UPDATE NOTIFICATIONS ===
 var GAME_VERSION="9.5";
-document.title += " v" + GAME_VERSION;
 var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
 if(LAST_SEEN_VERSION!==GAME_VERSION){
   localStorage.setItem("cr_lastVersion",GAME_VERSION);
@@ -1249,9 +1228,6 @@ if(LAST_SEEN_VERSION!==GAME_VERSION){
     owlUpdateNotify(GAME_VERSION,updateNotes);
   },2000);
 }
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
