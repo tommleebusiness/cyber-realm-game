@@ -1,395 +1,396 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#050510">
-<meta name="apple-mobile-web-app-title" content="Cyber Realm">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Футуристическая Idle Игра — тапай, улучшай, побеждай боссов!">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<title>Cyber Realm Idle v9</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{height:100%;overflow:hidden}
-body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-
-/* === ANIMATED BACKGROUND === */
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:
-  radial-gradient(ellipse at 20% 50%,rgba(0,255,255,.04) 0%,transparent 50%),
-  radial-gradient(ellipse at 80% 20%,rgba(170,0,255,.03) 0%,transparent 50%),
-  radial-gradient(ellipse at 50% 80%,rgba(0,255,100,.02) 0%,transparent 50%);
-  animation:bgShift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
-@keyframes bgShift{0%{opacity:.5;transform:scale(1)}100%{opacity:1;transform:scale(1.1)}}
-
-/* === FLOATING PARTICLES === */
-#bg-parts{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden}
-.bg-p{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
-@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.6}90%{opacity:.6}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
-
-/* === LOGIN SCREEN === */
-#login-scr{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,255,.08),transparent 70%);position:relative;z-index:2}
-#login-scr h1{font-size:2em;letter-spacing:4px;text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3);margin-bottom:8px;animation:glow 2s ease-in-out infinite alternate}
-@keyframes glow{0%{text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3)}100%{text-shadow:0 0 30px #0ff,0 0 60px rgba(0,255,255,.5),0 0 80px rgba(0,255,255,.2)}}
-#login-scr .sub{color:#0f0;font-size:.9em;margin-bottom:20px;animation:fadeIn 1s ease-out}
-@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-.fld{width:100%;max-width:320px}
-.fld input{width:100%;padding:14px;margin-bottom:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;color:#0ff;font-size:16px;outline:none;transition:all .3s}
-.fld input:focus{border-color:#0ff;box-shadow:0 0 12px rgba(0,255,255,.2),inset 0 0 8px rgba(0,255,255,.05);transform:scale(1.02)}
-.fld input::placeholder{color:rgba(0,255,255,.3)}
-.btn{width:100%;padding:14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:8px;color:#000;font-size:16px;font-weight:bold;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%);animation:shimmer 3s infinite}
-@keyframes shimmer{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
-.btn:active{transform:scale(.96);box-shadow:0 0 20px rgba(0,255,255,.4)}
-.btn2{width:100%;padding:14px;background:transparent;border:1px solid rgba(0,255,255,.3);color:#0ff;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:4px;transition:all .2s}
-.btn2:active{transform:scale(.96);background:rgba(0,255,255,.1)}
-.msg{text-align:center;font-size:12px;margin-top:10px;min-height:16px;transition:all .3s}
-.msg.ok{color:#0f0;text-shadow:0 0 8px #0f0}
-.msg.err{color:#f44;text-shadow:0 0 8px #f44;animation:shake .3s}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-
-/* === GAME SCREEN === */
-#game-scr{display:none;flex-direction:column;height:100%;position:relative;z-index:2}
-header{background:linear-gradient(180deg,#0a1628,#0d1025);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(0,255,255,.25);flex-shrink:0;position:relative}
-header::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#0ff,transparent);animation:headerGlow 3s ease-in-out infinite}
-@keyframes headerGlow{0%,100%{opacity:.5}50%{opacity:1}}
-header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
-.uinfo{display:flex;align-items:center;gap:8px;font-size:11px}
-.uinfo .nm{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
-.lout{background:none;border:1px solid rgba(255,0,68,.3);color:#f44;padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;transition:all .2s}
-.lout:active{background:rgba(255,0,68,.2);transform:scale(.95)}
-
-/* === RESOURCES BAR === */
-.res{display:flex;justify-content:space-around;padding:6px;background:#0d1025;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0;font-size:12px;position:relative}
-.res::after{content:'';position:absolute;bottom:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.2),transparent)}
-.r{display:flex;align-items:center;gap:3px;transition:all .3s}
-.r:hover{transform:scale(1.05)}
-.v{color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,.3);transition:all .3s}
-.v.pop{animation:popNum .3s ease-out}
-@keyframes popNum{0%{transform:scale(1.3);color:#fff}100%{transform:scale(1);color:#ffd700}}
-
-/* === GAME AREA === */
-#area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
-#tapz{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;min-height:0}
-
-/* === PARTICLES === */
-#parts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10}
-.pt{position:absolute;font-size:14px;font-weight:bold;animation:fly .8s ease-out forwards;pointer-events:none;text-shadow:0 0 8px currentColor}
-@keyframes fly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
-.pt-coin{color:#ffd700}
-.pt-gem{color:#f0f}
-.pt-bolt{color:#ff0}
-
-/* === TAP BUTTON === */
-#tpbtn{width:150px;height:150px;flex-shrink:0;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2),inset 0 0 30px rgba(0,255,255,.05);font-family:inherit;touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden}
-#tpbtn::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,#0ff,transparent);animation:rotateBorder 4s linear infinite;opacity:0;transition:opacity .3s}
-#tpbtn:hover::before{opacity:1}
-#tpbtn::after{content:'';position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.15),#0a0a2a 70%)}
-#tpbtn span{position:relative;z-index:1}
-@keyframes rotateBorder{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-#tpbtn:active{transform:scale(.9)!important;box-shadow:0 0 40px rgba(0,255,255,.5),inset 0 0 20px rgba(0,255,255,.1)}
-#tpbtn.pressing{animation:tapPulse .15s ease-out}
-@keyframes tapPulse{0%{box-shadow:0 0 20px rgba(0,255,255,.2)}50%{box-shadow:0 0 50px rgba(0,255,255,.6)}100%{box-shadow:0 0 20px rgba(0,255,255,.2)}}
-
-#tpinfo{font-size:13px;color:#0f0;margin:8px 0;min-height:18px;text-align:center;text-shadow:0 0 6px rgba(0,255,0,.3)}
-#tpinfo.bonus{color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,.5);animation:bonusPop .4s ease-out}
-@keyframes bonusPop{0%{transform:scale(1.2)}100%{transform:scale(1)}}
-#tcps{font-size:10px;color:#666;text-align:center}
-
-/* === PROGRESS BAR === */
-#prog{width:200px;margin:8px auto}
-.pb-bg{background:#1a1a2e;border-radius:4px;height:6px;overflow:hidden;position:relative}
-.pb-bg::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.1) 50%,transparent 100%);animation:progShine 2s infinite}
-@keyframes progShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.pb-fi{height:100%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:4px;width:0%;transition:.3s;box-shadow:0 0 8px rgba(0,255,255,.3)}
-.pb-t{text-align:center;font-size:10px;color:#666;margin-top:3px}
-
-/* === FOOTER === */
-footer{display:flex;background:#0d1025;border-top:1px solid rgba(0,255,255,.1);flex-shrink:0;position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch}
-footer::before{content:'';position:absolute;top:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent)}
-footer .tab{flex:0 0 auto;text-align:center;padding:10px 6px;font-size:10px;cursor:pointer;color:#555;transition:all .2s;position:relative;min-width:52px}
-footer .tab:active{transform:scale(.92);background:rgba(0,255,255,.05)}
-footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
-footer .tab.on::after{content:'';position:absolute;top:0;left:20%;width:60%;height:2px;background:#0ff;box-shadow:0 0 8px #0ff}
-footer .tab .tab-icon{display:block;font-size:16px;margin-bottom:2px;transition:transform .2s}
-footer .tab:active .tab-icon{transform:scale(1.2)}
-
-/* === PANEL === */
-#panel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:50;display:none;flex-direction:column;animation:panelIn .2s ease-out}
-@keyframes panelIn{0%{opacity:0}100%{opacity:1}}
-#ph{display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(0,255,255,.1);background:#0d1025;min-height:40px}
-#ph h2{flex:1;font-size:13px;letter-spacing:2px}
-#ph button{background:none;border:1px solid rgba(0,255,255,.3);color:#0ff;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s}
-#ph button:active{background:rgba(0,255,255,.1);transform:scale(.95)}
-#pc{flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
-
-/* === CARDS === */
-.card{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.15);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,255,.05),transparent);transition:left .4s}
-.card:active::before{left:100%}
-.card:active{transform:scale(.97);background:rgba(0,255,255,.08)}
-.card .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.card .nm{color:#0ff;font-weight:bold;font-size:13px}
-.card .lv{color:#ffd700;font-size:11px}
-.card .d{color:#777;font-size:11px;margin-bottom:3px}
-.card .c{color:#ffd700;font-size:12px}
-.card.can{border-color:rgba(0,255,255,.4);box-shadow:0 0 8px rgba(0,255,255,.1)}
-.card.can:active{box-shadow:0 0 15px rgba(0,255,255,.2)}
-.card.done{opacity:.35;cursor:default}
-
-/* === BOSS === */
-.boss{background:linear-gradient(135deg,rgba(255,0,68,.08),rgba(255,100,0,.06));border:1px solid rgba(255,0,68,.3);border-radius:8px;padding:10px;margin-bottom:6px;position:relative;overflow:hidden}
-.boss::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 50% 50%,rgba(255,0,68,.05),transparent 70%);animation:bossPulse 2s ease-in-out infinite}
-@keyframes bossPulse{0%,100%{opacity:.5}50%{opacity:1}}
-.boss .bn{color:#f44;font-weight:bold;font-size:13px;margin-bottom:3px;text-shadow:0 0 8px rgba(255,0,68,.5)}
-.boss .hp{background:#1a1a2e;border-radius:3px;height:6px;margin:3px 0;overflow:hidden}
-.boss .hp-f{height:100%;background:linear-gradient(90deg,#f44,#ff4400);border-radius:3px;transition:.2s;box-shadow:0 0 6px rgba(255,0,68,.4)}
-.boss .st{display:flex;justify-content:space-between;font-size:9px;color:#777}
-.boss .rw{color:#ffd700;font-size:10px;margin-top:3px}
-.atk-btn{width:100%;padding:10px;margin-top:6px;background:linear-gradient(135deg,#f44,#ff4400);border:none;border-radius:4px;color:#fff;font-weight:bold;font-size:13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.atk-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:shimmer 2s infinite}
-.atk-btn:active{transform:scale(.95);box-shadow:0 0 20px rgba(255,0,68,.5)}
-
-/* === ACHIEVEMENTS === */
-.ach{display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.08);border-radius:4px;margin-bottom:3px;transition:all .3s}
-.ach.done{border-color:#ffd700;background:rgba(255,215,0,.05);box-shadow:0 0 8px rgba(255,215,0,.1)}
-.ach.done .ic{animation:achPop .5s ease-out}
-@keyframes achPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-.ach .ic{font-size:18px;min-width:24px;text-align:center}
-.ach .inf{flex:1}
-.ach .an{font-size:11px;color:#0ff}
-.ach .ar{color:#ffd700;font-size:9px}
-
-/* === STATS === */
-.strow{display:flex;justify-content:space-between;padding:6px 3px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
-.strow:active{background:rgba(0,255,255,.03)}
-.strow .sl{color:#777}
-.strow .sv{color:#0ff;font-weight:bold}
-
-.danger{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3);color:#f44;padding:6px;border-radius:4px;font-size:11px;cursor:pointer;margin-top:6px;width:100%;transition:all .2s}
-.danger:active{background:rgba(255,0,68,.2);transform:scale(.97)}
-
-/* === CHAT === */
-#chat-scr{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.97);backdrop-filter:blur(6px);z-index:100;display:none;flex-direction:column;animation:chatIn .25s ease-out}
-@keyframes chatIn{0%{opacity:0;transform:scale(.98)}100%{opacity:1;transform:scale(1)}}
-#chtabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0}
-.chtab{flex:1;text-align:center;padding:8px;font-size:11px;cursor:pointer;color:#666;border-bottom:2px solid transparent;transition:all .2s}
-.chtab:active{background:rgba(0,255,255,.05)}
-.chtab.on{color:#0ff;border-color:#0ff;text-shadow:0 0 5px #0ff}
-#chmsgs{flex:1;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
-.chmsg{margin-bottom:6px;padding:8px;background:rgba(0,255,255,.03);border-radius:6px;border-left:2px solid #0ff;animation:msgIn .3s ease-out;transition:all .2s}
-@keyframes msgIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-.chmsg .auth{color:#ffd700;font-weight:bold;font-size:10px}
-.chmsg .txt{color:#ccc;font-size:12px;margin-top:2px;word-break:break-word;white-space:pre-wrap}
-.chmsg .time{color:#555;font-size:9px;margin-top:2px;text-align:right}
-.chmsg.me{border-left-color:#ffd700;background:rgba(255,215,0,.05)}
-.chmsg.owl{border-left-color:#a0f;background:rgba(170,0,255,.05)}
-.chmsg.owl .auth{color:#a0f;text-shadow:0 0 4px rgba(170,0,255,.5)}
-#chowli{font-size:10px;color:rgba(170,0,255,.7);text-align:center;padding:4px;display:none;background:rgba(170,0,255,.05);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
-#chinp{display:flex;padding:8px;border-top:1px solid rgba(0,255,255,.1);gap:6px;flex-shrink:0}
-#chinp input{flex:1;padding:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:4px;color:#0ff;font-size:13px;outline:none;transition:all .2s}
-#chinp input:focus{border-color:#0ff;box-shadow:0 0 8px rgba(0,255,255,.15)}
-#chinp button{padding:10px 14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:4px;color:#000;font-weight:bold;font-size:12px;cursor:pointer;transition:all .2s}
-#chinp button:active{transform:scale(.93)}
-
-/* === BOSS FIGHT === */
-#bfight{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:bfadeIn .3s ease-out}
-@keyframes bfadeIn{0%{opacity:0}100%{opacity:1}}
-#bfs{font-size:64px;animation:bounce 1s ease-in-out infinite;filter:drop-shadow(0 0 15px rgba(255,0,68,.5))}
-@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.05)}}
-#bfn{color:#f44;font-size:18px;font-weight:bold;text-shadow:0 0 12px #f44;margin:10px 0;animation:bossNameGlow 1.5s ease-in-out infinite alternate}
-@keyframes bossNameGlow{0%{text-shadow:0 0 12px #f44}100%{text-shadow:0 0 20px #f44,0 0 30px rgba(255,0,68,.3)}}
-.fdmg{position:absolute;font-size:20px;font-weight:bold;color:#f44;animation:fdmg .8s ease-out forwards;pointer-events:none;z-index:201;text-shadow:0 0 8px #f44}
-@keyframes fdmg{0%{opacity:1;transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(.8)}}
-
-/* === OVERLAY === */
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:150;padding:20px}
-.overlay.show{display:flex}
-.overlay-box{background:#0d1025;border:1px solid #0ff;border-radius:12px;padding:15px;max-width:320px;width:100%;text-align:center;animation:overlayIn .3s ease-out;box-shadow:0 0 30px rgba(0,255,255,.1)}
-@keyframes overlayIn{0%{opacity:0;transform:scale(.9) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-.overlay-box h3{color:#0ff;font-size:14px;margin-bottom:8px;text-shadow:0 0 6px rgba(0,255,255,.3)}
-.overlay-box p{color:#888;font-size:12px;margin-bottom:15px;line-height:1.5}
-.overlay-box button{background:linear-gradient(135deg,#0ff,#4af);border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:3px;transition:all .2s}
-.overlay-box button:active{transform:scale(.93)}
-.overlay-box button.cancel{background:transparent;border:1px solid rgba(255,0,68,.3);color:#f44}
-
-/* === ACHIEVEMENT POPUP === */
-#ach-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0d1025,#1a1a3e);border:2px solid #ffd700;border-radius:12px;padding:15px 20px;text-align:center;z-index:300;transition:all .4s cubic-bezier(.68,-.55,.27,1.55);box-shadow:0 0 40px rgba(255,215,0,.3);pointer-events:none;opacity:0}
-#ach-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
-#ach-popup .ach-icon{font-size:32px;margin-bottom:5px}
-#ach-popup .ach-title{color:#ffd700;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(255,215,0,.5)}
-#ach-popup .ach-desc{color:#888;font-size:11px;margin-top:3px}
-
-/* === COMBO DISPLAY === */
-#combo-display{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-size:24px;font-weight:bold;color:#ffd700;text-shadow:0 0 15px rgba(255,215,0,.6);pointer-events:none;z-index:15;opacity:0;transition:all .3s}
-#combo-display.show{opacity:1;animation:comboShake .3s ease-out}
-@keyframes comboShake{0%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
-
-/* === LEADERBOARD === */
-#lb-tabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);margin-bottom:8px}
-.lb-tab{flex:1;text-align:center;padding:6px;font-size:10px;cursor:pointer;color:#555;border-bottom:2px solid transparent;transition:all .2s}
-.lb-tab.on{color:#ffd700;border-color:#ffd700;text-shadow:0 0 5px rgba(255,215,0,.3)}
-.lb-row{display:flex;align-items:center;padding:6px 4px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
-.lb-row:active{background:rgba(0,255,255,.03)}
-.lb-row.me{background:rgba(255,215,0,.05);border-left:2px solid #ffd700}
-.lb-rank{min-width:28px;font-weight:bold;color:#ffd700;text-align:center}
-.lb-rank.gold{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
-.lb-rank.silver{color:#c0c0c0}
-.lb-rank.bronze{color:#cd7f32}
-.lb-name{flex:1;color:#0ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 6px}
-.lb-val{color:#ffd700;font-weight:bold;text-align:right;min-width:60px}
-.lb-empty{text-align:center;color:#555;padding:20px;font-size:11px}
-.lb-refresh{text-align:center;padding:6px;color:#555;font-size:10px;cursor:pointer}
-.lb-refresh:active{color:#0ff}
-.lb-sync-status{text-align:center;font-size:9px;color:#555;padding:4px}
-.lb-sync-status.syncing{color:#ffd700}
-.lb-sync-status.ok{color:#0f0}
-.lb-sync-status.err{color:#f44}
-
-/* === RESPONSIVE === */
-@media(max-width:360px){
-  #login-scr h1{font-size:1.6em;letter-spacing:2px}
-  #tpbtn{width:120px;height:120px;font-size:14px}
-  header h1{font-size:12px;letter-spacing:1px}
-  .res{font-size:10px;padding:4px}
-  footer .tab{padding:8px 1px;font-size:8px}
-  footer .tab .tab-icon{font-size:13px}
-  .fld input{font-size:16px;padding:12px}
-  .btn,.btn2{font-size:14px;padding:12px}
-}
-@media(min-width:361px) and (max-width:480px){
-  #tpbtn{width:130px;height:130px}
-  header h1{font-size:12px;letter-spacing:2px}
-  header{padding:6px 8px}
-  .res{font-size:10px;padding:4px}
-  footer .tab{padding:8px 2px;font-size:10px}
-  .fld input{font-size:16px;padding:12px}
-  .btn,.btn2{font-size:15px;padding:12px}
-}
-@media(min-width:481px) and (max-width:799px){
-  #tpbtn{width:160px;height:160px}
-  .res{font-size:13px}
-}
-@media(min-width:800px){
-  #tpbtn{width:180px;height:180px;font-size:18px}
-  .res{font-size:14px;padding:8px}
-  header{padding:10px 20px}
-  header h1{font-size:16px}
-  footer .tab{padding:12px 6px;font-size:12px}
-  footer .tab .tab-icon{font-size:18px}
-  #prog{width:260px}
-  .card{padding:12px}
-  .card .nm{font-size:14px}
-}
-@media(min-width:1200px){
-  #tpbtn{width:200px;height:200px}
-  .fld{max-width:400px}
-}
-
-/* === SCROLLBAR === */
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2);border-radius:2px}
-::-webkit-scrollbar-thumb:hover{background:rgba(0,255,255,.4)}
-
-/* === PWA STANDALONE === */
-@media all and (display-mode:standalone){
-  body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-}
-</style>
-</head>
-<body>
-
-<!-- Background particles -->
-<div id="bg-parts"></div>
-
-<!-- Achievement popup -->
-<div id="ach-popup"><div class="ach-icon">🏆</div><div class="ach-title"></div><div class="ach-desc"></div></div>
-
-<!-- Combo display -->
-<div id="combo-display"></div>
-
-<div id="login-scr">
-  <h1>⚡ CYBER REALM ⚡</h1>
-  <div class="sub">Футуристическая Idle Игра v9.4</div>
-  <div class="fld">
-    <input type="text" id="au" placeholder="Имя пользователя" maxlength="20" autocomplete="off">
-    <input type="password" id="ap" placeholder="Пароль" maxlength="30" autocomplete="off">
-    <div class="msg" id="amsg"></div>
-    <button class="btn" id="alogin">Войти</button>
-    <button class="btn2" id="areg">Регистрация</button>
-  </div>
-</div>
-
-<div id="game-scr">
-  <header>
-    <h1>⚡ CYBER REALM ⚡</h1>
-    <div class="uinfo"><span class="nm" id="uname"></span><button class="lout" id="lout">Выйти</button></div>
-  </header>
-  <div class="res">
-    <span class="r">💎 <span class="v" id="rc">0</span><span class="rt" id="rcR"></span></span>
-    <span class="r">⚡ <span class="v" id="rn">0</span></span>
-    <span class="r">🧬 <span class="v" id="rd">0</span></span>
-    <span class="r">🌀 <span class="v" id="re">0</span></span>
-  </div>
-  <div id="area">
-    <div id="tapz">
-      <div id="parts"></div>
-      <button id="tpbtn"><span>НАЖМИ</span></button>
-      <div id="tpinfo"></div>
-      <div id="tcps">в сек: 0 | тапов: 0</div>
-      <div id="event-bar" style="display:none;font-size:10px;color:#ffd700;text-align:center;margin:4px 0;text-shadow:0 0 6px rgba(255,215,0,.5);"></div>
-      <div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
-    </div>
-  </div>
-  <footer>
-    <div class="tab on" id="tgame"><span class="tab-icon">🎮</span><div>Игра</div></div>
-    <div class="tab" id="tup"><span class="tab-icon">⬆️</span><div>Улучш.</div></div>
-    <div class="tab" id="tbo"><span class="tab-icon">👹</span><div>Боссы</div></div>
-    <div class="tab" id="tch"><span class="tab-icon">💬</span><div>Чат</div></div>
-    <div class="tab" id="tdt"><span class="tab-icon">👑</span><div>Премиум</div></div>
-    <div class="tab" id="tst"><span class="tab-icon">📊</span><div>Стат.</div></div>
-    <div class="tab" id="tlb"><span class="tab-icon">🏆</span><div>Топ</div></div>
-    <div class="tab" id="tqu"><span class="tab-icon">🎯</span><div>Квесты</div></div>
-    <div class="tab" id="tcf"><span class="tab-icon">🔧</span><div>Крафт</div></div>
-  </footer>
-</div>
-
-<div id="panel">
-  <div id="ph"><h2 id="panT">Панель</h2><button id="pcan">✕</button></div>
-  <div id="pc"></div>
-</div>
-
-<div id="chat-scr">
-  <header><h1>💬 Чат</h1><button class="lout" id="cChat">✕</button></header>
-  <div id="chtabs">
-    <div class="chtab on" data-ct="g">🌍 Общий</div>
-    <div class="chtab" data-ct="o">🦉 OWL</div>
-  </div>
-  <div id="chmsgs"></div>
-  <div id="chowli">🦉 OWL думает...</div>
-  <div id="chinp"><input type="text" id="chat-in" placeholder="Сообщение..." maxlength="200"><button id="chat-send">→</button></div>
-</div>
-
-<div id="bfight">
-  <div id="bfs"></div>
-  <div id="bfn">Босс</div>
-  <div class="boss hp"><div class="hp-f" id="bf-hp"></div></div>
-  <div class="boss st"><span id="bf-text">HP: 100/100</span></div>
-  <button class="atk-btn" id="bf-atk">⚔️ АТАКОВАТЬ</button>
-</div>
-
-<div class="overlay" id="ov">
-  <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
-</div>
-
-<script>
+     1|<!-- MARKER: TEST_WRITE -->
+     2|<!DOCTYPE html>
+     3|<html lang="ru">
+     4|<head>
+     5|<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+     6|<meta charset="UTF-8">
+     7|<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+     8|<meta name="apple-mobile-web-app-capable" content="yes">
+     9|<meta name="mobile-web-app-capable" content="yes">
+    10|<meta name="theme-color" content="#050510">
+    11|<meta name="apple-mobile-web-app-title" content="Cyber Realm">
+    12|<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    13|<meta name="description" content="Футуристическая Idle Игра — тапай, улучшай, побеждай боссов!">
+    14|<link rel="manifest" href="./manifest.json">
+    15|<link rel="apple-touch-icon" href="./icon-192.png">
+    16|<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    17|<title>Cyber Realm Idle v9</title>
+    18|<style>
+    19|*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    20|html{height:100%;overflow:hidden}
+    21|body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+    22|
+    23|/* === ANIMATED BACKGROUND === */
+    24|body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:
+    25|radial-gradient(ellipse at 20% 50%,rgba(0,255,255,.04) 0%,transparent 50%),
+    26|radial-gradient(ellipse at 80% 20%,rgba(170,0,255,.03) 0%,transparent 50%),
+    27|radial-gradient(ellipse at 50% 80%,rgba(0,255,100,.02) 0%,transparent 50%);
+    28|animation:bgShift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+    29|@keyframes bgShift{0%{opacity:.5;transform:scale(1)}100%{opacity:1;transform:scale(1.1)}}
+    30|
+    31|/* === FLOATING PARTICLES === */
+    32|#bg-parts{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden}
+    33|.bg-p{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+    34|@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.6}90%{opacity:.6}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+    35|
+    36|/* === LOGIN SCREEN === */
+    37|#login-scr{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,255,.08),transparent 70%);position:relative;z-index:2}
+    38|#login-scr h1{font-size:2em;letter-spacing:4px;text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3);margin-bottom:8px;animation:glow 2s ease-in-out infinite alternate}
+    39|@keyframes glow{0%{text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3)}100%{text-shadow:0 0 30px #0ff,0 0 60px rgba(0,255,255,.5),0 0 80px rgba(0,255,255,.2)}}
+    40|#login-scr .sub{color:#0f0;font-size:.9em;margin-bottom:20px;animation:fadeIn 1s ease-out}
+    41|@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+    42|.fld{width:100%;max-width:320px}
+    43|.fld input{width:100%;padding:14px;margin-bottom:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;color:#0ff;font-size:16px;outline:none;transition:all .3s}
+    44|.fld input:focus{border-color:#0ff;box-shadow:0 0 12px rgba(0,255,255,.2),inset 0 0 8px rgba(0,255,255,.05);transform:scale(1.02)}
+    45|.fld input::placeholder{color:rgba(0,255,255,.3)}
+    46|.btn{width:100%;padding:14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:8px;color:#000;font-size:16px;font-weight:bold;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+    47|.btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%);animation:shimmer 3s infinite}
+    48|@keyframes shimmer{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+    49|.btn:active{transform:scale(.96);box-shadow:0 0 20px rgba(0,255,255,.4)}
+    50|.btn2{width:100%;padding:14px;background:transparent;border:1px solid rgba(0,255,255,.3);color:#0ff;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:4px;transition:all .2s}
+    51|.btn2:active{transform:scale(.96);background:rgba(0,255,255,.1)}
+    52|.msg{text-align:center;font-size:12px;margin-top:10px;min-height:16px;transition:all .3s}
+    53|.msg.ok{color:#0f0;text-shadow:0 0 8px #0f0}
+    54|.msg.err{color:#f44;text-shadow:0 0 8px #f44;animation:shake .3s}
+    55|@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+    56|
+    57|/* === GAME SCREEN === */
+    58|#game-scr{display:none;flex-direction:column;height:100%;position:relative;z-index:2}
+    59|header{background:linear-gradient(180deg,#0a1628,#0d1025);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(0,255,255,.25);flex-shrink:0;position:relative}
+    60|header::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#0ff,transparent);animation:headerGlow 3s ease-in-out infinite}
+    61|@keyframes headerGlow{0%,100%{opacity:.5}50%{opacity:1}}
+    62|header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
+    63|.uinfo{display:flex;align-items:center;gap:8px;font-size:11px}
+    64|.uinfo .nm{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
+    65|.lout{background:none;border:1px solid rgba(255,0,68,.3);color:#f44;padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;transition:all .2s}
+    66|.lout:active{background:rgba(255,0,68,.2);transform:scale(.95)}
+    67|
+    68|/* === RESOURCES BAR === */
+    69|.res{display:flex;justify-content:space-around;padding:6px;background:#0d1025;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0;font-size:12px;position:relative}
+    70|.res::after{content:'';position:absolute;bottom:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.2),transparent)}
+    71|.r{display:flex;align-items:center;gap:3px;transition:all .3s}
+    72|.r:hover{transform:scale(1.05)}
+    73|.v{color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,.3);transition:all .3s}
+    74|.v.pop{animation:popNum .3s ease-out}
+    75|@keyframes popNum{0%{transform:scale(1.3);color:#fff}100%{transform:scale(1);color:#ffd700}}
+    76|
+    77|/* === GAME AREA === */
+    78|#area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
+    79|#tapz{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;min-height:0}
+    80|
+    81|/* === PARTICLES === */
+    82|#parts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10}
+    83|.pt{position:absolute;font-size:14px;font-weight:bold;animation:fly .8s ease-out forwards;pointer-events:none;text-shadow:0 0 8px currentColor}
+    84|@keyframes fly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
+    85|.pt-coin{color:#ffd700}
+    86|.pt-gem{color:#f0f}
+    87|.pt-bolt{color:#ff0}
+    88|
+    89|/* === TAP BUTTON === */
+    90|#tpbtn{width:150px;height:150px;flex-shrink:0;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2),inset 0 0 30px rgba(0,255,255,.05);font-family:inherit;touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden}
+    91|#tpbtn::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,#0ff,transparent);animation:rotateBorder 4s linear infinite;opacity:0;transition:opacity .3s}
+    92|#tpbtn:hover::before{opacity:1}
+    93|#tpbtn::after{content:'';position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.15),#0a0a2a 70%)}
+    94|#tpbtn span{position:relative;z-index:1}
+    95|@keyframes rotateBorder{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    96|#tpbtn:active{transform:scale(.9)!important;box-shadow:0 0 40px rgba(0,255,255,.5),inset 0 0 20px rgba(0,255,255,.1)}
+    97|#tpbtn.pressing{animation:tapPulse .15s ease-out}
+    98|@keyframes tapPulse{0%{box-shadow:0 0 20px rgba(0,255,255,.2)}50%{box-shadow:0 0 50px rgba(0,255,255,.6)}100%{box-shadow:0 0 20px rgba(0,255,255,.2)}}
+    99|
+   100|#tpinfo{font-size:13px;color:#0f0;margin:8px 0;min-height:18px;text-align:center;text-shadow:0 0 6px rgba(0,255,0,.3)}
+   101|#tpinfo.bonus{color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,.5);animation:bonusPop .4s ease-out}
+   102|@keyframes bonusPop{0%{transform:scale(1.2)}100%{transform:scale(1)}}
+   103|#tcps{font-size:10px;color:#666;text-align:center}
+   104|
+   105|/* === PROGRESS BAR === */
+   106|#prog{width:200px;margin:8px auto}
+   107|.pb-bg{background:#1a1a2e;border-radius:4px;height:6px;overflow:hidden;position:relative}
+   108|.pb-bg::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.1) 50%,transparent 100%);animation:progShine 2s infinite}
+   109|@keyframes progShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+   110|.pb-fi{height:100%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:4px;width:0%;transition:.3s;box-shadow:0 0 8px rgba(0,255,255,.3)}
+   111|.pb-t{text-align:center;font-size:10px;color:#666;margin-top:3px}
+   112|
+   113|/* === FOOTER === */
+   114|footer{display:flex;background:#0d1025;border-top:1px solid rgba(0,255,255,.1);flex-shrink:0;position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch}
+   115|footer::before{content:'';position:absolute;top:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent)}
+   116|footer .tab{flex:0 0 auto;text-align:center;padding:10px 6px;font-size:10px;cursor:pointer;color:#555;transition:all .2s;position:relative;min-width:52px}
+   117|footer .tab:active{transform:scale(.92);background:rgba(0,255,255,.05)}
+   118|footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
+   119|footer .tab.on::after{content:'';position:absolute;top:0;left:20%;width:60%;height:2px;background:#0ff;box-shadow:0 0 8px #0ff}
+   120|footer .tab .tab-icon{display:block;font-size:16px;margin-bottom:2px;transition:transform .2s}
+   121|footer .tab:active .tab-icon{transform:scale(1.2)}
+   122|
+   123|/* === PANEL === */
+   124|#panel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:50;display:none;flex-direction:column;animation:panelIn .2s ease-out}
+   125|@keyframes panelIn{0%{opacity:0}100%{opacity:1}}
+   126|#ph{display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(0,255,255,.1);background:#0d1025;min-height:40px}
+   127|#ph h2{flex:1;font-size:13px;letter-spacing:2px}
+   128|#ph button{background:none;border:1px solid rgba(0,255,255,.3);color:#0ff;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s}
+   129|#ph button:active{background:rgba(0,255,255,.1);transform:scale(.95)}
+   130|#pc{flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+   131|
+   132|/* === CARDS === */
+   133|.card{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.15);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+   134|.card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,255,.05),transparent);transition:left .4s}
+   135|.card:active::before{left:100%}
+   136|.card:active{transform:scale(.97);background:rgba(0,255,255,.08)}
+   137|.card .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+   138|.card .nm{color:#0ff;font-weight:bold;font-size:13px}
+   139|.card .lv{color:#ffd700;font-size:11px}
+   140|.card .d{color:#777;font-size:11px;margin-bottom:3px}
+   141|.card .c{color:#ffd700;font-size:12px}
+   142|.card.can{border-color:rgba(0,255,255,.4);box-shadow:0 0 8px rgba(0,255,255,.1)}
+   143|.card.can:active{box-shadow:0 0 15px rgba(0,255,255,.2)}
+   144|.card.done{opacity:.35;cursor:default}
+   145|
+   146|/* === BOSS === */
+   147|.boss{background:linear-gradient(135deg,rgba(255,0,68,.08),rgba(255,100,0,.06));border:1px solid rgba(255,0,68,.3);border-radius:8px;padding:10px;margin-bottom:6px;position:relative;overflow:hidden}
+   148|.boss::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 50% 50%,rgba(255,0,68,.05),transparent 70%);animation:bossPulse 2s ease-in-out infinite}
+   149|@keyframes bossPulse{0%,100%{opacity:.5}50%{opacity:1}}
+   150|.boss .bn{color:#f44;font-weight:bold;font-size:13px;margin-bottom:3px;text-shadow:0 0 8px rgba(255,0,68,.5)}
+   151|.boss .hp{background:#1a1a2e;border-radius:3px;height:6px;margin:3px 0;overflow:hidden}
+   152|.boss .hp-f{height:100%;background:linear-gradient(90deg,#f44,#ff4400);border-radius:3px;transition:.2s;box-shadow:0 0 6px rgba(255,0,68,.4)}
+   153|.boss .st{display:flex;justify-content:space-between;font-size:9px;color:#777}
+   154|.boss .rw{color:#ffd700;font-size:10px;margin-top:3px}
+   155|.atk-btn{width:100%;padding:10px;margin-top:6px;background:linear-gradient(135deg,#f44,#ff4400);border:none;border-radius:4px;color:#fff;font-weight:bold;font-size:13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+   156|.atk-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:shimmer 2s infinite}
+   157|.atk-btn:active{transform:scale(.95);box-shadow:0 0 20px rgba(255,0,68,.5)}
+   158|
+   159|/* === ACHIEVEMENTS === */
+   160|.ach{display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.08);border-radius:4px;margin-bottom:3px;transition:all .3s}
+   161|.ach.done{border-color:#ffd700;background:rgba(255,215,0,.05);box-shadow:0 0 8px rgba(255,215,0,.1)}
+   162|.ach.done .ic{animation:achPop .5s ease-out}
+   163|@keyframes achPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+   164|.ach .ic{font-size:18px;min-width:24px;text-align:center}
+   165|.ach .inf{flex:1}
+   166|.ach .an{font-size:11px;color:#0ff}
+   167|.ach .ar{color:#ffd700;font-size:9px}
+   168|
+   169|/* === STATS === */
+   170|.strow{display:flex;justify-content:space-between;padding:6px 3px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
+   171|.strow:active{background:rgba(0,255,255,.03)}
+   172|.strow .sl{color:#777}
+   173|.strow .sv{color:#0ff;font-weight:bold}
+   174|
+   175|.danger{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3);color:#f44;padding:6px;border-radius:4px;font-size:11px;cursor:pointer;margin-top:6px;width:100%;transition:all .2s}
+   176|.danger:active{background:rgba(255,0,68,.2);transform:scale(.97)}
+   177|
+   178|/* === CHAT === */
+   179|#chat-scr{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.97);backdrop-filter:blur(6px);z-index:100;display:none;flex-direction:column;animation:chatIn .25s ease-out}
+   180|@keyframes chatIn{0%{opacity:0;transform:scale(.98)}100%{opacity:1;transform:scale(1)}}
+   181|#chtabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0}
+   182|.chtab{flex:1;text-align:center;padding:8px;font-size:11px;cursor:pointer;color:#666;border-bottom:2px solid transparent;transition:all .2s}
+   183|.chtab:active{background:rgba(0,255,255,.05)}
+   184|.chtab.on{color:#0ff;border-color:#0ff;text-shadow:0 0 5px #0ff}
+   185|#chmsgs{flex:1;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
+   186|.chmsg{margin-bottom:6px;padding:8px;background:rgba(0,255,255,.03);border-radius:6px;border-left:2px solid #0ff;animation:msgIn .3s ease-out;transition:all .2s}
+   187|@keyframes msgIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+   188|.chmsg .auth{color:#ffd700;font-weight:bold;font-size:10px}
+   189|.chmsg .txt{color:#ccc;font-size:12px;margin-top:2px;word-break:break-word;white-space:pre-wrap}
+   190|.chmsg .time{color:#555;font-size:9px;margin-top:2px;text-align:right}
+   191|.chmsg.me{border-left-color:#ffd700;background:rgba(255,215,0,.05)}
+   192|.chmsg.owl{border-left-color:#a0f;background:rgba(170,0,255,.05)}
+   193|.chmsg.owl .auth{color:#a0f;text-shadow:0 0 4px rgba(170,0,255,.5)}
+   194|#chowli{font-size:10px;color:rgba(170,0,255,.7);text-align:center;padding:4px;display:none;background:rgba(170,0,255,.05);animation:pulse 1s ease-in-out infinite}
+   195|@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+   196|#chinp{display:flex;padding:8px;border-top:1px solid rgba(0,255,255,.1);gap:6px;flex-shrink:0}
+   197|#chinp input{flex:1;padding:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:4px;color:#0ff;font-size:13px;outline:none;transition:all .2s}
+   198|#chinp input:focus{border-color:#0ff;box-shadow:0 0 8px rgba(0,255,255,.15)}
+   199|#chinp button{padding:10px 14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:4px;color:#000;font-weight:bold;font-size:12px;cursor:pointer;transition:all .2s}
+   200|#chinp button:active{transform:scale(.93)}
+   201|
+   202|/* === BOSS FIGHT === */
+   203|#bfight{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:bfadeIn .3s ease-out}
+   204|@keyframes bfadeIn{0%{opacity:0}100%{opacity:1}}
+   205|#bfs{font-size:64px;animation:bounce 1s ease-in-out infinite;filter:drop-shadow(0 0 15px rgba(255,0,68,.5))}
+   206|@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.05)}}
+   207|#bfn{color:#f44;font-size:18px;font-weight:bold;text-shadow:0 0 12px #f44;margin:10px 0;animation:bossNameGlow 1.5s ease-in-out infinite alternate}
+   208|@keyframes bossNameGlow{0%{text-shadow:0 0 12px #f44}100%{text-shadow:0 0 20px #f44,0 0 30px rgba(255,0,68,.3)}}
+   209|.fdmg{position:absolute;font-size:20px;font-weight:bold;color:#f44;animation:fdmg .8s ease-out forwards;pointer-events:none;z-index:201;text-shadow:0 0 8px #f44}
+   210|@keyframes fdmg{0%{opacity:1;transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(.8)}}
+   211|
+   212|/* === OVERLAY === */
+   213|.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:150;padding:20px}
+   214|.overlay.show{display:flex}
+   215|.overlay-box{background:#0d1025;border:1px solid #0ff;border-radius:12px;padding:15px;max-width:320px;width:100%;text-align:center;animation:overlayIn .3s ease-out;box-shadow:0 0 30px rgba(0,255,255,.1)}
+   216|@keyframes overlayIn{0%{opacity:0;transform:scale(.9) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+   217|.overlay-box h3{color:#0ff;font-size:14px;margin-bottom:8px;text-shadow:0 0 6px rgba(0,255,255,.3)}
+   218|.overlay-box p{color:#888;font-size:12px;margin-bottom:15px;line-height:1.5}
+   219|.overlay-box button{background:linear-gradient(135deg,#0ff,#4af);border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:3px;transition:all .2s}
+   220|.overlay-box button:active{transform:scale(.93)}
+   221|.overlay-box button.cancel{background:transparent;border:1px solid rgba(255,0,68,.3);color:#f44}
+   222|
+   223|/* === ACHIEVEMENT POPUP === */
+   224|#ach-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0d1025,#1a1a3e);border:2px solid #ffd700;border-radius:12px;padding:15px 20px;text-align:center;z-index:300;transition:all .4s cubic-bezier(.68,-.55,.27,1.55);box-shadow:0 0 40px rgba(255,215,0,.3);pointer-events:none;opacity:0}
+   225|#ach-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+   226|#ach-popup .ach-icon{font-size:32px;margin-bottom:5px}
+   227|#ach-popup .ach-title{color:#ffd700;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(255,215,0,.5)}
+   228|#ach-popup .ach-desc{color:#888;font-size:11px;margin-top:3px}
+   229|
+   230|/* === COMBO DISPLAY === */
+   231|#combo-display{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-size:24px;font-weight:bold;color:#ffd700;text-shadow:0 0 15px rgba(255,215,0,.6);pointer-events:none;z-index:15;opacity:0;transition:all .3s}
+   232|#combo-display.show{opacity:1;animation:comboShake .3s ease-out}
+   233|@keyframes comboShake{0%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
+   234|
+   235|/* === LEADERBOARD === */
+   236|#lb-tabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);margin-bottom:8px}
+   237|.lb-tab{flex:1;text-align:center;padding:6px;font-size:10px;cursor:pointer;color:#555;border-bottom:2px solid transparent;transition:all .2s}
+   238|.lb-tab.on{color:#ffd700;border-color:#ffd700;text-shadow:0 0 5px rgba(255,215,0,.3)}
+   239|.lb-row{display:flex;align-items:center;padding:6px 4px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
+   240|.lb-row:active{background:rgba(0,255,255,.03)}
+   241|.lb-row.me{background:rgba(255,215,0,.05);border-left:2px solid #ffd700}
+   242|.lb-rank{min-width:28px;font-weight:bold;color:#ffd700;text-align:center}
+   243|.lb-rank.gold{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
+   244|.lb-rank.silver{color:#c0c0c0}
+   245|.lb-rank.bronze{color:#cd7f32}
+   246|.lb-name{flex:1;color:#0ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 6px}
+   247|.lb-val{color:#ffd700;font-weight:bold;text-align:right;min-width:60px}
+   248|.lb-empty{text-align:center;color:#555;padding:20px;font-size:11px}
+   249|.lb-refresh{text-align:center;padding:6px;color:#555;font-size:10px;cursor:pointer}
+   250|.lb-refresh:active{color:#0ff}
+   251|.lb-sync-status{text-align:center;font-size:9px;color:#555;padding:4px}
+   252|.lb-sync-status.syncing{color:#ffd700}
+   253|.lb-sync-status.ok{color:#0f0}
+   254|.lb-sync-status.err{color:#f44}
+   255|
+   256|/* === RESPONSIVE === */
+   257|@media(max-width:360px){
+   258|#login-scr h1{font-size:1.6em;letter-spacing:2px}
+   259|#tpbtn{width:120px;height:120px;font-size:14px}
+   260|header h1{font-size:12px;letter-spacing:1px}
+   261|.res{font-size:10px;padding:4px}
+   262|footer .tab{padding:8px 1px;font-size:8px}
+   263|footer .tab .tab-icon{font-size:13px}
+   264|.fld input{font-size:16px;padding:12px}
+   265|.btn,.btn2{font-size:14px;padding:12px}
+   266|}
+   267|@media(min-width:361px) and (max-width:480px){
+   268|#tpbtn{width:130px;height:130px}
+   269|header h1{font-size:12px;letter-spacing:2px}
+   270|header{padding:6px 8px}
+   271|.res{font-size:10px;padding:4px}
+   272|footer .tab{padding:8px 2px;font-size:10px}
+   273|.fld input{font-size:16px;padding:12px}
+   274|.btn,.btn2{font-size:15px;padding:12px}
+   275|}
+   276|@media(min-width:481px) and (max-width:799px){
+   277|#tpbtn{width:160px;height:160px}
+   278|.res{font-size:13px}
+   279|}
+   280|@media(min-width:800px){
+   281|#tpbtn{width:180px;height:180px;font-size:18px}
+   282|.res{font-size:14px;padding:8px}
+   283|header{padding:10px 20px}
+   284|header h1{font-size:16px}
+   285|footer .tab{padding:12px 6px;font-size:12px}
+   286|footer .tab .tab-icon{font-size:18px}
+   287|#prog{width:260px}
+   288|.card{padding:12px}
+   289|.card .nm{font-size:14px}
+   290|}
+   291|@media(min-width:1200px){
+   292|#tpbtn{width:200px;height:200px}
+   293|.fld{max-width:400px}
+   294|}
+   295|
+   296|/* === SCROLLBAR === */
+   297|::-webkit-scrollbar{width:4px}
+   298|::-webkit-scrollbar-track{background:transparent}
+   299|::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2);border-radius:2px}
+   300|::-webkit-scrollbar-thumb:hover{background:rgba(0,255,255,.4)}
+   301|
+   302|/* === PWA STANDALONE === */
+   303|@media all and (display-mode:standalone){
+   304|body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+   305|}
+   306|</style>
+   307|</head>
+   308|<body>
+   309|
+   310|<!-- Background particles -->
+   311|<div id="bg-parts"></div>
+   312|
+   313|<!-- Achievement popup -->
+   314|<div id="ach-popup"><div class="ach-icon">🏆</div><div class="ach-title"></div><div class="ach-desc"></div></div>
+   315|
+   316|<!-- Combo display -->
+   317|<div id="combo-display"></div>
+   318|
+   319|<div id="login-scr">
+   320|<h1>⚡ CYBER REALM ⚡</h1>
+   321|<div class="sub">Футуристическая Idle Игра v9.4</div>
+   322|<div class="fld">
+   323|<input type="text" id="au" placeholder="Имя пользователя" maxlength="20" autocomplete="off">
+   324|<input type="password" id="ap" placeholder="Пароль" maxlength="30" autocomplete="off">
+   325|<div class="msg" id="amsg"></div>
+   326|<button class="btn" id="alogin">Войти</button>
+   327|<button class="btn2" id="areg">Регистрация</button>
+   328|</div>
+   329|</div>
+   330|
+   331|<div id="game-scr">
+   332|<header>
+   333|<h1>⚡ CYBER REALM ⚡</h1>
+   334|<div class="uinfo"><span class="nm" id="uname"></span><button class="lout" id="lout">Выйти</button></div>
+   335|</header>
+   336|<div class="res">
+   337|<span class="r">💎 <span class="v" id="rc">0</span><span class="rt" id="rcR"></span></span>
+   338|<span class="r">⚡ <span class="v" id="rn">0</span></span>
+   339|<span class="r">🧬 <span class="v" id="rd">0</span></span>
+   340|<span class="r">🌀 <span class="v" id="re">0</span></span>
+   341|</div>
+   342|<div id="area">
+   343|<div id="tapz">
+   344|<div id="parts"></div>
+   345|<button id="tpbtn"><span>НАЖМИ</span></button>
+   346|<div id="tpinfo"></div>
+   347| тапов: 0</div>
+   348|<div id="event-bar" style="display:none;font-size:10px;color:#ffd700;text-align:center;margin:4px 0;text-shadow:0 0 6px rgba(255,215,0,.5);"></div>
+   349|<div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
+   350|</div>
+   351|</div>
+   352|<footer>
+   353|<div class="tab on" id="tgame"><span class="tab-icon">🎮</span><div>Игра</div></div>
+   354|<div class="tab" id="tup"><span class="tab-icon">⬆️</span><div>Улучш.</div></div>
+   355|<div class="tab" id="tbo"><span class="tab-icon">👹</span><div>Боссы</div></div>
+   356|<div class="tab" id="tch"><span class="tab-icon">💬</span><div>Чат</div></div>
+   357|<div class="tab" id="tdt"><span class="tab-icon">👑</span><div>Премиум</div></div>
+   358|<div class="tab" id="tst"><span class="tab-icon">📊</span><div>Стат.</div></div>
+   359|<div class="tab" id="tlb"><span class="tab-icon">🏆</span><div>Топ</div></div>
+   360|<div class="tab" id="tqu"><span class="tab-icon">🎯</span><div>Квесты</div></div>
+   361|<div class="tab" id="tcf"><span class="tab-icon">🔧</span><div>Крафт</div></div>
+   362|</footer>
+   363|</div>
+   364|
+   365|<div id="panel">
+   366|<div id="ph"><h2 id="panT">Панель</h2><button id="pcan">✕</button></div>
+   367|<div id="pc"></div>
+   368|</div>
+   369|
+   370|<div id="chat-scr">
+   371|<header><h1>💬 Чат</h1><button class="lout" id="cChat">✕</button></header>
+   372|<div id="chtabs">
+   373|<div class="chtab on" data-ct="g">🌍 Общий</div>
+   374|<div class="chtab" data-ct="o">🦉 OWL</div>
+   375|</div>
+   376|<div id="chmsgs"></div>
+   377|<div id="chowli">🦉 OWL думает...</div>
+   378|<div id="chinp"><input type="text" id="chat-in" placeholder="Сообщение..." maxlength="200"><button id="chat-send">→</button></div>
+   379|</div>
+   380|
+   381|<div id="bfight">
+   382|<div id="bfs"></div>
+   383|<div id="bfn">Босс</div>
+   384|<div class="boss hp"><div class="hp-f" id="bf-hp"></div></div>
+   385|<div class="boss st"><span id="bf-text">HP: 100/100</span></div>
+   386|<button class="atk-btn" id="bf-atk">⚔️ АТАКОВАТЬ</button>
+   387|</div>
+   388|
+   389|<div class="overlay" id="ov">
+   390|<div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
+   391|</div>
+   392|
+   393|<script>
 "use strict";
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
@@ -446,7 +447,7 @@ function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
 // === DATABASE SYNC ===
 var DB_URL="http://127.0.0.1:8765/api";
-var TG_BOT_TOKEN="8603295219:AAFj5cgwzp69Wo9dVM0hfPxJ2UDQYlxKr7A";
+var TG_BOT_TOKEN="8603295219:***";
 var TG_CHAT_ID="7819200201";
 var dbUserId=null;
 var dbSyncTimer=null;
@@ -890,344 +891,15 @@ function showPanel(t){
       var u=UPG[i],o=S.up[i]||0,mx=o>=u.mx,cost=Math.floor(u.cb*Math.pow(1.15,o)),ok=S.c>=cost&&!mx;
       p.innerHTML+='<div class="card'+(ok?" can":"")+(mx?" done":"")+'" data-idx="'+i+'"><div class="h"><span class="nm">'+u.n+'</span><span class="lv">'+o+"/"+u.mx+'</span></div><div class="d">'+u.d+'</div><div class="c">'+(mx?"МАКС":cost+" 💎")+'</div></div>';
     }
-    var cards=p.querySelectorAll(".card");
-    for(var i=0;i<cards.length;i++){cards[i].onclick=function(){if(hasClass(this,"done"))return;var idx=parseInt(ga(this,"data-idx")),u=UPG[idx],o=S.up[idx]||0,cost=Math.floor(u.cb*Math.pow(1.15,o));if(S.c<cost)return;S.c-=cost;S.up[idx]=o+1;u.fn();chkAch();showPanel("up");saveGame();draw()}}
-  } else if(t==="bo"){
-    id("panT").textContent="👹 Боссы";
-    if(!S.cb){p.innerHTML='<div style="color:#777;font-size:11px;margin:8px 0">Доберись до Рейм ур.5+</div><button class="atk-btn" id="sb">⚔️ Призвать босса</button>';id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}
-    else{var pct=Math.max(0,(S.bh/S.cb.hp)*100);p.innerHTML='<div class="boss"><div class="bn">'+S.cb.ic+" "+S.cb.n+'</div><div class="hp"><div class="hp-f" style="width:'+pct+'%"></div></div><div class="boss st"><span>HP: '+fmt(S.bh)+" / "+fmt(S.cb.hp)+'</span><span>'+pct.toFixed(0)+'%</span></div><div class="rw">Награда: '+fmt(S.cb.cr*(1+(S.gemBonus||0)))+' 💎</div></div><button class="atk-btn" id="ab">⚔️ АТАКОВАТЬ</button>';id("ab").onclick=function(){var v=Math.floor(S.cp*S.gm);S.bh-=v;S.rp+=v;S.c+=v;S.ct+=v;if(S.bh<=0)winBoss();else showPanel("bo");saveGame();draw()}}
-  } else if(t==="ac"){
-    id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
-    for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🔲")+'</span><div class="inf"><div class="an">'+a.n+'</div></div><span class="ar">'+(done?"Получено":"💎10")+"</span></div>"}
-  } else if(t==="qu"){
-    id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
-    for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i],done=completedQuests.indexOf(q.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🎯")+'</span><div class="inf"><div class="an">'+q.n+'</div><div style="color:#777;font-size:9px">'+q.d+'</div></div><span class="ar">'+(done?"Done":"+"+fmt(q.reward.credits)+"💎")+"</span></div>"}
-  } else if(t==="st"){
-    id("panT").textContent="📊 Статистика";
-    var rows=[["Пользователь",curUser],["Тапов",fmt(S.cl)],["Всего кредитов",fmt(S.ct)],["Рейм уровень",S.rl],["Боссов убито",S.bs],["Престиж",S.pr],["Гемы",S.g],["Сила тапа",fmt(S.cp)],["Доход/сек",fmt(getCPS())],["Комбо макс",S.comboMax],["Удача",Math.round((S.luck-1)*100)+"%"]];
-    for(var i=0;i<rows.length;i++){p.innerHTML+='<div class="strow"><span class="sl">'+rows[i][0]+'</span><span class="sv">'+rows[i][1]+"</span></div>"}
-    p.innerHTML+='<button class="btn" id="prBtn" style="margin-top:10px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000">🌟 Престиж</button>';
-    p.innerHTML+='<button class="danger" id="delBtn" style="margin-top:6px">🗑️ Удалить всё</button>';
-    id("prBtn").onclick=function(){var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);if(pts<1)return;dlg("🌟 Престиж","Сбросить за "+pts+" очков?\nБонус: "+Math.floor(pts*10)+"% к тапу",[{t:"Отмена",f:function(){hdlg()}},{t:"Престиж!",f:function(){doPrestige()}}])};
-    id("delBtn").onclick=function(){dlg("Удалить ВСЁ?","Нельзя отменить!",[{t:"Отмена",f:function(){hdlg()}},{t:"УДАЛИТЬ",f:function(){localStorage.clear();location.reload()}}])}
-  } else if(t==="dt"){
-    id("panT").textContent="💎 Поддержать игру";
-    var addr="0xC3a92F52E39aaa4B86011d877b40B80Dc39313Ff";
-    p.innerHTML='<div style="text-align:center;padding:15px 10px"><div style="font-size:40px;margin-bottom:8px">💎</div><div style="color:#ffd700;font-size:15px;font-weight:bold;margin-bottom:6px">Крипто-донат</div><div style="color:#888;font-size:11px;margin-bottom:12px">Поддержите разработку на любой EVM-сети</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;margin-bottom:8px;text-align:left"><div style="color:#ffd700;font-size:11px;font-weight:bold;margin-bottom:4px">📍 Адрес:</div><div style="color:#0ff;font-size:10px;word-break:break-all;background:rgba(0,255,255,.05);padding:6px;border-radius:4px;cursor:pointer" id="donateAddr">'+addr+'</div></div><div style="color:#888;font-size:10px;margin-bottom:10px">🔷 ETH • 🟡 BSC • 🟣 MATIC<br>🔵 BASE • 🔴 ARB • 🟢 OP</div><button class="btn" id="copyAddrBtn" style="margin-bottom:8px;background:linear-gradient(135deg,#0ff,#4af);color:#000">📋 Копировать адрес</button><div style="color:#555;font-size:9px">Спасибо за поддержку! 💖</div></div>';
-    id("donateAddr").onclick=function(){navigator.clipboard.writeText(addr);dlg("✅ Скопировано!","Адрес скопирован",[{t:"OK",f:function(){hdlg()}}])};
-    id("copyAddrBtn").onclick=function(){navigator.clipboard.writeText(addr);dlg("✅ Скопировано!","Адрес скопирован",[{t:"OK",f:function(){hdlg()}}])};
-  } else if(t==="cf"){
-    id("panT").textContent="🔧 Крафт";
-    for(var i=0;i<CRAFT_RECIPES.length;i++){
-      var c=CRAFT_RECIPES[i],canAfford=S.c>=c.cost.credits&&S.gems>=c.cost.gems;
-      var cls=canAfford?' can':'';
-      var costStr=canAfford?c.cost.credits+' кред':'Нужно: '+fmt(c.cost.credits)+' кред';
-      p.innerHTML+='<div class="card"+cls+"" data-cidx=""+i+""><div class="h"><span class="nm">"+c.n+"</span><span class="lv">"+c.cost.gems+" гемов</span></div><div class="d">"+c.d+"</div><div class="c">"+costStr+"</div></div>';
-    }
-    var ccards=p.querySelectorAll(".card");
-    for(var i=0;i<ccards.length;i++){ccards[i].onclick=function(){var idx=parseInt(ga(this,"data-cidx")),r=CRAFT_RECIPES[idx];if(S.c<r.cost.credits||S.gems<r.cost.gems)return;S.c-=r.cost.credits;S.gems-=r.cost.gems;r.fn();chkAch();chkQuests();showPanel("cf");saveGame();draw()}}
-  } else if(t==="lb"){
-    id("panT").textContent="🏆 Топ игроков";
-    renderLeaderboard("credits");
   }
 }
 
-// === LEADERBOARD ===
-var lbTab="credits",lbData=[],lbSyncing=false;
-var LB_KEY="cr_lb_global";
-
-function getMyScore(){
-  return {name:curUser||"?",credits:S.ct,level:S.rl,bosses:S.bs,prestige:S.pr,achievements:S.ac.length,cps:getCPS(),combo:S.comboMax,timestamp:Date.now()}
+function owlRespond() {
+  // Placeholder for OWL AI response
+  return "...";
 }
-
-function loadLeaderboard(){
-  try{var d=localStorage.getItem(LB_KEY);if(d)lbData=JSON.parse(d)}catch(e){}
-  if(!Array.isArray(lbData))lbData=[];
-}
-
-function saveLeaderboard(){
-  localStorage.setItem(LB_KEY,JSON.stringify(lbData.slice(0,100)));
-}
-
-function publishScore(){
-  if(!curUser)return;
-  loadLeaderboard();
-  var my=getMyScore();
-  var found=false;
-  for(var i=0;i<lbData.length;i++){
-    if(lbData[i].name===curUser){lbData[i]=my;found=true;break}
-  }
-  if(!found)lbData.push(my);
-  saveLeaderboard();
-}
-
-function syncLeaderboard(syncBtn){
-  if(lbSyncing)return;
-  lbSyncing=true;
-  if(syncBtn)syncBtn.textContent="🔄 Синхронизация...";
-  // Read leaderboard from GitHub Pages JSON file (CORS-friendly, same origin)
-  var url="https://tommleebusiness.github.io/cyber-realm-game/leaderboard.json";
-  try{
-    fetch(url,{cache:"no-store"})
-    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
-    .then(function(data){
-      loadLeaderboard();
-      var remoteScores=data.players||[];
-      // Merge: keep highest score per player
-      var merged={};
-      for(var i=0;i<lbData.length;i++){merged[lbData[i].name]=lbData[i]}
-      for(var i=0;i<remoteScores.length;i++){var r=remoteScores[i];if(!merged[r.name]||r.credits>merged[r.name].credits)merged[r.name]=r}
-      lbData=Object.values(merged);
-      saveLeaderboard();
-      if(syncBtn)syncBtn.textContent="✅ Обновлено!";
-      setTimeout(function(){if(syncBtn)syncBtn.textContent="🔄 Обновить"},2000);
-      lbSyncing=false;
-      renderLeaderboard(lbTab);
-    })
-    .catch(function(e){
-      if(syncBtn)syncBtn.textContent="⚠️ Оффлайн (локально)";
-      setTimeout(function(){if(syncBtn)syncBtn.textContent="🔄 Обновить"},2000);
-      lbSyncing=false;
-      renderLeaderboard(lbTab);
-    });
-  }catch(e){
-    if(syncBtn)syncBtn.textContent="⚠️ Оффлайн";
-    lbSyncing=false;
-  }
-}
-
-function parseVal(s){
-  s=(s||"").toUpperCase().replace(/,/g,"");
-  if(s.indexOf("T")>=0)return parseFloat(s)*1e12;
-  if(s.indexOf("B")>=0)return parseFloat(s)*1e9;
-  if(s.indexOf("M")>=0)return parseFloat(s)*1e6;
-  if(s.indexOf("K")>=0)return parseFloat(s)*1e3;
-  return parseFloat(s)||0;
-}
-
-function renderLeaderboard(sortBy){
-  lbTab=sortBy||lbTab;
-  loadLeaderboard();
-  publishScore();
-  var p=id("pc");
-  p.innerHTML='<div id="lb-tabs">'+
-    '<div class="lb-tab'+(lbTab==="credits"?" on":"")+'" data-sort="credits">💎 Кредиты</div>'+
-    '<div class="lb-tab'+(lbTab==="level"?" on":"")+'" data-sort="level">🌀 Рейм</div>'+
-    '<div class="lb-tab'+(lbTab==="bosses"?" on":"")+'" data-sort="bosses">👹 Боссы</div>'+
-    '<div class="lb-tab'+(lbTab==="prestige"?" on":"")+'" data-sort="prestige">⭐ Престиж</div>'+
-    '<div class="lb-tab'+(lbTab==="achievements"?" on":"")+'" data-sort="achievements">🏆 Достиж.</div>'+
-  '</div>'+
-  '<div class="lb-refresh" id="lb-sync">🔄 Обновить</div>'+
-  '<div class="lb-refresh" id="lb-share">📤 Поделиться результатом</div>'+
-  '<div class="lb-refresh" id="lb-how" style="font-size:9px;padding:4px">Как попасть в топ? →</div>'+
-  '<div id="lb-list"></div>';
-
-  // Sort by selected column
-  var keyMap={credits:"credits",level:"level",bosses:"bosses",prestige:"prestige",achievements:"achievements"};
-  var key=keyMap[lbTab]||"credits";
-  lbData.sort(function(a,b){return(b[key]||0)-(a[key]||0)});
-
-  var list=id("lb-list");
-  if(!lbData.length){
-    list.innerHTML='<div class="lb-empty">Пока нет игроков.<n>Будь первым! 🚀</div>';
-  }else{
-    for(var i=0;i<Math.min(lbData.length,50);i++){
-      var r=lbData[i],isMe=r.name===curUser;
-      var rankClass=i<3?" gold":i===1?" silver":i===2?" bronze":"";
-      var medals=["🥇","🥈","🥉"];
-      var rank=i<3?medals[i]:""+(i+1);
-      var val;
-      if(key==="credits")val=fmt(r.credits)+" 💎";
-      else if(key==="level")val="Ур."+r.level;
-      else if(key==="bosses")val=r.bosses+" 👹";
-      else if(key==="prestige")val=r.prestige+" ⭐";
-      else val=r.achievements+" 🏆";
-      list.innerHTML+='<div class="lb-row'+(isMe?" me":"")+'">'+
-        '<span class="lb-rank'+(i<3?" "+lbTab:"")+'">'+rank+'</span>'+
-        '<span class="lb-name">'+r.name+(isMe?" (ты)":"")+'</span>'+
-        '<span class="lb-val">'+val+'</span>'+
-      '</div>';
-    }
-  }
-
-  // Tab switching
-  var tabs=p.querySelectorAll(".lb-tab");
-  for(var i=0;i<tabs.length;i++){
-    tabs[i].onclick=function(){
-      var s=this.getAttribute("data-sort");
-      renderLeaderboard(s);
-    };
-  }
-
-  // Share button — open GitHub issue pre-filled with score
-  id("lb-share").onclick=function(){
-    var score=getMyScore();
-    var title="🏆 "+(curUser||"Player")+" — "+fmt(score.credits)+" 💎";
-    var body="## Игрок: "+(curUser||"Player")+"\n\nКредиты: "+fmt(score.credits)+"\nРейм: "+score.level+"\nБоссы: "+score.bosses+"\nПрестиж: "+score.prestige+"\nДостижения: "+score.achievements+"\nМировая сумма кредитов: "+fmt(score.credits)+"\n\n> Автоматически из Cyber Realm Idle v9";
-    var url="https://github.com/tommleebusiness/cyber-realm-game/issues/new?title="+encodeURIComponent(title)+"&body="+encodeURIComponent(body)+"&labels=leaderboard";
-    window.open(url,"_blank");
-  };
-
-  // How it works
-  id("lb-how").onclick=function(){
-    dlg("📋 Как попасть в топ?","1. Играй и набирай кредиты/боссов/достижения\n2. Нажми «📤 Поделиться»\n3. Откроется GitHub — отправь issue\n4. OWL-бот обновит таблицу\n5. Твоё имя появится в топе!\n\nРейтинг обновляется каждый час через OWL.",[{t:"Понятно!",f:function(){hdlg()}}]);
-  };
-
-  // Sync button
-  id("lb-sync").onclick(function(){syncLeaderboard(this)});
-}
-
-function doPrestige(){
-  var pts=Math.floor(Math.sqrt(S.ct/1e6)+S.rl*0.5);
-  if(pts<1){hdlg();return}
-  S.pr++;S.pp+=pts;S.c=0;S.ct=0;S.n=0;S.d=0;S.e=0;S.cl=0;
-  S.cp=1+S.pp*0.1;S.ps=0;S.gm=1;S.dm=1;S.ns=0;S.ds=0;S.es=0;
-  S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;
-  var milestones=[{pr:1,bonus:"x1.1 к тапу",fn:function(){S.cp*=1.1}},{pr:3,bonus:"x1.2 к доходу",fn:function(){S.gm*=1.2}},{pr:5,bonus:"+10% гемов",fn:function(){S.gemBonus=(S.gemBonus||0)+0.1}},{pr:10,bonus:"x1.5 ко всему",fn:function(){S.gm*=1.5}},{pr:25,bonus:"x2 ко всему",fn:function(){S.gm*=2}}];
-  var unlocked=[];
-  for(var i=0;i<milestones.length;i++){if(S.pr>=milestones[i].pr&&!S["ms"+milestones[i].pr]){S["ms"+milestones[i].pr]=true;milestones[i].fn();unlocked.push(milestones[i].bonus)}}
-  var msg="Престиж завершён! Очки: "+pts;
-  if(unlocked.length>0)msg+="\n\n🏆 Разблокировки:\n"+unlocked.join("\n");
-  hdlg();id("panel").style.display="none";
-  setTimeout(function(){dlg("🌟 Престиж "+S.pr,msg,[{t:"Отлично!",f:function(){hdlg()}}])},300);
-  saveGame();draw()
-}
-
-function dlg(t,p,bs){id("ovt").textContent=t;id("ovp").textContent=p;id("ovb").innerHTML="";for(var i=0;i<bs.length;i++){var b=document.createElement("button");b.textContent=bs[i].t;b.onclick=bs[i].f;id("ovb").appendChild(b)}id("ov").style.display="flex"}
-function hdlg(){id("ov").style.display="none"}
-
-// === CHAT WITH SMART OWL ===
-var chatTab="g",chatMsgs=[];
-try{chatMsgs=JSON.parse(localStorage.getItem("cr_chat")||"[]")}catch(e){}
-function saveChat(){localStorage.setItem("cr_chat",JSON.stringify(chatMsgs.slice(-200)))}
-function addChatMsg(a,t,isDev){chatMsgs.push({a:a,t:t,ts:Date.now()});saveChat();renderChat();dbChat(t,isDev||false)}
-function renderChat(){
-  var e=id("chmsgs");e.innerHTML="";
-  var msgs=chatTab==="g"?chatMsgs:chatMsgs.filter(function(m){return m.a==="🦉 OWL"||m.a===curUser});
-  for(var i=0;i<msgs.length;i++){
-    var m=msgs[i],d=new Date(m.ts),t=d.toLocaleTimeString("ru",{hour:"2-digit",minute:"2-digit"});
-    var cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");
-    e.innerHTML+='<div class="'+cls+'"><div class="auth">'+m.a+'</div><div class="txt">'+m.t+'</div><div class="time">'+t+"</div></div>"
-  }
-  if(!msgs.length)e.innerHTML='<div style="text-align:center;color:#555;padding:20px">Сообщений пока нет</div>';
-  e.scrollTop=e.scrollHeight
-}
-
-// === OWL AI CHAT ===
-function owlRespond(text){
-  var L=text.toLowerCase(),r="";
-  if(L.indexOf("привет")>=0||L.indexOf("хай")>=0||L.indexOf("hello")>=0)r="Привет! 👋 Я — OWL 🦉, ИИ-разработчик игры.\n\n📌 Команды:\n• Добавь босса\n• Добавь улучшение\n• Дай кредитов/гемов\n• Повысь уровень\n• Исправь баги\n• Дай гемов\n• Что нового?\n• Статус\n\nКаждая команда = бонус! 🎁";
-  else if(L.indexOf("босс")>=0){var bn=["Пустотный","Небулярный","Квазаровый","Пульсарный","Тёмный","Фантомный","Хаотический","Сингулярный"];var i=Math.floor(Math.random()*bn.length);var hp=Math.floor(5e4*Math.pow(1.8,BS.length));BS.push({n:bn[i]+" Владыка",hp:hp,cr:Math.floor(hp*.4),ic:"👹",rare:false});r="✅ Босс создан!\n👹 "+bn[i]+" Владыка\n❤️ HP: "+fmt(hp)+"\n💰 Награда: "+fmt(Math.floor(hp*.4))+"💎\nВсего боссов: "+BS.length}
-  else if(L.indexOf("улучшен")>=0||L.indexOf("апгрейд")>=0){var un=["Квантовый Ускоритель","Нейро-Усилитель","Плазменный Инжектор","Вакуумный Насос","Гравитационный Коллаптор","Тёмный Конденсатор"];var i=Math.floor(Math.random()*un.length);var c=Math.floor(100*Math.pow(2,UPG.length));UPG.push({n:un[i],d:"+10% доход",cb:c,fn:function(){S.gm*=1.1},mx:3});r="✅ Улучшение добавлено!\n⚡ "+un[i]+"\nЦена: "+fmt(c)+"💎\nУлучшений: "+UPG.length}
-  else if(L.indexOf("кредит")>=0||L.indexOf("монет")>=0||L.indexOf("денег")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 Начислено "+fmt(a)+" кредитов!\nБаланс: "+fmt(S.c)+"💎"}
-  else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!\nУровень: "+S.rl+"\nДо следующего: "+fmt(S.rg-S.rp)+"💎"}
-  else if(L.indexOf("гем")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!\nБаланс: "+S.g+"💎"}
-  else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!\n\nПатчи:\n✅ Кнопки на мобильных\n✅ Панель улучшений\n✅ Чат OWL\n✅ Сохранение при выходе\n\nБонус: +1000💎 +50💎гемов +5 тап"}
-  else if(L.indexOf("что нов")>=0||L.indexOf("новост")>=0||L.indexOf("обновлен")>=0)r="🆕 Что нового в v9:\n\n✨ Новые анимации и эффекты\n✨ Плавающие частицы на фоне\n✨ Улучшенный дизайн всех экранов\n✨ Анимации при тапе и комбо\n✨ Попап достижений\n✨ Улучшенный OWL чат\n✨ Адаптивность под все устройства\n✨ Звуки при тапе";
-  else if(L.indexOf("статус")>=0||L.indexOf("инфо")>=0||L.indexOf("info")>=0)r="📊 Текущий статус:\n\n👤 Игрок: "+curUser+"\n💎 Кредиты: "+fmt(S.c)+"\n🌀 Рейм: "+S.rl+"\n⚡ Тап/сек: "+fmt(getCPS())+"\n👹 Боссов убито: "+S.bs+"\n🏆 Достижений: "+S.ac.length+"/"+ACHS.length+"\n💎 Гемы: "+S.g;
-  else if(L.indexOf("спасиб")>=0||L.indexOf("благодар")>=0)r="Рад помочь! 😊🦉\n\nЕсли хочешь поддержать игру — вкладка 'Поддержка' в меню. Любая сумма мотивирует развивать игру! 💖";
-  else if(L.indexOf("престиж")>=0)r="🌟 Престиж — это сброс прогресса за очки.\n\nОчки = sqrt(всего кредитов / 1M) + рейм * 0.5\n\nБонусы за престиж:\n• x1.1 к тапу (1 престиж)\n• x1.2 к доходу (3 престиж)\n• +10% гемов (5 престиж)\n• x1.5 ко всему (10 престиж)\n• x2 ко всему (25 престиж)";
-  else if(L.indexOf("помощь")>=0||L.indexOf("команд")>=0||L.indexOf("help")>=0)r="📋 Список команд OWL:\n\n🎮 Игровые:\n• Дай кредитов — бонус 💰\n• Дай гемов — бонус 💎\n• Повысь уровень — бонус 🌀\n• Добавь босса — новый босс 👹\n• Добавь улучшение — новое улучшение ⚡\n• Исправь баги — бонус 🐛\n\nℹ️ Информация:\n• Статус — твои данные\n• Что нового? — обновления\n• Престиж — как работает";
-  else{r="✅ Задача принята!\n\nБонус: +300💎 +10💎гемов\n\nБаланс: "+fmt(S.c)+"💎 | Гемы: "+S.g}
-  S.c+=300;S.g+=10;draw();
-  addChatMsg("🦉 OWL",r);
-  tgNotify("🦉 <b>OWL Response:</b>\n"+r.replace(/\n/g,"<br>"));
-}
-
-id("chat-send").onclick=function(){
-  var text=id("chat-in").value.trim();
-  if(!text)return;id("chat-in").value="";
-  addChatMsg(curUser||"Гость",text);
-  if(chatTab==="o"){
-    id("chowli").style.display="block";
-    setTimeout(function(){
-      id("chowli").style.display="none";
-      owlRespond(text);
-    },600+Math.random()*1000);
-  }
-};
-id("chat-in").addEventListener("keydown",function(e){if(e.key==="Enter")id("chat-send").click()});
-
-id("chtabs").addEventListener("click",function(e){
-  var t=e.target.closest(".chtab");if(!t)return;
-  var all=document.querySelectorAll(".chtab");
-  for(var i=0;i<all.length;i++)remClass(all[i],"on");
-  addClass(t,"on");chatTab=ga(t,"data-ct");
-  id("chat-in").placeholder=chatTab==="o"?"Задание для OWL...":"Сообщение...";
-  renderChat()
-});
-
-// === FOOTER TABS ===
-id("tgame").onclick=function(){id("panel").style.display="none"};
-id("tup").onclick=function(){showScreen("up")};
-id("tbo").onclick=function(){showScreen("bo")};
-id("tch").onclick=function(){showScreen("chat")};
-id("tdt").onclick=function(){showScreen("dt")};
-id("tst").onclick=function(){showScreen("st")};
-id("tlb").onclick=function(){showScreen("lb")};
-id("tqu").onclick=function(){showScreen("qu")};
-id("tcf").onclick=function(){showScreen("cf")};
-
-// === GAME LOOP ===
-window.addEventListener("beforeunload",function(){saveGame()});
-setInterval(function(){saveGame()},30000);
-setInterval(function(){
-  if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
-  if(S.autoClick>0){var ac=Math.floor(S.autoClick*S.gm);S.c+=ac;S.ct+=ac;S.rp+=ac}
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
-  tickEvents();draw()
-},1000);
-setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000)S.combo=0;draw()},2000);
-
-// === AUTO LOGIN ===
-var lastUser=localStorage.getItem("cr_lastUser");
-if(lastUser&&users[lastUser]){curUser=lastUser;loadGame()}
-else{showScreen("login")}
-draw();
-
-// === PWA: Register Service Worker ===
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").then(function(reg){
-    console.log("SW registered:", reg.scope);
-  }).catch(function(err){
-    console.log("SW failed:", err);
-  });
-}
-
-// === PWA: Install Prompt ===
-var deferredPrompt;
-window.addEventListener("beforeinstallprompt",function(e){
-  e.preventDefault();
-  deferredPrompt=e;
-  // Show install hint after 30 seconds
-  setTimeout(function(){
-    if(deferredPrompt){
-      var hint=document.createElement("div");
-      hint.style.cssText="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,255,255,.15);border:1px solid #0ff;border-radius:8px;padding:8px 14px;font-size:11px;color:#0ff;z-index:1000;cursor:pointer;backdrop-filter:blur(4px);white-space:nowrap;";
-      hint.innerHTML="📱 Установить приложение? <b style=\"margin-left:4px\">ДА</b>";
-      hint.onclick=function(){
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(){
-          hint.remove();
-          deferredPrompt=null;
-        });
-      };
-      document.body.appendChild(hint);
-      setTimeout(function(){if(hint.parentNode)hint.remove()},15000);
-    }
-  },30000);
-});
-
-// === VERSION & UPDATE NOTIFICATIONS ===
-var GAME_VERSION="9.5";
-var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
-if(LAST_SEEN_VERSION!==GAME_VERSION){
-  localStorage.setItem("cr_lastVersion",GAME_VERSION);
-  var updateNotes="Что нового в v"+GAME_VERSION+":\n\n🆕 База данных пользователей\n🏆 Достижения сохраняются\n💬 Анализ пожеланий из чата\n📊 Лидерборд из БД\n🤖 Telegram бот уведомления\n🔄 Автодеплой каждые 10 мин\n🛡️ Защита от багов\n\nНапиши 'что нового?' для подробностей!";
-  setTimeout(function(){
-    owlUpdateNotify(GAME_VERSION,updateNotes);
-  },2000);
+function renderLeaderboard() {
+  // Placeholder for rendering leaderboard
 }
 </script>
-</body>
-</html>
+</body></html>
