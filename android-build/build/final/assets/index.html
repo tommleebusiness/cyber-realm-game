@@ -690,17 +690,7 @@ function tap(){
   }
 
   // Boss fight
-  if(S.cb&&S.bh>0){
-    S.bh-=v;
-    // Screen flash when hitting boss
-    var bfight = id("bfight");
-    var originalBg = bfight.style.backgroundColor;
-    bfight.style.backgroundColor = "rgba(255,0,68,0.3)";
-    setTimeout(function(){
-      if(originalBg) bfight.style.backgroundColor = originalBg;
-    }, 100);
-    if(S.bh<=0)winBoss()
-  }
+  if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
 
   // Level up
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
