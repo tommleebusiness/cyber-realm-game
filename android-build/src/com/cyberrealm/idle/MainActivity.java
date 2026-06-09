@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
-        webView.loadUrl("https://tommleebusiness.github.io/cyber-realm-game/");
+        webView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
