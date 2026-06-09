@@ -693,7 +693,24 @@ function tap(){
   if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
 
   // Level up
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
+  var levelsGained = 0;
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3; levelsGained++;}
+  if(levelsGained > 0){
+    // Show level up notification
+    var notify = document.createElement('div');
+    notify.textContent = 'РЕЙМ ПОВЫШЕН! Уровень ' + S.rl;
+    notify.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,255,255,.2);border:1px solid #0ff;border-radius:8px;padding:8px 16px;font-size:14px;color:#0ff;z-index:1000;pointer-events:none;animation:notifyUp .5s ease-out forwards';
+    notify.innerHTML = 'РЕЙМ ПОВЫШЕН! Уровень <span style="color:#ffd700">' + S.rl + '</span>';
+    document.body.appendChild(notify);
+    setTimeout(function(){if(notify.parentNode)notify.parentNode.removeChild(notify)},1500);
+    // Add CSS animation if not already present
+    if(!document.getElementById('notify-style')){
+      var style = document.createElement('style');
+      style.id = 'notify-style';
+      style.textContent = '@keyframes notifyUp{0%{opacity:0;transform:translateX(-50%) translateY(-20px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}';
+      document.head.appendChild(style);
+    }
+  }
 
   // Random boss spawn (rare: ~0.5% base, scales with realm level)
   if(!S.cb&&S.rl>=5&&Math.random()<0.005+Math.min(S.rl*0.001,0.015)){
