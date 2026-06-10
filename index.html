@@ -510,6 +510,39 @@ function dbAchievement(achId,achName){
   dbReq("/achievement","POST",{user_id:dbUserId,achievement_id:achId,achievement_name:achName});
 }
 
+function tap() {
+  S.cl++;
+  S.c += 1;
+  draw();
+  var btn = id('tpbtn');
+  if (btn) {
+    addClass(btn, 'pressing');
+    setTimeout(function() { remClass(btn, 'pressing'); }, 150);
+  }
+  // Spawn tap particle
+  var parts = id('parts');
+  if (parts) {
+    var p = document.createElement('div');
+    var types = ['pt-coin', 'pt-gem', 'pt-bolt'];
+    var type = types[Math.floor(Math.random() * types.length)];
+    p.className = 'pt ' + type;
+    var btnRect = btn.getBoundingClientRect();
+    var x = btnRect.left + btnRect.width / 2;
+    var y = btnRect.top + btnRect.height / 2;
+    // random offset
+    var offset = 20 * (Math.random() - 0.5); // -10 to 10
+    p.style.left = (x + offset) + 'px';
+    p.style.top = (y + offset) + 'px';
+    parts.appendChild(p);
+    // remove after animation ends (0.8s)
+    setTimeout(function() {
+      if (p.parentNode) {
+        p.parentNode.removeChild(p);
+      }
+    }, 800);
+  }
+}
+
 function dbChat(message,isDev){
   if(!curUser)return;
   dbReq("/chat","POST",{username:curUser,message:message,is_dev_chat:isDev||false});
