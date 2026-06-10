@@ -340,9 +340,9 @@ footer .tab:active .tab-icon{transform:scale(1.2)}
   </div>
   <div id="area">
     <div id="tapz">
-      <div id="parts"></div>
-      <button id="tpbtn"><span>НАЖМИ</span></button>
-      <div id="tpinfo"></div>
+   <div id="parts"></div>
+   <button id="tpbtn" onclick="tap()"><span>НАЖМИ</span></button>
+   <div id="tpinfo"></div>
       <div id="tcps">в сек: 0 | тапов: 0</div>
       <div id="event-bar" style="display:none;font-size:10px;color:#ffd700;text-align:center;margin:4px 0;text-shadow:0 0 6px rgba(255,215,0,.5);"></div>
       <div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
@@ -392,6 +392,19 @@ footer .tab:active .tab-icon{transform:scale(1.2)}
 <script>
 "use strict";
 var curUser=null,users={};
+var S = {c:0, cl:0, rl:0, bs:0, pr:0, comboMax:0, luck:0, g:0, ct:0, lastDaily:0, dailyStreak:0};
+var lastTapCount = 0;
+var lastTime = Date.now();
+var tps = 0;
+setInterval(function() {
+    var now = Date.now();
+    var elapsed = (now - lastTime) / 1000; // in seconds
+    if (elapsed > 0) {
+        tps = (S.cl - lastTapCount) / elapsed;
+        lastTapCount = S.cl;
+        lastTime = now;
+    }
+}, 1000);
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
 function saveUsers(){localStorage.setItem("cr_users",JSON.stringify(users))}
 function hv(p){var h=0;for(var i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0}return h.toString(36)}
@@ -446,7 +459,7 @@ function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
 // === DATABASE SYNC ===
 var DB_URL="http://127.0.0.1:8765/api";
-var TG_BOT_TOKEN="8603295219:***";
+var TG_BOT_TOKEN="***";
 var TG_CHAT_ID="7819200201";
 var dbUserId=null;
 var dbSyncTimer=null;
@@ -496,12 +509,54 @@ function dbLogin(username,password){
 function dbSave(){
   if(!dbUserId)return;
   dbReq("/save","POST",{user_id:dbUserId,stats:{
-    credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
-    prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
-    g:S.g, ct:S.ct, lastDaily:S.lastDaily, dailyStreak:S.dailyStreak
-  }},function(s,t){
-    if(s===200){try{var d=JSON.parse(t);if(d.ok){/* saved */}}catch(e){}}
-  });
+   credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
+   prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
+   g:S.g, ct:S.ct, lastDaily:S.lastDaily, dailyStreak:S.dailyStreak
+ }},function(s,t){
+   if(s===200){try{var d=JSON.parse(t);if(d.ok){/* saved */}}catch(e){}}
+ });
+}
+function tap() {
+  S.cl++;
+  S.c += 1;
+  draw();
+}
+function draw() {
+  id('rc').textContent = S.g;
+  id('rn').textContent = S.c;
+  id('rd').textContent = 0;
+  id('re').textContent = 0;
+  id('uname').textContent = curUser ? curUser.nm : '';
+  id('tcps').textContent = 'в сек: ' + tps.toFixed(2) + ' | тапов: ' + S.cl;
+  var prog = Math.min(S.rl * 10, 100);
+  id('prog-fi').style.width = prog + '%';
+  id('prog-t').textContent = 'Рейм ур.' + (S.rl+1);
+}
+function saveGame() {
+  try {
+    localStorage.setItem('cyberRealmSave', JSON.stringify({S: S, curUser: curUser}));
+  } catch (e) {}
+}
+function loadGame() {
+  try {
+    var save = localStorage.getItem('cyberRealmSave');
+    if (save) {
+      var data = JSON.parse(save);
+      if (data.S) S = data.S;
+      if (data.curUser) curUser = data.curUser;
+      draw();
+    }
+  } catch (e) {}
+}
+function owlRespond(message) {
+  var resp = "Я OWL, ваш наставник. ";
+  if (message.includes('привет')) resp += 'Привет! Как дела?';
+  else if (message.includes('кто')) resp += 'Я OWL, созданный чтобы помогать в Cyber Realm.';
+  else resp += 'Интересный вопрос. Продолжайте тапать!';
+  addChatMsg('🦉 OWL', resp);
+}
+function renderLeaderboard() {
+  // Placeholder implementation
 }
 </script>
 </body>
