@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 "use strict";
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
@@ -98,21 +98,22 @@ function dbRegister(username,password){
 
 function dbLogin(username,password){
   dbReq("/login","POST",{username:username,password:password},function(s,t){
-    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=username;dbStartSync()}}catch(e){}}
+    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=d.user_id;dbStartSync()}}catch(e){}}
   });
 }
 
 function dbSave(){
   if(!dbUserId)return;
   dbReq("/save","POST",{user_id:dbUserId,stats:{
-    credits:S.c,total_credits:S.ct,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
+    credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
     prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
     tap_power:S.cp,cps:getCPS()
-  },achievements:S.ac,quests_completed:completedQuests,upgrades:S.up});
+  }});
 }
 
 function dbAchievement(achId,achName){
-  // Achievements are synced via dbSave
+  if(!dbUserId)return;
+  dbReq("/achievement","POST",{user_id:dbUserId,achievement_id:achId,achievement_name:achName});
 }
 
 function dbChat(message,isDev){
@@ -251,12 +252,11 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
 
   // Combo display
-  var cd=id("combo-display");
   if(S.combo>=5){
-    cd.textContent="⚡ COMBO x"+comboBonus.toFixed(1)+"!";
+    var cd=id("combo-display");
+    cd.textContent="⚡ COMBO x"+S.combo+"!";
     cd.className="show";
-  } else {
-    cd.className="";
+    setTimeout(function(){cd.className=""},1500);
   }
 
   var comboText=S.combo>1?" x"+comboBonus+" ⚡":"";
@@ -509,7 +509,7 @@ function showPanel(t){
     id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
     for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🔲")+'</span><div class="inf"><div class="an">'+a.n+'</div></div><span class="ar">'+(done?"Получено":"💎10")+"</span></div>"}
   } else if(t==="qu"){
-    id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
+    id("panT").textContent="🎯 Квests ("+completedQuests.length+"/"+QUESTS.length+")";
     for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i],done=completedQuests.indexOf(q.id)>=0;p.innerHTML+='<div class="ach'+(done?" done":"")+'"><span class="ic">'+(done?"✅":"🎯")+'</span><div class="inf"><div class="an">'+q.n+'</div><div style="color:#777;font-size:9px">'+q.d+'</div></div><span class="ar">'+(done?"Done":"+"+fmt(q.reward.credits)+"💎")+"</span></div>"}
   } else if(t==="st"){
     id("panT").textContent="📊 Статистика";
@@ -837,38 +837,3 @@ if(LAST_SEEN_VERSION!==GAME_VERSION){
     owlUpdateNotify(GAME_VERSION,updateNotes);
   },2000);
 }
-=======
-var curUser=null,users={};
-try{users=JSON.parse(localStorage.getItem('cr_users')||'{}');}catch(e){};
-window.saveUsers=function(){localStorage.setItem('cr_users',JSON.stringify(users));};
-window.h=function(p){var hv=0;for(var i=0;i<p.length;i++){hv=((hv<<5)-hv)+p.charCodeAt(i);hv|=0;}return hv.toString(36);};
-window.id=function(s){return document.getElementById(s);};
-window.showScreen=function(s){
-  var login=document.getElementById('login-scr');
-  var game=document.getElementById('game-scr');
-  if(s==='login'){
-    login.classList.remove('hide');
-    game.classList.add('hide');
-  }else if(s==='game'){
-    login.classList.add('hide');
-    game.classList.remove('hide');
-  }
-};
-window.amsg=function(m,t){var e=document.getElementById('amsg');e.textContent=m;e.className='msg '+(t||'');};
-document.getElementById('alogin').onclick=function(){
-  var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
-  if(!u||!p){window.amsg('Заполни все поля','err');return;}
-  if(!users[u]){window.amsg('Пользователь не найден','err');return;}
-  if(users[u].pass!==window.h(p)){window.amsg('Неверный пароль','err');return;}
-  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');document.getElementById('uname').textContent = curUser;window.amsg('','');
-};
-document.getElementById('areg').onclick=function(){
-  var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
-  if(!u||!p){window.amsg('Заполни все поля','err');return;}
-  if(u.length<3){window.amsg('Минимум 3 символа','err');return;}
-  if(p.length<4){window.amsg('Минимум 4 символа пароля','err');return;}
-  if(users[u]){window.amsg('Имя занято','err');return;}
-  users[u]={pass:window.h(p),created:Date.now(),lastLogin:Date.now()};window.saveUsers();
-  curUser=u;window.showScreen('game');window.amsg('Аккаунт создан!','ok');
-};
->>>>>>> 0a9d9fa44a127560015f0e15acc1cd5f29f1c3b3

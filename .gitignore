@@ -12,3 +12,7 @@ android-sdk/
 *.pyc
 __pycache__/
 data/users.db
+<<<<<<< HEAD
+gh_token.txt
+=======
+>>>>>>> 0a9d9fa44a127560015f0e15acc1cd5f29f1c3b3
