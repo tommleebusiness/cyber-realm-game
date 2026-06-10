@@ -522,15 +522,15 @@ function tap() {
   draw();
 }
 function draw() {
-  id('rc').textContent = S.g;
-  id('rn').textContent = S.c;
-  id('rd').textContent = 0;
-  id('re').textContent = 0;
-  id('uname').textContent = curUser ? curUser.nm : '';
-  id('tcps').textContent = 'в сек: ' + tps.toFixed(2) + ' | тапов: ' + S.cl;
-  var prog = Math.min(S.rl * 10, 100);
-  id('prog-fi').style.width = prog + '%';
-  id('prog-t').textContent = 'Рейм ур.' + (S.rl+1);
+ id('rc').textContent = S.g;
+ id('rn').textContent = S.c;
+ id('rd').textContent = S.bs * 10;
+ id('re').textContent = S.rl * 10;
+ id('uname').textContent = curUser ? curUser.nm : '';
+ id('tcps').textContent = 'в сек: ' + tps.toFixed(2) + ' | тапов: ' + S.cl;
+ var prog = Math.min(S.rl * 10, 100);
+ id('prog-fi').style.width = prog + '%';
+ id('prog-t').textContent = 'Рейм ур.' + (S.rl+1);
 }
 function saveGame() {
   try {
