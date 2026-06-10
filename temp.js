@@ -111,3 +111,6 @@ function dbSave(){
     if(s===200){try{var d=JSON.parse(t);if(d.ok){/* saved */}}catch(e){}}
   });
 }
+</script>
+</body>
+</html>
