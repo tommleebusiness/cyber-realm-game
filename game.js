@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use strict";
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
@@ -55,7 +54,7 @@ function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
 // === DATABASE SYNC ===
 var DB_URL="http://127.0.0.1:8765/api";
-var TG_BOT_TOKEN="8603295219:AAFj5cgwzp69Wo9dVM0hfPxJ2UDQYlxKr7A";
+var TG_BOT_TOKEN="8603295219:***";
 var TG_CHAT_ID="7819200201";
 var dbUserId=null;
 var dbSyncTimer=null;
@@ -98,22 +97,28 @@ function dbRegister(username,password){
 
 function dbLogin(username,password){
   dbReq("/login","POST",{username:username,password:password},function(s,t){
-    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=username;dbStartSync()}}catch(e){}}
+    if(s===200){try{var d=JSON.parse(t);if(d.ok){dbUserId=d.user_id;dbStartSync()}}catch(e){}}
   });
 }
 
 function dbSave(){
   if(!dbUserId)return;
   dbReq("/save","POST",{user_id:dbUserId,stats:{
-    credits:S.c,total_credits:S.ct,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
+    credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
     prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,
+    g:S.g, ct:S.ct, lastDaily:S.lastDaily, dailyStreak:S.dailyStreak,
     tap_power:S.cp,cps:getCPS()
-  },achievements:S.ac,quests_completed:completedQuests,upgrades:S.up});
+  }},function(s,t){
+    if(s===200){try{var d=JSON.parse(t);if(d.ok){/* saved */}}catch(e){}}
+  });
 }
 
 function dbAchievement(achId,achName){
-  // Achievements are synced via dbSave
+  if(!dbUserId)return;
+  dbReq("/achievement","POST",{user_id:dbUserId,achievement_id:achId,achievement_name:achName});
 }
+
+
 
 function dbChat(message,isDev){
   if(!curUser)return;
@@ -235,7 +240,8 @@ var ACHS=[
   {id:"a22",n:"Мастер Престижа",ck:function(){return S.pr>=25}},
   {id:"a23",n:"Мультивселенная",ck:function(){return S.rl>=50}},
   {id:"a24",n:"Квадриллионер",ck:function(){return S.ct>=1e15}},
-  {id:"a25",n:"Божество",ck:function(){return S.gm>=100}}
+  {id:"a25",n:"Божество",ck:function(){return S.gm>=100}},
+  {id:"a26",n:"Кликер-Мастер",ck:function(){return S.cl>=1000}}
 ];
 
 function getCPS(){return Math.floor(S.ps*S.gm)}
@@ -251,12 +257,11 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
 
   // Combo display
-  var cd=id("combo-display");
   if(S.combo>=5){
-    cd.textContent="⚡ COMBO x"+comboBonus.toFixed(1)+"!";
+    var cd=id("combo-display");
+    cd.textContent="⚡ COMBO x"+S.combo+"!";
     cd.className="show";
-  } else {
-    cd.className="";
+    setTimeout(function(){cd.className=""},1500);
   }
 
   var comboText=S.combo>1?" x"+comboBonus+" ⚡":"";
@@ -299,10 +304,27 @@ function tap(){
   }
 
   // Boss fight
-  if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
+  if(S.cb&&S.bh>0){S.bh-=v;updateBossHP();if(S.bh<=0)winBoss()}
 
   // Level up
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3}
+  var levelsGained = 0;
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.4);S.cp+=Math.ceil(S.rl*0.5);S.ps+=S.rl*0.3; levelsGained++;}
+  if(levelsGained > 0){
+    // Show level up notification
+    var notify = document.createElement('div');
+    notify.textContent = 'РЕЙМ ПОВЫШЕН! Уровень ' + S.rl;
+    notify.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,255,255,.2);border:1px solid #0ff;border-radius:8px;padding:8px 16px;font-size:14px;color:#0ff;z-index:1000;pointer-events:none;animation:notifyUp .5s ease-out forwards';
+    notify.innerHTML = 'РЕЙМ ПОВЫШЕН! Уровень <span style="color:#ffd700">' + S.rl + '</span>';
+    document.body.appendChild(notify);
+    setTimeout(function(){if(notify.parentNode)notify.parentNode.removeChild(notify)},1500);
+    // Add CSS animation if not already present
+    if(!document.getElementById('notify-style')){
+      var style = document.createElement('style');
+      style.id = 'notify-style';
+      style.textContent = '@keyframes notifyUp{0%{opacity:0;transform:translateX(-50%) translateY(-20px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}';
+      document.head.appendChild(style);
+    }
+  }
 
   // Random boss spawn (rare: ~0.5% base, scales with realm level)
   if(!S.cb&&S.rl>=5&&Math.random()<0.005+Math.min(S.rl*0.001,0.015)){
@@ -343,6 +365,10 @@ function winBoss(){
   S.c+=r;S.bs++;
   flyText("+ "+fmt(r));
   S.cb=null;S.bh=0;id("bfight").style.display="none";
+  // If the boss panel is open, refresh it to show the summoned button
+  if (id("panel").style.display === "flex" && id("panT").textContent.trim() === "👹 Боссы") {
+    showPanel("bo");
+  }
   chkAch();draw()
 }
 
@@ -528,13 +554,13 @@ function showPanel(t){
   } else if(t==="cf"){
     id("panT").textContent="🔧 Крафт";
     for(var i=0;i<CRAFT_RECIPES.length;i++){
-      var c=CRAFT_RECIPES[i],canAfford=S.c>=c.cost.credits&&S.gems>=c.cost.gems;
+      var c=CRAFT_RECIPES[i],canAfford=S.c>=c.cost.credits&&S.g>=c.cost.gems;
       var cls=canAfford?' can':'';
       var costStr=canAfford?c.cost.credits+' кред':'Нужно: '+fmt(c.cost.credits)+' кред';
       p.innerHTML+='<div class="card"+cls+"" data-cidx=""+i+""><div class="h"><span class="nm">"+c.n+"</span><span class="lv">"+c.cost.gems+" гемов</span></div><div class="d">"+c.d+"</div><div class="c">"+costStr+"</div></div>';
     }
     var ccards=p.querySelectorAll(".card");
-    for(var i=0;i<ccards.length;i++){ccards[i].onclick=function(){var idx=parseInt(ga(this,"data-cidx")),r=CRAFT_RECIPES[idx];if(S.c<r.cost.credits||S.gems<r.cost.gems)return;S.c-=r.cost.credits;S.gems-=r.cost.gems;r.fn();chkAch();chkQuests();showPanel("cf");saveGame();draw()}}
+    for(var i=0;i<ccards.length;i++){ccards[i].onclick=function(){var idx=parseInt(ga(this,"data-cidx")),r=CRAFT_RECIPES[idx];if(S.c<r.cost.credits||S.g<r.cost.gems)return;S.c-=r.cost.credits;S.g-=r.cost.gems;r.fn();chkAch();chkQuests();showPanel("cf");saveGame();draw()}}
   } else if(t==="lb"){
     id("panT").textContent="🏆 Топ игроков";
     renderLeaderboard("credits");
@@ -642,7 +668,7 @@ function renderLeaderboard(sortBy){
   }else{
     for(var i=0;i<Math.min(lbData.length,50);i++){
       var r=lbData[i],isMe=r.name===curUser;
-      var rankClass=i<3?" gold":i===1?" silver":i===2?" bronze":"";
+      var rankClass=i===0?" gold":i===1?" silver":i===2?" bronze":"";
       var medals=["🥇","🥈","🥉"];
       var rank=i<3?medals[i]:""+(i+1);
       var val;
@@ -652,7 +678,7 @@ function renderLeaderboard(sortBy){
       else if(key==="prestige")val=r.prestige+" ⭐";
       else val=r.achievements+" 🏆";
       list.innerHTML+='<div class="lb-row'+(isMe?" me":"")+'">'+
-        '<span class="lb-rank'+(i<3?" "+lbTab:"")+'">'+rank+'</span>'+
+        '<span class="lb-rank'+rankClass+'">'+rank+'</span>'+
         '<span class="lb-name">'+r.name+(isMe?" (ты)":"")+'</span>'+
         '<span class="lb-val">'+val+'</span>'+
       '</div>';
@@ -732,11 +758,12 @@ function owlRespond(text){
   else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!\nУровень: "+S.rl+"\nДо следующего: "+fmt(S.rg-S.rp)+"💎"}
   else if(L.indexOf("гем")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!\nБаланс: "+S.g+"💎"}
   else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!\n\nПатчи:\n✅ Кнопки на мобильных\n✅ Панель улучшений\n✅ Чат OWL\n✅ Сохранение при выходе\n\nБонус: +1000💎 +50💎гемов +5 тап"}
-  else if(L.indexOf("что нов")>=0||L.indexOf("новост")>=0||L.indexOf("обновлен")>=0)r="🆕 Что нового в v9:\n\n✨ Новые анимации и эффекты\n✨ Плавающие частицы на фоне\n✨ Улучшенный дизайн всех экранов\n✨ Анимации при тапе и комбо\n✨ Попап достижений\n✨ Улучшенный OWL чат\n✨ Адаптивность под все устройства\n✨ Звуки при тапе";
+else if(L.indexOf("что нов")>=0||L.indexOf("новост")>=0||L.indexOf("обновлен")>=0)r="🆕 Что нового в v"+GAME_VERSION+":\n\n🆕 База данных пользователей\n🏆 Достижения сохраняются\n💬 Анализ пожеланий из чата\n📊 Лидерборд из БД\n🤖 Telegram бот уведомления\n🔄 Автодеплой каждые 10 мин\n🛡️ Защита от баgos";
   else if(L.indexOf("статус")>=0||L.indexOf("инфо")>=0||L.indexOf("info")>=0)r="📊 Текущий статус:\n\n👤 Игрок: "+curUser+"\n💎 Кредиты: "+fmt(S.c)+"\n🌀 Рейм: "+S.rl+"\n⚡ Тап/сек: "+fmt(getCPS())+"\n👹 Боссов убито: "+S.bs+"\n🏆 Достижений: "+S.ac.length+"/"+ACHS.length+"\n💎 Гемы: "+S.g;
   else if(L.indexOf("спасиб")>=0||L.indexOf("благодар")>=0)r="Рад помочь! 😊🦉\n\nЕсли хочешь поддержать игру — вкладка 'Поддержка' в меню. Любая сумма мотивирует развивать игру! 💖";
   else if(L.indexOf("престиж")>=0)r="🌟 Престиж — это сброс прогресса за очки.\n\nОчки = sqrt(всего кредитов / 1M) + рейм * 0.5\n\nБонусы за престиж:\n• x1.1 к тапу (1 престиж)\n• x1.2 к доходу (3 престиж)\n• +10% гемов (5 престиж)\n• x1.5 ко всему (10 престиж)\n• x2 ко всему (25 престиж)";
   else if(L.indexOf("помощь")>=0||L.indexOf("команд")>=0||L.indexOf("help")>=0)r="📋 Список команд OWL:\n\n🎮 Игровые:\n• Дай кредитов — бонус 💰\n• Дай гемов — бонус 💎\n• Повысь уровень — бонус 🌀\n• Добавь босса — новый босс 👹\n• Добавь улучшение — новое улучшение ⚡\n• Исправь баги — бонус 🐛\n\nℹ️ Информация:\n• Статус — твои данные\n• Что нового? — обновления\n• Престиж — как работает";
+  else if(L.indexOf("шутка")>=0||L.indexOf("joke")>=0){var jokes=["Почему программисты путают Хэллоуин и Рождество? Потому что Oct 31 == Dec 25!","Я бы рассказал вам шутку про UDP, но вы могли ее не получить.","Почему Java-разработчики носят очки? Потому что они не видят sharp!"];var j=jokes[Math.floor(Math.random()*jokes.length)];r="😄 Шутка дня:\n"+j+"\n\nБонус: +50💎 +5💎гемов";S.c+=50;S.g+=5;}
   else{r="✅ Задача принята!\n\nБонус: +300💎 +10💎гемов\n\nБаланс: "+fmt(S.c)+"💎 | Гемы: "+S.g}
   S.c+=300;S.g+=10;draw();
   addChatMsg("🦉 OWL",r);
@@ -829,6 +856,8 @@ window.addEventListener("beforeinstallprompt",function(e){
 
 // === VERSION & UPDATE NOTIFICATIONS ===
 var GAME_VERSION="9.5";
+document.title += " v" + GAME_VERSION;
+document.getElementById('version-text').textContent = 'Футуристическая Idle Игра v' + GAME_VERSION;
 var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
 if(LAST_SEEN_VERSION!==GAME_VERSION){
   localStorage.setItem("cr_lastVersion",GAME_VERSION);
@@ -837,38 +866,5 @@ if(LAST_SEEN_VERSION!==GAME_VERSION){
     owlUpdateNotify(GAME_VERSION,updateNotes);
   },2000);
 }
-=======
-var curUser=null,users={};
-try{users=JSON.parse(localStorage.getItem('cr_users')||'{}');}catch(e){};
-window.saveUsers=function(){localStorage.setItem('cr_users',JSON.stringify(users));};
-window.h=function(p){var hv=0;for(var i=0;i<p.length;i++){hv=((hv<<5)-hv)+p.charCodeAt(i);hv|=0;}return hv.toString(36);};
-window.id=function(s){return document.getElementById(s);};
-window.showScreen=function(s){
-  var login=document.getElementById('login-scr');
-  var game=document.getElementById('game-scr');
-  if(s==='login'){
-    login.classList.remove('hide');
-    game.classList.add('hide');
-  }else if(s==='game'){
-    login.classList.add('hide');
-    game.classList.remove('hide');
-  }
-};
-window.amsg=function(m,t){var e=document.getElementById('amsg');e.textContent=m;e.className='msg '+(t||'');};
-document.getElementById('alogin').onclick=function(){
-  var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
-  if(!u||!p){window.amsg('Заполни все поля','err');return;}
-  if(!users[u]){window.amsg('Пользователь не найден','err');return;}
-  if(users[u].pass!==window.h(p)){window.amsg('Неверный пароль','err');return;}
-  curUser=u;users[u].lastLogin=Date.now();window.saveUsers();window.showScreen('game');document.getElementById('uname').textContent = curUser;window.amsg('','');
-};
-document.getElementById('areg').onclick=function(){
-  var u=document.getElementById('au').value.trim(),p=document.getElementById('ap').value;
-  if(!u||!p){window.amsg('Заполни все поля','err');return;}
-  if(u.length<3){window.amsg('Минимум 3 символа','err');return;}
-  if(p.length<4){window.amsg('Минимум 4 символа пароля','err');return;}
-  if(users[u]){window.amsg('Имя занято','err');return;}
-  users[u]={pass:window.h(p),created:Date.now(),lastLogin:Date.now()};window.saveUsers();
-  curUser=u;window.showScreen('game');window.amsg('Аккаунт создан!','ok');
-};
->>>>>>> 0a9d9fa44a127560015f0e15acc1cd5f29f1c3b3
+
+
