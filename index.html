@@ -1091,7 +1091,7 @@ function renderLeaderboard(sortBy){
   }else{
     for(var i=0;i<Math.min(lbData.length,50);i++){
       var r=lbData[i],isMe=r.name===curUser;
-      var rankClass=i<3?" gold":i===1?" silver":i===2?" bronze":"";
+      var rankClass=i===0?" gold":i===1?" silver":i===2?" bronze":"";
       var medals=["🥇","🥈","🥉"];
       var rank=i<3?medals[i]:""+(i+1);
       var val;
@@ -1101,7 +1101,7 @@ function renderLeaderboard(sortBy){
       else if(key==="prestige")val=r.prestige+" ⭐";
       else val=r.achievements+" 🏆";
       list.innerHTML+='<div class="lb-row'+(isMe?" me":"")+'">'+
-        '<span class="lb-rank'+(i<3?" "+lbTab:"")+'">'+rank+'</span>'+
+        '<span class="lb-rank'+rankClass+'">'+rank+'</span>'+
         '<span class="lb-name">'+r.name+(isMe?" (ты)":"")+'</span>'+
         '<span class="lb-val">'+val+'</span>'+
       '</div>';
