@@ -510,38 +510,7 @@ function dbAchievement(achId,achName){
   dbReq("/achievement","POST",{user_id:dbUserId,achievement_id:achId,achievement_name:achName});
 }
 
-function tap() {
-  S.cl++;
-  S.c += 1;
-  draw();
-  var btn = id('tpbtn');
-  if (btn) {
-    addClass(btn, 'pressing');
-    setTimeout(function() { remClass(btn, 'pressing'); }, 150);
-  }
-  // Spawn tap particle
-  var parts = id('parts');
-  if (parts) {
-    var p = document.createElement('div');
-    var types = ['pt-coin', 'pt-gem', 'pt-bolt'];
-    var type = types[Math.floor(Math.random() * types.length)];
-    p.className = 'pt ' + type;
-    var btnRect = btn.getBoundingClientRect();
-    var x = btnRect.left + btnRect.width / 2;
-    var y = btnRect.top + btnRect.height / 2;
-    // random offset
-    var offset = 20 * (Math.random() - 0.5); // -10 to 10
-    p.style.left = (x + offset) + 'px';
-    p.style.top = (y + offset) + 'px';
-    parts.appendChild(p);
-    // remove after animation ends (0.8s)
-    setTimeout(function() {
-      if (p.parentNode) {
-        p.parentNode.removeChild(p);
-      }
-    }, 800);
-  }
-}
+
 
 function dbChat(message,isDev){
   if(!curUser)return;
@@ -1091,7 +1060,7 @@ function renderLeaderboard(sortBy){
   }else{
     for(var i=0;i<Math.min(lbData.length,50);i++){
       var r=lbData[i],isMe=r.name===curUser;
-      var rankClass=i<3?" gold":i===1?" silver":i===2?" bronze":"";
+      var rankClass=i===0?" gold":i===1?" silver":i===2?" bronze":"";
       var medals=["🥇","🥈","🥉"];
       var rank=i<3?medals[i]:""+(i+1);
       var val;
@@ -1101,7 +1070,7 @@ function renderLeaderboard(sortBy){
       else if(key==="prestige")val=r.prestige+" ⭐";
       else val=r.achievements+" 🏆";
       list.innerHTML+='<div class="lb-row'+(isMe?" me":"")+'">'+
-        '<span class="lb-rank'+(i<3?" "+lbTab:"")+'">'+rank+'</span>'+
+        '<span class="lb-rank'+rankClass+'">'+rank+'</span>'+
         '<span class="lb-name">'+r.name+(isMe?" (ты)":"")+'</span>'+
         '<span class="lb-val">'+val+'</span>'+
       '</div>';
@@ -1181,7 +1150,7 @@ function owlRespond(text){
   else if(L.indexOf("уровень")>=0||L.indexOf("рейм")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 Рейм повышен на "+lv+"!\nУровень: "+S.rl+"\nДо следующего: "+fmt(S.rg-S.rp)+"💎"}
   else if(L.indexOf("гем")>=0){var g=20+Math.floor(Math.random()*80);S.g+=g;r="💎 Начислено "+g+" гемов!\nБаланс: "+S.g+"💎"}
   else if(L.indexOf("баг")>=0||L.indexOf("ошибк")>=0){S.c+=1e3;S.g+=50;S.cp+=5;r="🐛 Баги исправлены!\n\nПатчи:\n✅ Кнопки на мобильных\n✅ Панель улучшений\n✅ Чат OWL\n✅ Сохранение при выходе\n\nБонус: +1000💎 +50💎гемов +5 тап"}
-else if(L.indexOf("что нов")>=0||L.indexOf("новост")>=0||L.indexOf("обновлен")>=0)r="🆕 Что нового в v"+GAME_VERSION+":\\n\\n🆕 База данных пользователей\\n🏆 Достижения сохраняются\\n💬 Анализ пожеланий из чата\\n📊 Лидерборд из БД\\n🤖 Telegram бот уведомления\\n🔄 Автодеплой каждые 10 мин\\n🛡️ Защита от багов";
+else if(L.indexOf("что нов")>=0||L.indexOf("новост")>=0||L.indexOf("обновлен")>=0)r="🆕 Что нового в v"+GAME_VERSION+":\n\n🆕 База данных пользователей\n🏆 Достижения сохраняются\n💬 Анализ пожеланий из чата\n📊 Лидерборд из БД\n🤖 Telegram бот уведомления\n🔄 Автодеплой каждые 10 мин\n🛡️ Защита от баgos";
   else if(L.indexOf("статус")>=0||L.indexOf("инфо")>=0||L.indexOf("info")>=0)r="📊 Текущий статус:\n\n👤 Игрок: "+curUser+"\n💎 Кредиты: "+fmt(S.c)+"\n🌀 Рейм: "+S.rl+"\n⚡ Тап/сек: "+fmt(getCPS())+"\n👹 Боссов убито: "+S.bs+"\n🏆 Достижений: "+S.ac.length+"/"+ACHS.length+"\n💎 Гемы: "+S.g;
   else if(L.indexOf("спасиб")>=0||L.indexOf("благодар")>=0)r="Рад помочь! 😊🦉\n\nЕсли хочешь поддержать игру — вкладка 'Поддержка' в меню. Любая сумма мотивирует развивать игру! 💖";
   else if(L.indexOf("престиж")>=0)r="🌟 Престиж — это сброс прогресса за очки.\n\nОчки = sqrt(всего кредитов / 1M) + рейм * 0.5\n\nБонусы за престиж:\n• x1.1 к тапу (1 престиж)\n• x1.2 к доходу (3 престиж)\n• +10% гемов (5 престиж)\n• x1.5 ко всему (10 престиж)\n• x2 ко всему (25 престиж)";
