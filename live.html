@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="theme-color" content="#050510">
+
+<meta name="apple-mobile-web-app-title" content="Cyber Realm">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta name="description" content="Футуристическая Idle Игра — тапай, улучшай, побеждай боссов!">
+
+<link rel="manifest" href="./manifest.json">
+
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+
+<title>Cyber Realm Idle v9.5</title>
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html{height:100%;overflow:hidden}
+
+body{background:#050510;color:#0ff;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;height:100%;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+
+
+
+/* === ANIMATED BACKGROUND === */
+
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:
+
+  radial-gradient(ellipse at 20% 50%,rgba(0,255,255,.04) 0%,transparent 50%),
+
+  radial-gradient(ellipse at 80% 20%,rgba(170,0,255,.03) 0%,transparent 50%),
+
+  radial-gradient(ellipse at 50% 80%,rgba(0,255,100,.02) 0%,transparent 50%);
+
+  animation:bgShift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+
+@keyframes bgShift{0%{opacity:.5;transform:scale(1)}100%{opacity:1;transform:scale(1.1)}}
+
+
+
+/* === FLOATING PARTICLES === */
+
+#bg-parts{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden}
+
+.bg-p{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+
+@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.6}90%{opacity:.6}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+
+
+
+/* === LOGIN SCREEN === */
+
+#login-scr{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,255,.08),transparent 70%);position:relative;z-index:2}
+
+#login-scr h1{font-size:2em;letter-spacing:4px;text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3);margin-bottom:8px;animation:glow 2s ease-in-out infinite alternate}
+
+@keyframes glow{0%{text-shadow:0 0 20px #0ff,0 0 40px rgba(0,255,255,.3)}100%{text-shadow:0 0 30px #0ff,0 0 60px rgba(0,255,255,.5),0 0 80px rgba(0,255,255,.2)}}
+
+#login-scr .sub{color:#0f0;font-size:.9em;margin-bottom:20px;animation:fadeIn 1s ease-out}
+
+@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+.fld{width:100%;max-width:320px}
+
+.fld input{width:100%;padding:14px;margin-bottom:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:8px;color:#0ff;font-size:16px;outline:none;transition:all .3s}
+
+.fld input:focus{border-color:#0ff;box-shadow:0 0 12px rgba(0,255,255,.2),inset 0 0 8px rgba(0,255,255,.05);transform:scale(1.02)}
+
+.fld input::placeholder{color:rgba(0,255,255,.3)}
+
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:8px;color:#000;font-size:16px;font-weight:bold;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+
+.btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%);animation:shimmer 3s infinite}
+
+@keyframes shimmer{0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(100%) rotate(45deg)}}
+
+.btn:active{transform:scale(.96);box-shadow:0 0 20px rgba(0,255,255,.4)}
+
+.btn2{width:100%;padding:14px;background:transparent;border:1px solid rgba(0,255,255,.3);color:#0ff;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:4px;transition:all .2s}
+
+.btn2:active{transform:scale(.96);background:rgba(0,255,255,.1)}
+
+.msg{text-align:center;font-size:12px;margin-top:10px;min-height:16px;transition:all .3s}
+
+.msg.ok{color:#0f0;text-shadow:0 0 8px #0f0}
+
+.msg.err{color:#f44;text-shadow:0 0 8px #f44;animation:shake .3s}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+
+
+/* === GAME SCREEN === */
+
+#game-scr{display:none;flex-direction:column;height:100%;position:relative;z-index:2}
+
+header{background:linear-gradient(180deg,#0a1628,#0d1025);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(0,255,255,.25);flex-shrink:0;position:relative}
+
+header::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#0ff,transparent);animation:headerGlow 3s ease-in-out infinite}
+
+@keyframes headerGlow{0%,100%{opacity:.5}50%{opacity:1}}
+
+header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
+
+.uinfo{display:flex;align-items:center;gap:8px;font-size:11px}
+
+.uinfo .nm{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
+
+.lout{background:none;border:1px solid rgba(255,0,68,.3);color:#f44;padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;transition:all .2s}
+
+.lout:active{background:rgba(255,0,68,.2);transform:scale(.95)}
+
+
+
+/* === RESOURCES BAR === */
+
+.res{display:flex;justify-content:space-around;padding:6px;background:#0d1025;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0;font-size:12px;position:relative}
+
+.res::after{content:'';position:absolute;bottom:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.2),transparent)}
+
+.r{display:flex;align-items:center;gap:3px;transition:all .3s}
+
+.r:hover{transform:scale(1.05)}
+
+.v{color:#ffd700;font-weight:bold;text-shadow:0 0 4px rgba(255,215,0,.3);transition:all .3s}
+
+.v.pop{animation:popNum .3s ease-out}
+
+@keyframes popNum{0%{transform:scale(1.3);color:#fff}100%{transform:scale(1);color:#ffd700}}
+
+
+
+/* === GAME AREA === */
+
+#area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
+
+#tapz{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;min-height:0}
+
+
+
+/* === PARTICLES === */
+
+#parts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10}
+
+.pt{position:absolute;font-size:14px;font-weight:bold;animation:fly .8s ease-out forwards;pointer-events:none;text-shadow:0 0 8px currentColor}
+
+@keyframes fly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
+
+.pt-coin{color:#ffd700}
+
+.pt-gem{color:#f0f}
+
+.pt-bolt{color:#ff0}
+
+
+
+/* === TAP BUTTON === */
+
+#tpbtn{width:150px;height:150px;flex-shrink:0;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2),inset 0 0 30px rgba(0,255,255,.05);font-family:inherit;touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden}
+
+#tpbtn::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,#0ff,transparent);animation:rotateBorder 4s linear infinite;opacity:0;transition:opacity .3s}
+
+#tpbtn:hover::before{opacity:1}
+
+#tpbtn::after{content:'';position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.15),#0a0a2a 70%)}
+
+#tpbtn span{position:relative;z-index:1}
+
+@keyframes rotateBorder{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+#tpbtn:active{transform:scale(.9)!important;box-shadow:0 0 40px rgba(0,255,255,.5),inset 0 0 20px rgba(0,255,255,.1)}
+
+#tpbtn.pressing{animation:tapPulse .15s ease-out}
+
+@keyframes tapPulse{0%{box-shadow:0 0 20px rgba(0,255,255,.2)}50%{box-shadow:0 0 50px rgba(0,255,255,.6)}100%{box-shadow:0 0 20px rgba(0,255,255,.2)}}
+
+
+
+#tpinfo{font-size:13px;color:#0f0;margin:8px 0;min-height:18px;text-align:center;text-shadow:0 0 6px rgba(0,255,0,.3)}
+
+#tpinfo.bonus{color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,.5);animation:bonusPop .4s ease-out}
+
+@keyframes bonusPop{0%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+#tcps{font-size:10px;color:#666;text-align:center}
+
+
+
+/* === PROGRESS BAR === */
+
+#prog{width:200px;margin:8px auto}
+
+.pb-bg{background:#1a1a2e;border-radius:4px;height:6px;overflow:hidden;position:relative}
+
+.pb-bg::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.1) 50%,transparent 100%);animation:progShine 2s infinite}
+
+@keyframes progShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.pb-fi{height:100%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:4px;width:0%;transition:.3s;box-shadow:0 0 8px rgba(0,255,255,.3)}
+
+.pb-t{text-align:center;font-size:10px;color:#666;margin-top:3px}
+
+
+
+/* === FOOTER === */
+
+footer{display:flex;background:#0d1025;border-top:1px solid rgba(0,255,255,.1);flex-shrink:0;position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+footer::before{content:'';position:absolute;top:0;left:10%;width:80%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent)}
+
+footer .tab{flex:0 0 auto;text-align:center;padding:10px 6px;font-size:10px;cursor:pointer;color:#555;transition:all .2s;position:relative;min-width:52px}
+
+footer .tab:active{transform:scale(.92);background:rgba(0,255,255,.05)}
+
+footer .tab.on{color:#0ff;text-shadow:0 0 5px #0ff}
+
+footer .tab.on::after{content:'';position:absolute;top:0;left:20%;width:60%;height:2px;background:#0ff;box-shadow:0 0 8px #0ff}
+
+footer .tab .tab-icon{display:block;font-size:16px;margin-bottom:2px;transition:transform .2s}
+
+footer .tab:active .tab-icon{transform:scale(1.2)}
+
+
+
+/* === PANEL === */
+
+#panel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:50;display:none;flex-direction:column;animation:panelIn .2s ease-out}
+
+@keyframes panelIn{0%{opacity:0}100%{opacity:1}}
+
+#ph{display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(0,255,255,.1);background:#0d1025;min-height:40px}
+
+#ph h2{flex:1;font-size:13px;letter-spacing:2px}
+
+#ph button{background:none;border:1px solid rgba(0,255,255,.3);color:#0ff;padding:5px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s}
+
+#ph button:active{background:rgba(0,255,255,.1);transform:scale(.95)}
+
+#pc{flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+
+
+
+/* === CARDS === */
+
+.card{background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.15);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+
+.card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,255,.05),transparent);transition:left .4s}
+
+.card:active::before{left:100%}
+
+.card:active{transform:scale(.97);background:rgba(0,255,255,.08)}
+
+.card .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+
+.card .nm{color:#0ff;font-weight:bold;font-size:13px}
+
+.card .lv{color:#ffd700;font-size:11px}
+
+.card .d{color:#777;font-size:11px;margin-bottom:3px}
+
+.card .c{color:#ffd700;font-size:12px}
+
+.card.can{border-color:rgba(0,255,255,.4);box-shadow:0 0 8px rgba(0,255,255,.1)}
+
+.card.can:active{box-shadow:0 0 15px rgba(0,255,255,.2)}
+
+.card.done{opacity:.35;cursor:default}
+
+
+
+/* === BOSS === */
+
+.boss{background:linear-gradient(135deg,rgba(255,0,68,.08),rgba(255,100,0,.06));border:1px solid rgba(255,0,68,.3);border-radius:8px;padding:10px;margin-bottom:6px;position:relative;overflow:hidden}
+
+.boss::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 50% 50%,rgba(255,0,68,.05),transparent 70%);animation:bossPulse 2s ease-in-out infinite}
+
+@keyframes bossPulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+.boss .bn{color:#f44;font-weight:bold;font-size:13px;margin-bottom:3px;text-shadow:0 0 8px rgba(255,0,68,.5)}
+
+.boss .hp{background:#1a1a2e;border-radius:3px;height:6px;margin:3px 0;overflow:hidden}
+
+.boss .hp-f{height:100%;background:linear-gradient(90deg,#f44,#ff4400);border-radius:3px;transition:.2s;box-shadow:0 0 6px rgba(255,0,68,.4)}
+
+.boss .st{display:flex;justify-content:space-between;font-size:9px;color:#777}
+
+.boss .rw{color:#ffd700;font-size:10px;margin-top:3px}
+
+.atk-btn{width:100%;padding:10px;margin-top:6px;background:linear-gradient(135deg,#f44,#ff4400);border:none;border-radius:4px;color:#fff;font-weight:bold;font-size:13px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+
+.atk-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:shimmer 2s infinite}
+
+.atk-btn:active{transform:scale(.95);box-shadow:0 0 20px rgba(255,0,68,.5)}
+
+
+
+/* === ACHIEVEMENTS === */
+
+.ach{display:flex;align-items:center;gap:6px;padding:6px;background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.08);border-radius:4px;margin-bottom:3px;transition:all .3s}
+
+.ach.done{border-color:#ffd700;background:rgba(255,215,0,.05);box-shadow:0 0 8px rgba(255,215,0,.1)}
+
+.ach.done .ic{animation:achPop .5s ease-out}
+
+@keyframes achPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+.ach .ic{font-size:18px;min-width:24px;text-align:center}
+
+.ach .inf{flex:1}
+
+.ach .an{font-size:11px;color:#0ff}
+
+.ach .ar{color:#ffd700;font-size:9px}
+
+
+
+/* === STATS === */
+
+.strow{display:flex;justify-content:space-between;padding:6px 3px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
+
+.strow:active{background:rgba(0,255,255,.03)}
+
+.strow .sl{color:#777}
+
+.strow .sv{color:#0ff;font-weight:bold}
+
+
+
+.danger{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3);color:#f44;padding:6px;border-radius:4px;font-size:11px;cursor:pointer;margin-top:6px;width:100%;transition:all .2s}
+
+.danger:active{background:rgba(255,0,68,.2);transform:scale(.97)}
+
+
+
+/* === CHAT === */
+
+#chat-scr{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.97);backdrop-filter:blur(6px);z-index:100;display:none;flex-direction:column;animation:chatIn .25s ease-out}
+
+@keyframes chatIn{0%{opacity:0;transform:scale(.98)}100%{opacity:1;transform:scale(1)}}
+
+#chtabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);flex-shrink:0}
+
+.chtab{flex:1;text-align:center;padding:8px;font-size:11px;cursor:pointer;color:#666;border-bottom:2px solid transparent;transition:all .2s}
+
+.chtab:active{background:rgba(0,255,255,.05)}
+
+.chtab.on{color:#0ff;border-color:#0ff;text-shadow:0 0 5px #0ff}
+
+#chmsgs{flex:1;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
+
+.chmsg{margin-bottom:6px;padding:8px;background:rgba(0,255,255,.03);border-radius:6px;border-left:2px solid #0ff;animation:msgIn .3s ease-out;transition:all .2s}
+
+@keyframes msgIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+.chmsg .auth{color:#ffd700;font-weight:bold;font-size:10px}
+
+.chmsg .txt{color:#ccc;font-size:12px;margin-top:2px;word-break:break-word;white-space:pre-wrap}
+
+.chmsg .time{color:#555;font-size:9px;margin-top:2px;text-align:right}
+
+.chmsg.me{border-left-color:#ffd700;background:rgba(255,215,0,.05)}
+
+.chmsg.owl{border-left-color:#a0f;background:rgba(170,0,255,.05)}
+
+.chmsg.owl .auth{color:#a0f;text-shadow:0 0 4px rgba(170,0,255,.5)}
+
+#chowli{font-size:10px;color:rgba(170,0,255,.7);text-align:center;padding:4px;display:none;background:rgba(170,0,255,.05);animation:pulse 1s ease-in-out infinite}
+
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+#chinp{display:flex;padding:8px;border-top:1px solid rgba(0,255,255,.1);gap:6px;flex-shrink:0}
+
+#chinp input{flex:1;padding:10px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:4px;color:#0ff;font-size:13px;outline:none;transition:all .2s}
+
+#chinp input:focus{border-color:#0ff;box-shadow:0 0 8px rgba(0,255,255,.15)}
+
+#chinp button{padding:10px 14px;background:linear-gradient(135deg,#0ff,#4af);border:none;border-radius:4px;color:#000;font-weight:bold;font-size:12px;cursor:pointer;transition:all .2s}
+
+#chinp button:active{transform:scale(.93)}
+
+
+
+/* === BOSS FIGHT === */
+
+#bfight{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,.95);backdrop-filter:blur(4px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:bfadeIn .3s ease-out}
+
+@keyframes bfadeIn{0%{opacity:0}100%{opacity:1}}
+
+#bfs{font-size:64px;animation:bounce 1s ease-in-out infinite;filter:drop-shadow(0 0 15px rgba(255,0,68,.5))}
+
+@keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.05)}}
+
+#bfn{color:#f44;font-size:18px;font-weight:bold;text-shadow:0 0 12px #f44;margin:10px 0;animation:bossNameGlow 1.5s ease-in-out infinite alternate}
+
+@keyframes bossNameGlow{0%{text-shadow:0 0 12px #f44}100%{text-shadow:0 0 20px #f44,0 0 30px rgba(255,0,68,.3)}}
+
+.fdmg{position:absolute;font-size:20px;font-weight:bold;color:#f44;animation:fdmg .8s ease-out forwards;pointer-events:none;z-index:201;text-shadow:0 0 8px #f44}
+
+@keyframes fdmg{0%{opacity:1;transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(.8)}}
+
+
+
+/* === OVERLAY === */
+
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:150;padding:20px}
+
+.overlay.show{display:flex}
+
+.overlay-box{background:#0d1025;border:1px solid #0ff;border-radius:12px;padding:15px;max-width:320px;width:100%;text-align:center;animation:overlayIn .3s ease-out;box-shadow:0 0 30px rgba(0,255,255,.1)}
+
+@keyframes overlayIn{0%{opacity:0;transform:scale(.9) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
+.overlay-box h3{color:#0ff;font-size:14px;margin-bottom:8px;text-shadow:0 0 6px rgba(0,255,255,.3)}
+
+.overlay-box p{color:#888;font-size:12px;margin-bottom:15px;line-height:1.5}
+
+.overlay-box button{background:linear-gradient(135deg,#0ff,#4af);border:none;color:#000;padding:6px 15px;border-radius:4px;font-size:11px;font-weight:bold;cursor:pointer;margin:3px;transition:all .2s}
+
+.overlay-box button:active{transform:scale(.93)}
+
+.overlay-box button.cancel{background:transparent;border:1px solid rgba(255,0,68,.3);color:#f44}
+
+
+
+/* === ACHIEVEMENT POPUP === */
+
+#ach-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0d1025,#1a1a3e);border:2px solid #ffd700;border-radius:12px;padding:15px 20px;text-align:center;z-index:300;transition:all .4s cubic-bezier(.68,-.55,.27,1.55);box-shadow:0 0 40px rgba(255,215,0,.3);pointer-events:none;opacity:0}
+
+#ach-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+
+#ach-popup .ach-icon{font-size:32px;margin-bottom:5px}
+
+#ach-popup .ach-title{color:#ffd700;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(255,215,0,.5)}
+
+#ach-popup .ach-desc{color:#888;font-size:11px;margin-top:3px}
+
+
+
+/* === COMBO DISPLAY === */
+
+#combo-display{position:absolute;top:10%;left:50%;transform:translateX(-50%);font-size:24px;font-weight:bold;color:#ffd700;text-shadow:0 0 15px rgba(255,215,0,.6);pointer-events:none;z-index:15;opacity:0;transition:all .3s}
+
+#combo-display.show{opacity:1;animation:comboShake .3s ease-out}
+
+@keyframes comboShake{0%{transform:translateX(-50%) scale(1.3)}100%{transform:translateX(-50%) scale(1)}}
+
+
+
+/* === LEADERBOARD === */
+
+#lb-tabs{display:flex;border-bottom:1px solid rgba(0,255,255,.1);margin-bottom:8px}
+
+.lb-tab{flex:1;text-align:center;padding:6px;font-size:10px;cursor:pointer;color:#555;border-bottom:2px solid transparent;transition:all .2s}
+
+.lb-tab.on{color:#ffd700;border-color:#ffd700;text-shadow:0 0 5px rgba(255,215,0,.3)}
+
+.lb-row{display:flex;align-items:center;padding:6px 4px;border-bottom:1px solid rgba(0,255,255,.05);font-size:11px;transition:background .2s}
+
+.lb-row:active{background:rgba(0,255,255,.03)}
+
+.lb-row.me{background:rgba(255,215,0,.05);border-left:2px solid #ffd700}
+
+.lb-rank{min-width:28px;font-weight:bold;color:#ffd700;text-align:center}
+
+.lb-rank.gold{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5)}
+
+.lb-rank.silver{color:#c0c0c0}
+
+.lb-rank.bronze{color:#cd7f32}
+
+.lb-name{flex:1;color:#0ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 6px}
+
+.lb-val{color:#ffd700;font-weight:bold;text-align:right;min-width:60px}
+
+.lb-empty{text-align:center;color:#555;padding:20px;font-size:11px}
+
+.lb-refresh{text-align:center;padding:6px;color:#555;font-size:10px;cursor:pointer}
+
+.lb-refresh:active{color:#0ff}
+
+.lb-sync-status{text-align:center;font-size:9px;color:#555;padding:4px}
+
+.lb-sync-status.syncing{color:#ffd700}
+
+.lb-sync-status.ok{color:#0f0}
+
+.lb-sync-status.err{color:#f44}
+
+
+
+/* === RESPONSIVE === */
+
+@media(max-width:360px){
+
+  #login-scr h1{font-size:1.6em;letter-spacing:2px}
+
+  #tpbtn{width:120px;height:120px;font-size:14px}
+
+  header h1{font-size:12px;letter-spacing:1px}
+
+  .res{font-size:10px;padding:4px}
+
+  footer .tab{padding:8px 1px;font-size:8px}
+
+  footer .tab .tab-icon{font-size:13px}
+
+  .fld input{font-size:16px;padding:12px}
+
+  .btn,.btn2{font-size:14px;padding:12px}
+
+}
+
+@media(min-width:361px) and (max-width:480px){
+
+  #tpbtn{width:130px;height:130px}
+
+  header h1{font-size:12px;letter-spacing:2px}
+
+  header{padding:6px 8px}
+
+  .res{font-size:10px;padding:4px}
+
+  footer .tab{padding:8px 2px;font-size:10px}
+
+  .fld input{font-size:16px;padding:12px}
+
+  .btn,.btn2{font-size:15px;padding:12px}
+
+}
+
+@media(min-width:481px) and (max-width:799px){
+
+  #tpbtn{width:160px;height:160px}
+
+  .res{font-size:13px}
+
+}
+
+@media(min-width:800px){
+
+  #tpbtn{width:180px;height:180px;font-size:18px}
+
+  .res{font-size:14px;padding:8px}
+
+  header{padding:10px 20px}
+
+  header h1{font-size:16px}
+
+  footer .tab{padding:12px 6px;font-size:12px}
+
+  footer .tab .tab-icon{font-size:18px}
+
+  #prog{width:260px}
+
+  .card{padding:12px}
+
+  .card .nm{font-size:14px}
+
+}
+
+@media(min-width:1200px){
+
+  #tpbtn{width:200px;height:200px}
+
+  .fld{max-width:400px}
+
+}
+
+
+
+/* === SCROLLBAR === */
+
+::-webkit-scrollbar{width:4px}
+
+::-webkit-scrollbar-track{background:transparent}
+
+::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2);border-radius:2px}
+
+::-webkit-scrollbar-thumb:hover{background:rgba(0,255,255,.4)}
+
+
+
+/* === PWA STANDALONE === */
+
+@media all and (display-mode:standalone){
+
+  body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<!-- Background particles -->
+
+<div id="bg-parts"></div>
+
+
+
+<!-- Achievement popup -->
+
+<div id="ach-popup"><div class="ach-icon">🏆</div><div class="ach-title"></div><div class="ach-desc"></div></div>
+
+
+
+<!-- Combo display -->
+
+<div id="combo-display"></div>
+
+
+
+<div id="login-scr">
+
+  <h1>⚡ CYBER REALM ⚡</h1>
+
+  <div class="sub">Футуристическая Idle Игра v9.5</div>
+
+  <div class="fld">
+
+    <input type="text" id="au" placeholder="Имя пользователя" maxlength="20" autocomplete="off">
+
+    <input type="password" id="ap" placeholder="Пароль" maxlength="30" autocomplete="off">
+
+    <div class="msg" id="amsg"></div>
+
+    <button class="btn" id="alogin">Войти</button>
+
+    <button class="btn2" id="areg">Регистрация</button>
+
+  </div>
+
+</div>
+
+
+
+<div id="game-scr">
+
+  <header>
+
+    <h1>⚡ CYBER REALM ⚡</h1>
+
+    <div class="uinfo"><span class="nm" id="uname"></span><button class="lout" id="lout">Выйти</button></div>
+
+    <button id="soundBtn" class="lout" style="margin-left:10px;" title="Toggle sound">🔊</button>
+
+  </header>
+
+  <div class="res">
+
+    <span class="r">💎 <span class="v" id="rc">0</span><span class="rt" id="rcR"></span></span>
+
+    <span class="r">⚡ <span class="v" id="rn">0</span></span>
+
+    <span class="r">🧬 <span class="v" id="rd">0</span></span>
+
+    <span class="r">🌀 <span class="v" id="re">0</span></span>
+
+  </div>
+
+  <div id="area">
+
+    <div id="tapz">
+
+      <div id="parts"></div>
+
+      <button id="tpbtn"><span>НАЖМИ</span></button>
+
+      <div id="tpinfo"></div>
+
+ тапов: <span id=\"tapCount\">0</span>
+
+      <div id="event-bar" style="display:none;font-size:10px;color:#ffd700;text-align:center;margin:4px 0;text-shadow:0 0 6px rgba(255,215,0,.5);"></div>
+
+      <div id="prog"><div class="pb-bg"><div class="pb-fi" id="prog-fi"></div></div><div class="pb-t" id="prog-t">Рейм ур.1</div></div>
+
+    </div>
+
+  </div>
+
+  <footer>
+
+    <div class="tab on" id="tgame"><span class="tab-icon">🎮</span><div>Игра</div></div>
+
+    <div class="tab" id="tup"><span class="tab-icon">⬆️</span><div>Улучш.</div></div>
+
+    <div class="tab" id="tbo"><span class="tab-icon">👹</span><div>Боссы</div></div>
+
+    <div class="tab" id="tch"><span class="tab-icon">💬</span><div>Чат</div></div>
+
+    <div class="tab" id="tdt"><span class="tab-icon">👑</span><div>Премиум</div></div>
+
+    <div class="tab" id="tst"><span class="tab-icon">📊</span><div>Стат.</div></div>
+
+    <div class="tab" id="tlb"><span class="tab-icon">🏆</span><div>Топ</div></div>
+
+    <div class="tab" id="tqu"><span class="tab-icon">🎯</span><div>Квесты</div></div>
+
+    <div class="tab" id="tcf"><span class="tab-icon">🔧</span><div>Крафт</div></div>
+
+  </footer>
+
+</div>
+
+
+
+<div id="panel">
+
+  <div id="ph"><h2 id="panT">Панель</h2><button id="pcan">✕</button></div>
+
+  <div id="pc"></div>
+
+</div>
+
+
+
+<div id="chat-scr">
+
+  <header><h1>💬 Чат</h1><button class="lout" id="cChat">✕</button></header>
+
+  <div id="chtabs">
+
+    <div class="chtab on" data-ct="g">🌍 Общий</div>
+
+    <div class="chtab" data-ct="o">🦉 OWL</div>
+
+  </div>
+
+  <div id="chmsgs"></div>
+
+  <div id="chowli">🦉 OWL думает...</div>
+
+  <div id="chinp"><input type="text" id="chat-in" placeholder="Сообщение..." maxlength="200"><button id="chat-send">→</button></div>
+
+</div>
+
+
+
+<div id="bfight">
+
+  <div id="bfs"></div>
+
+  <div id="bfn">Босс</div>
+
+  <div class="boss hp"><div class="hp-f" id="bf-hp"></div></div>
+
+  <div class="boss st"><span id="bf-text">HP: 100/100</span></div>
+
+  <button class="atk-btn" id="bf-atk">⚔️ АТАКОВАТЬ</button>
+
+</div>
+
+
+
+<div class="overlay" id="ov">
+
+  <div class="overlay-box"><h3 id="ovt"></h3><p id="ovp"></p><div id="ovb"></div></div>
+
+</div>
+
+
+
+<script>
+"use strict";
+var curUser=null,users={};
+try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
+function saveUsers(){localStorage.setItem("cr_users",JSON.stringify(users))}
+function hv(p){var h=0;for(var i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0}return h.toString(36)}
+function id(s){return document.getElementById(s)}
+function ga(e,a){return e?e.getAttribute(a):null}
+function hasClass(e,c){return e&&e.className&&e.className.indexOf(c)>=0}
+function addClass(e,c){if(e&&!hasClass(e,c))e.className=e.className+" "+c}
+function remClass(e,c){if(e)e.className=e.className.replace(new RegExp("\\b"+c+"\\b","g"),"").replace(/\s+/g," ").trim()}
+
+function fmt(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function dlg(title, text, buttons) {
+  var ov = id('ov');
+  var ovt = id('ovt');
+  var ovp = id('ovp');
+  var ovb = id('ovb');
+  ovt.textContent = title;
+  ovp.textContent = text;
+  ovb.innerHTML = '';
+  for (var i = 0; i < buttons.length; i++) {
+    var btn = document.createElement('button');
+    btn.textContent = buttons[i].t;
+    btn.addEventListener('click', buttons[i].f);
+    ovb.appendChild(btn);
+  }
+  addClass(ov, 'show');
+}
+
+function hdlg() {
+  remClass(id('ov'), 'show');
+}
+
+// === TAP SOUND ===
+function playTapSound() {
+  if (!S.soundEnabled) return;
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.frequency.value = 440; // A4
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (e) {
+    console.warn('Web Audio API not supported or error:', e);
+  }
+}
+
+
+// === BACKGROUND PARTICLES ===
+function initBgParts(){
+  var c=id("bg-parts");
+  var colors=["#0ff","#f0f","#0f0","#ffd700","#f44"];
+  for(var i=0;i<15;i++){
+    var p=document.createElement("div");
+    p.className="bg-p";
+    var size=2+Math.random()*4;
+    p.style.cssText="width:"+size+"px;height:"+size+"px;background:"+colors[Math.floor(Math.random()*colors.length)]+";left:"+(Math.random()*100)+"%;animation-duration:"+(8+Math.random()*12)+"s;animation-delay:"+(Math.random()*10)+"s";
+    c.appendChild(p);
+  }
+}
+initBgParts();
+
+var S = {
+    lastDaily: 0,
+    dailyStreak: 0,
+    c: 0,
+    g: 0,
+    ct: 0,
+    cl: 0,
+    rl: 0,
+    bs: 0,
+    pr: 0,
+    comboMax: 0,
+    luck: 0,
+    gm: 0,
+    soundEnabled: true,
+    combo: 0,
+    lastTapTime: 0
+};
+var comboTimeout = null;
+
+function saveGameState() {
+  if (!curUser) return;
+  try {
+    localStorage.setItem('cr_gamestate_' + curUser, JSON.stringify(S));
+  } catch (e) {
+    console.warn('Failed to save game state:', e);
+  }
+}
+
+function loadGameState() {
+  if (!curUser) return;
+  try {
+    var saved = localStorage.getItem('cr_gamestate_' + curUser);
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      for (var key in parsed) {
+        if (parsed.hasOwnProperty(key)) {
+          S[key] = parsed[key];
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load game state:', e);
+  }
+}
+
+// === SCREEN MANAGEMENT ===
+function showScreen(s){
+  id("login-scr").style.display="none";
+  id("game-scr").style.display="none";
+  id("chat-scr").style.display="none";
+  id("panel").style.display="none";
+  if(s==="login")id("login-scr").style.display="flex";
+  else if(s==="game")id("game-scr").style.display="flex";
+  else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
+  else if(s==="up"||s==="bo"||s==="ac"||s==="qu"||s==="cf"||s==="st"||s==="dt"||s==="lb"){id("game-scr").style.display="flex";showPanel(s)}
+}
+
+// === DAILY REWARD ===
+function checkDailyReward(){
+  var now=Math.floor(Date.now()/86400000);
+  var last=S.lastDaily||0;
+  var streak=S.dailyStreak||0;
+  if(now>last){
+    if(now===last+1){streak++}else{streak=1};
+    S.lastDaily=now;S.dailyStreak=streak;
+    var rewards=[{day:1,credits:100,gems:5},{day:2,credits:250,gems:10},{day:3,credits:500,gems:20},{day:4,credits:1000,gems:35},{day:5,credits:2000,gems:50},{day:6,credits:5000,gems:75},{day:7,credits:10000,gems:100}];
+    var reward=rewards[Math.min(streak-1,rewards.length-1)];
+    S.c+=reward.credits;S.g+=reward.gems;S.ct+=reward.credits;
+    setTimeout(function(){dlg("🎁 Ежедневная награда!","День "+streak+" подряд!\n\n+"+fmt(reward.credits)+" 💎\n+"+reward.gems+" 💎 гемов",[{t:"Отлично!",f:function(){hdlg()}}])},500);
+  }
+}
+
+function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
+
+// === DATABASE SYNC ===
+var DB_URL="http://127.0.0.1:8765/api";
+var TG_BOT_TOKEN="8603295219:***";
+var TG_CHAT_ID="7819200201";
+var dbUserId=null;
+var dbSyncTimer=null;
+
+function tgNotify(text){
+  try{
+    var x=new XMLHttpRequest();
+    x.open("POST","https://api.telegram.org/bot"+TG_BOT_TOKEN+"/sendMessage",true);
+    x.setRequestHeader("Content-Type","application/json");
+    x.timeout=5000;
+    x.onreadystatechange=function(){};
+    x.send(JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:"HTML"}));
+  }catch(e){}
+}
+
+function owlUpdateNotify(version,changes){
+  var msg="🆕 <b>Обновление v"+version+"!</b>\n\n"+changes+"\n\n💡 Напиши 'что нового?' чтобы узнать подробности!";
+  addChatMsg("🦉 OWL",msg);
+  tgNotify(msg);
+}
+
+function dbReq(path,method,data,cb){
+  try{
+    var x=new XMLHttpRequest();
+    x.open(method||"GET",DB_URL+path,true);
+    x.setRequestHeader("Content-Type","application/json");
+    x.timeout=5000;
+    x.onreadystatechange=function(){if(x.readyState===4&&cb)cb(x.status,x.responseText)};
+    x.onerror=function(){if(cb)cb(0,"")};
+    x.ontimeout=function(){if(cb)cb(0,"")};
+    x.send(data?JSON.stringify(data):null);
+  }catch(e){if(cb)cb(0,"")}
+}
+
+function dbRegister(username,password){
+  dbReq("/register","POST",{username:username,password:password},function(s,t){
+    if(s===200){
+      try{
+        var d=JSON.parse(t);
+        if(d.ok){
+          amsg('Регистрация успешна! Автоматический вход...', 'ok');
+          dbLogin(username,password);
+        }else{
+          amsg(d.error || 'Ошибка регистрации', 'err');
+        }
+      }catch(e){
+        amsg('Ошибка регистрации', 'err');
+      }
+    }else{
+      amsg('Ошибка регистрации', 'err');
+    }
+  });
+}
+
+function dbLogin(username,password){
+  dbReq("/login","POST",{username:username,password:password},function(s,t){
+    if(s===200){
+      try{
+        var d=JSON.parse(t);
+        if(d.ok){
+          dbUserId=d.user_id;
+          curUser = username;
+          loadGameState();
+          // Update sound button text
+          var soundBtn = id('soundBtn');
+          if (soundBtn) {
+            soundBtn.textContent = S.soundEnabled ? '🔊' : '🔇';
+          }
+          saveUsers();
+          showScreen('game');
+          checkDailyReward();
+          id('uname').textContent = username;
+          // Clear login form
+          id('au').value = '';
+          id('ap').value = '';
+          id('amsg').textContent = '';
+        }else{
+          amsg(d.error || 'Ошибка входа', 'err');
+        }
+      }catch(e){
+        amsg('Ошибка входа', 'err');
+      }
+    }else{
+      amsg('Ошибка входа', 'err');
+    }
+  });
+}
+
+function dbSave(){
+  if(!dbUserId)return;
+  dbReq("/save","POST",{user_id:dbUserId,stats:{
+    credits:S.c,taps:S.cl,realm_level:S.rl,bosses_killed:S.bs,
+    prestige:S.pr,comboMax:S.comboMax,luck:S.luck,gm:S.gm,}},function(s,t){});
+}
+
+function dbStartSync(){
+  if (dbSyncTimer) {
+    clearInterval(dbSyncTimer);
+  }
+  dbSyncTimer = setInterval(dbSync, 30000);
+  dbSync();
+}
+
+function handleLogin() {
+  var username = id('au').value.trim();
+  var password = id('ap').value.trim();
+  if (username === '' || password === '') {
+    amsg('Введите имя пользователя и пароль', 'err');
+    return;
+  }
+  dbLogin(username, password);
+}
+
+function handleRegister() {
+  var username = id('au').value.trim();
+  var password = id('ap').value.trim();
+  if (username === '' || password === '') {
+    amsg('Введите имя пользователя и пароль', 'err');
+    return;
+  }
+  dbRegister(username, password);
+}
+
+
+
+function dbSync(){
+  // TODO: Implement actual sync with backend
+  // For now, just do nothing to avoid errors
+  console.log('Sync called');
+}
+// OWL Chat functions
+var chatMessages = [];
+var chatFilter = 'g'; // 'g' for general, 'o' for OWL
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"/']/g, function(m) { return map[m]; });
+}
+function addChatMsg(author, text) {
+  var msg = {
+    author: author,
+    text: text,
+    time: new Date()
+  };
+  chatMessages.push(msg);
+  // If chat screen is visible, append the message
+  if (id('chat-scr').style.display !== 'none') {
+    var chmsgs = id('chmsgs');
+    var div = document.createElement('div');
+    var className = 'chmsg';
+    if (author === '🦉 OWL') {
+      className += ' owl';
+    }
+    div.className = className;
+    div.innerHTML = '<span class="auth">' + escapeHtml(author) + '</span><span class="txt">' + escapeHtml(text) + '</span><span class="time">' + msg.time.toLocaleTimeString() + '</span>';
+    chmsgs.appendChild(div);
+    // Scroll to bottom
+    chmsgs.scrollTop = chmsgs.scrollHeight;
+  }
+}
+function renderChat() {
+  var chmsgs = id('chmsgs');
+  chmsgs.innerHTML = '';
+  var filter = chatFilter;
+  for (var i = 0; i < chatMessages.length; i++) {
+    var msg = chatMessages[i];
+    if (filter === 'g' || (filter === 'o' && msg.author === '🦉 OWL')) {
+      var div = document.createElement('div');
+      var className = 'chmsg';
+      if (msg.author === '🦉 OWL') {
+        className += ' owl';
+      }
+      div.className = className;
+      div.innerHTML = '<span class="auth">' + escapeHtml(msg.author) + '</span><span class="txt">' + escapeHtml(msg.text) + '</span><span class="time">' + msg.time.toLocaleTimeString() + '</span>';
+      chmsgs.appendChild(div);
+    }
+  }
+  // Scroll to bottom
+  chmsgs.scrollTop = chmsgs.scrollHeight;
+}
+function switchChatTab(tab) {
+  // tab is either 'g' or 'o'
+  chatFilter = tab;
+  // Update tab UI
+  var tabs = id('chtabs').children;
+  for (var i = 0; i < tabs.length; i++) {
+    if (tabs[i].getAttribute('data-ct') === tab) {
+      addClass(tabs[i], 'on');
+    } else {
+      remClass(tabs[i], 'on');
+    }
+  }
+  renderChat();
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // Set initial tab
+  switchChatTab('g');
+  // Chat tab click handlers
+  var chatTabsContainer = id('chtabs');
+  if (chatTabsContainer) {
+    var tabs = chatTabsContainer.children;
+    for (var i = 0; i < tabs.length; i++) {
+      var tab = tabs[i];
+      var ct = tab.getAttribute('data-ct');
+      if (ct) {
+        tab.addEventListener('click', function(e) {
+          var ct = this.getAttribute('data-ct');
+          switchChatTab(ct);
+        });
+      }
+    }
+  }
+  // Chat send button
+  var chatSend = id('chat-send');
+  var chatIn = id('chat-in');
+  function sendChatMessage() {
+    var text = chatIn.value.trim();
+    if (text !== '') {
+      addChatMsg(curUser || 'Anonymous', text);
+      chatIn.value = '';
+      // Check if message contains "owl" (case-insensitive) and user is not OWL
+      if (curUser && curUser !== '🦉 OWL' && text.toLowerCase().indexOf('owl') !== -1) {
+        // OWL responds after 1 second
+        setTimeout(function() {
+          addChatMsg('🦉 OWL', 'Хоо-хоо! Я здесь! Чем могу помочь?');
+        }, 1000);
+      }
+    }
+  }
+  chatSend.addEventListener('click', sendChatMessage);
+  chatIn.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      sendChatMessage();
+    }
+  });
+ 
+  // Function to update the level progress bar and text
+  function updateLevelProgress() {
+  // Calculate current level and progress
+  var levelThreshold = (S.rl + 1) * 1000;
+  var progress = (S.ct - S.rl * 1000) / 1000; // fraction from 0 to 1
+  if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+  // Update progress bar width
+    var progFi = id('prog-fi');
+    if (progFi) {
+      progFi.style.width = (progress * 100) + '%';
+    }
+
+    // Update level text
+    var progT = id('prog-t');
+    if (progT) {
+      progT.textContent = 'Рейм ур.' + (S.rl + 1);
+    }
+
+    // Check for level up
+    if (S.ct >= levelThreshold) {
+      S.rl++;
+      // After leveling up, update progress bar again
+      updateLevelProgress();
+    }
+  }
+  // Login and register buttons
+  var alogin = id('alogin');
+  var areg = id('areg');
+  if (alogin) {
+    alogin.addEventListener('click', handleLogin);
+  }
+  if (areg) {
+    areg.addEventListener('click', handleRegister);
+  }
+  // Tap button handler
+  var tpbtn = id('tpbtn');
+  var tapCount = id('tapCount');
+  var creditsDisplay = id('rc');
+   function handleTap() {
+     var now = Date.now();
+     if (now - S.lastTapTime < 500) { // 0.5 seconds
+       S.combo++;
+     } else {
+       S.combo = 0;
+     }
+     S.lastTapTime = now;
+
+     // Update comboMax
+     if (S.combo > S.comboMax) S.comboMax = S.combo;
+
+     // Update combo display
+     var comboDisplay = id('combo-display');
+     if (comboDisplay) {
+       if (S.combo > 1) {
+         comboDisplay.textContent = 'Комбо x' + S.combo;
+         addClass(comboDisplay, 'show');
+       } else {
+         remClass(comboDisplay, 'show');
+       }
+     }
+
+     // Clear existing timeout
+     if (comboTimeout !== null) {
+       clearTimeout(comboTimeout);
+     }
+     // Set new timeout to reset combo after 1 second of inactivity
+     comboTimeout = setTimeout(function() {
+       S.combo = 0;
+       var comboDisplay = id('combo-display');
+       if (comboDisplay) {
+         remClass(comboDisplay, 'show');
+       }
+     }, 1000);
+
+     S.cl++;
+     S.c++; // Add credits per tap
+     S.ct++; // Add to total credits
+
+     // Bonus credits: for every 10 combo, give an extra credit
+     var bonus = Math.floor(S.combo / 10);
+     if (bonus > 0) {
+       S.c += bonus;
+       S.ct += bonus;
+     }
+
+     tapCount.textContent = S.cl;
+     creditsDisplay.textContent = S.c;
+     // Add pressing class for animation
+     addClass(tpbtn, 'pressing');
+     // Pop the credits number
+     addClass(creditsDisplay, 'pop');
+     setTimeout(function() {
+       remClass(tpbtn, 'pressing');
+       remClass(creditsDisplay, 'pop');
+     }, 150); // match the animation duration
+     // Update level progress
+     updateLevelProgress();
+   };
+  tpbtn.addEventListener('click', handleTap);
+  // Sound button handler
+  var soundBtn = id('soundBtn');
+  if (soundBtn) {
+    soundBtn.addEventListener('click', function() {
+      S.soundEnabled = !S.soundEnabled;
+      // Update button text
+      soundBtn.textContent = S.soundEnabled ? '🔊' : '🔇';
+      // Optional: play a confirmation sound when enabling
+      if (S.soundEnabled) {
+        playTapSound();
+      }
+    });
+  }
+  // Logout button handler
+  var lout = id('lout');
+  if (lout) {
+    lout.addEventListener('click', function() {
+      saveGameState();
+      curUser = null;
+      dbUserId = null;
+      id('uname').textContent = ''
+      if (dbSyncTimer) {
+        clearInterval(dbSyncTimer);
+        dbSyncTimer = null;
+      }
+      showScreen('login');
+    });
+  };
+  // Save game state before unloading
+  window.addEventListener('beforeunload', saveGameState);
+  // Initialize level progress bar
+  updateLevelProgress();
+  });
+function buildLeaderboardContent() {
+  // Get all game state keys
+  var leaderboard = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    if (key.startsWith('cr_gamestate_')) {
+      var username = key.substring('cr_gamestate_'.length);
+      try {
+        var state = JSON.parse(localStorage.getItem(key));
+        if (state && typeof state === 'object') {
+          leaderboard.push({
+            username: username,
+            credits: state.ct || 0,
+            level: state.rl || 0,
+            taps: state.cl || 0,
+            bosses: state.bs || 0
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to parse state for key', key, e);
+      }
+    }
+  }
+  // Sort by credits descending
+  leaderboard.sort(function(a, b) { return b.credits - a.credits; });
+  // Take top 10
+  leaderboard = leaderboard.slice(0, 10);
+  // Build HTML
+  var html = '';
+  html += '<div class="lb-refresh" onclick="buildAndShowLeaderboard()">🔄 Обновить</div>';
+  html += '<div class="lb-sync-status" id="lb-sync-status">Обновлено: ' + new Date().toLocaleTimeString() + '</div>';
+  if (leaderboard.length === 0) {
+    html += '<div class="lb-empty">Нет данных для отображения</div>';
+  } else {
+    html += '<div class="lb-table">';
+    html += '<div class="lb-header lb-row"><div class="lb-rank">#</div><div class="lb-name">Игрок</div><div class="lb-val">Кредиты</div><div class="lb-val">Уровень</div></div>';
+    leaderboard.forEach(function(entry, index) {
+      var rank = index + 1;
+      var rankClass = 'lb-rank';
+      if (rank === 1) rankClass += ' gold';
+      else if (rank === 2) rankClass += ' silver';
+      else if (rank === 3) rankClass += ' bronze';
+      html += '<div class="lb-row">';
+      html += '<div class="' + rankClass + '">' + rank + '</div>';
+      html += '<div class="lb-name">' + escapeHtml(entry.username) + '</div>';
+      html += '<div class="lb-val">' + fmt(entry.credits) + '</div>';
+      html += '<div class="lb-val">' + entry.level + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+// Helper to escape HTML
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// We'll also create a function to show the leaderboard in the panel
+function buildAndShowLeaderboard() {
+  var content = id('pc');
+  if (content) {
+    content.innerHTML = buildLeaderboardContent();
+  }
+}
+function showPanel(tab) {
+  var panelTitle = id('panT');
+  var panelContent = id('pc');
+  // Set title based on tab
+  switch(tab) {
+    case 'up':
+      panelTitle.textContent = 'Улучшения';
+      panelContent.innerHTML = '<p>Здесь будут улучшения.</p>';
+      break;
+    case 'bo':
+      panelTitle.textContent = 'Боссы';
+      panelContent.innerHTML = '<p>Здесь будут боссы.</p>';
+      break;
+    case 'ac':
+      panelTitle.textContent = 'Достижения';
+      panelContent.innerHTML = '<p>Здесь будут достижения.</p>';
+      break;
+    case 'qu':
+      panelTitle.textContent = 'Квесты';
+      panelContent.innerHTML = '<p>Здесь будут квесты.</p>';
+      break;
+    case 'cf':
+      panelTitle.textContent = 'Крафт';
+      panelContent.innerHTML = '<p>Здесь будет крафт.</p>';
+      break;
+    case 'st':
+      panelTitle.textContent = 'Статистика';
+      panelContent.innerHTML = '<p>Здесь будет статистика.</p>';
+      break;
+    case 'dt':
+      panelTitle.textContent = 'Премиум';
+      panelContent.innerHTML = '<p>Здесь будет премиум.</p>';
+      break;
+    case 'lb':
+      panelTitle.textContent = 'Таблица лидеров';
+      panelContent.innerHTML = buildLeaderboardContent();
+      break;
+    default:
+      panelTitle.textContent = 'Панель';
+      panelContent.innerHTML = '<p>Выберите раздел.</p>';
+      break;
+  }
+}
+</script>
+</body></html>
