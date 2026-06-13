@@ -696,7 +696,7 @@ function tap(){
   }
 
   // Boss fight
-  if(S.cb&&S.bh>0){S.bh-=v;if(S.bh<=0)winBoss()}
+  if(S.cb&&S.bh>0){S.bh-=v;updateBossHP();if(S.bh<=0)winBoss()}
 
   // Level up
   var levelsGained = 0;
