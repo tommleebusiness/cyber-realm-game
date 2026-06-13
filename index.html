@@ -317,7 +317,7 @@ footer .tab:active .tab-icon{transform:scale(1.2)}
 
 <div id="login-scr">
   <h1>⚡ CYBER REALM ⚡</h1>
-  <div class="sub">Футуристическая Idle Игра v9.4</div>
+  <div class="sub" id="version-text">Футуристическая Idle Игра v9.4</div>
   <div class="fld">
     <input type="text" id="au" placeholder="Имя пользователя" maxlength="20" autocomplete="off">
     <input type="password" id="ap" placeholder="Пароль" maxlength="30" autocomplete="off">
@@ -1279,6 +1279,7 @@ window.addEventListener("beforeinstallprompt",function(e){
 // === VERSION & UPDATE NOTIFICATIONS ===
 var GAME_VERSION="9.5";
 document.title += " v" + GAME_VERSION;
+document.getElementById('version-text').textContent = 'Футуристическая Idle Игра v' + GAME_VERSION;
 var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
 if(LAST_SEEN_VERSION!==GAME_VERSION){
   localStorage.setItem("cr_lastVersion",GAME_VERSION);
