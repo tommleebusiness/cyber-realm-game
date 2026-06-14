@@ -292,6 +292,7 @@ id("areg").onclick=function(){var u=id("au").value.trim(),p=id("ap").value;if(!u
 id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
+id("tpbtn").addEventListener("click",tap);
 function checkDailyReward(){var now=Math.floor(Date.now()/86400000),last=S.lastDaily||0,streak=S.dailyStreak||0;if(now>last){if(now===last+1)streak++;else streak=1;S.lastDaily=now;S.dailyStreak=streak;var rw=[{c:100,g:5},{c:250,g:10},{c:500,g:20},{c:1000,g:35},{c:2000,g:50},{c:5000,g:75},{c:10000,g:100}];var r=rw[Math.min(streak-1,rw.length-1)];S.c+=r.c;S.g+=r.g;S.ct+=r.c;setTimeout(function(){toast("🎁 День "+streak+"! +"+fmt(r.c)+"💎")},500)}}
 var chatTab="g",chatMsgs=[];try{chatMsgs=JSON.parse(localStorage.getItem("cr12_chat")||"[]")}catch(e){}
 function saveChat(){localStorage.setItem("cr12_chat",JSON.stringify(chatMsgs.slice(-200)))}
