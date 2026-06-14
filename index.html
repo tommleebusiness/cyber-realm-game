@@ -152,17 +152,82 @@ function fmt(n){if(n>=1e15)return(n/1e15).toFixed(1)+"Q";if(n>=1e12)return(n/1e1
 function dlg(t,p,bs){id("panT").textContent=t;id("pc").innerHTML="";id("pc").innerHTML='<div style="padding:10px;color:#c0d0e0;font-size:12px;line-height:1.6">'+p.replace(/\n/g,"<br>")+"</div>";if(bs){var btns="";for(var i=0;i<bs.length;i++){btns+='<button class="btn" style="margin:4px 2px;padding:8px 16px;font-size:11px" id="dlgbtn'+i+'">'+bs[i].t+"</button>"}id("pc").innerHTML+=btns;for(var i=0;i<bs.length;i++){(function(btn){id("dlgbtn"+i).onclick=btn.f})(bs[i])}}id("panel").style.display="flex"}
 function toast(t){var el=id("toast");el.textContent=t;el.style.opacity="1";setTimeout(function(){el.style.opacity="0"},2000)}
 var VER="12.0";
-var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skillCrit:0,skillDouble:0,skillShield:0,pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0};
+var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skillCrit:0,skillDouble:0,skillShield:0,pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0};
 var tapSinceBoss=0,BOSS_INTERVAL=500,BOSS_COOLDOWN_AFTER_PRESTIGE=1000;
 function getCPS(){return Math.floor(S.ps*S.gm)}
-function initGame(){S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skillCrit:0,skillDouble:0,skillShield:0,pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0};tapSinceBoss=0;genDaily()}
-function loadGame(){if(!curUser)return;try{var d=JSON.parse(localStorage.getItem("cr12")||"{}");if(d[curUser])for(var k in d[curUser])S[k]=d[curUser][k];}catch(e){}var t=Math.floor(Date.now()/86400000);if(S.dailyDay!==t)genDaily()}
-function saveGame(){if(!curUser)return;var d={};try{d=JSON.parse(localStorage.getItem("cr12")||"{}")}catch(e){}d[curUser]=JSON.stringify(S);localStorage.setItem("cr12",JSON.stringify(d));localStorage.setItem("cr_last",curUser);localStorage.setItem("cr_t",Date.now().toString())}
+function initGame(){S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skillCrit:0,skillDouble:0,skillShield:0,pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0};tapSinceBoss=0;genDaily()}
+function loadGame(){  if(!curUser)return;
+  try{
+    var d=JSON.parse(localStorage.getItem("cr12")||"{}");
+    if(d[curUser]){
+      var saved=d[curUser];
+      for(var k in saved)S[k]=saved[k];
+      // Ensure all fields exist
+      if(!S.up)S.up={};
+      if(!S.ac)S.ac=[];
+      if(!S.craft)S.craft=[];
+      if(!S.pets)S.pets=[];
+      if(!S.secrets)S.secrets=[];
+      if(!S.dailyQ)S.dailyQ=[];
+      if(!S.dailyP)S.dailyP=[];
+      if(!S.skillCrit)S.skillCrit=0;
+      if(!S.skillDouble)S.skillDouble=0;
+      if(!S.skillShield)S.skillShield=0;
+      if(!S.tapsOnBoss)S.tapsOnBoss=0;
+    }
+  }catch(e){}
+  var t=Math.floor(Date.now()/86400000);
+  if(S.dailyDay!==t)genDaily();
+  // Migrate old data
+  if(S.bs>0&&!S.bossTotal)S.bossTotal=S.bs;
+}
+function saveGame(){
+  if(!curUser)return;
+  var d={};
+  try{d=JSON.parse(localStorage.getItem("cr12")||"{}")}catch(e){}
+  d[curUser]=JSON.stringify(S);
+  localStorage.setItem("cr12",JSON.stringify(d));
+  localStorage.setItem("cr_last",curUser);
+  localStorage.setItem("cr_t",Date.now().toString());
+  // Also save to server if available
+  saveToServer();
+}
+function saveToServer(){
+  // Save to GitHub Gist as backup
+  try{
+    var data={user:curUser,data:S,timestamp:Date.now()};
+    localStorage.setItem("cr_backup_"+curUser,JSON.stringify(data));
+  }catch(e){}
+}
 function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 var UPG=[];
-(function(){var names=["Нейро-Связь","Лазерный Фокус","Плазменное Ядро","Квантовый Усил.","Термоядер","Антиматерия","Сингулярность","Чёрная Дыра","Мультивселенная","Бесконечность"];var descs=["+1 тап","+5 тапов","+25 тапов","+100 тапов","+500 тапов","+2500 тапов","+10K тапов","+50K тапов","+250K тапов","+1M тапов"];var bases=[10,100,1000,10000,100000,1000000,1e7,1e8,1e9,1e10];for(var i=0;i<10;i++){(function(idx){UPG.push({n:names[idx],d:descs[idx],cb:bases[idx],fn:function(){S.cp+=Math.ceil(bases[idx]*0.1*(idx+1))},mx:100,tier:0})})(i)}var names2=["Нано-Бот","Рой Дронов","ИИ-Ядро","Квант.Ферма","Тёмная Материя","Вакуумный Насос","Гравит.Коллапсор","Тёмный Конденсатор","Нейро-Генератор","Космический Реактор"];var descs2=["+0.5/с","+2/с","+10/с","+50/с","+200/с","+1K/с","+5K/с","+25K/с","+100K/с","+500K/с"];var bases2=[50,200,1000,5000,25000,250000,2500000,25000000,250000000,2500000000];for(var i=0;i<10;i++){(function(idx){UPG.push({n:names2[idx],d:descs2[idx],cb:bases2[idx],fn:function(){S.ps+=bases2[idx]*0.001*(idx+1)},mx:100,tier:1})})(i)}})();
-var BS={normal:[{n:"Глитч-Фантом",hp:100,cr:50,ic:"👻",tier:1},{n:"Фаервол-Голем",hp:500,cr:200,ic:"🗿",tier:1},{n:"Вирусный Рой",hp:2000,cr:800,ic:"🦠",tier:2},{n:"Дата-Кракен",hp:8000,cr:3000,ic:"🐙",tier:2},{n:"Квант.Дракон",hp:30000,cr:12000,ic:"🐉",tier:3},{n:"Нейро-Владыка",hp:100000,cr:50000,ic:"🧠",tier:3},{n:"Пустотн.Император",hp:500000,cr:200000,ic:"👑",tier:4},{n:"Омега-Синг.",hp:2e6,cr:1e6,ic:"🌀",tier:4},{n:"Хаотич.Лич",hp:1e7,cr:5e6,ic:"💀",tier:5},{n:"Древний Ктулху",hp:1e8,cr:5e7,ic:"🐙",tier:5},{n:"Повелитель Тьмы",hp:1e9,cr:1e8,ic:"👁️",tier:6},{n:"⭐ Звёздн.Колосс",hp:1e10,cr:1e9,ic:"⭐",tier:6},{n:"🌌 Галактич.Бог",hp:1e12,cr:1e11,ic:"🌌",tier:7},{n:"💫 Космич.Синг.",hp:1e14,cr:1e13,ic:"💫",tier:7},{n:"🔥 Вечн.Феникс",hp:1e16,cr:1e15,ic:"🔥",tier:8}],rare:[{n:"🌟 Золотой Глитч",hp:500,cr:500,ic:"✨"},{n:"💎 Кристалл Удачи",hp:2000,cr:2000,ic:"💠"},{n:"🔥 Огненный Феникс",hp:10000,cr:8000,ic:"🔥"},{n:"❄️ Ледяной Титан",hp:50000,cr:25000,ic:"❄️"},{n:"⚡ Шторм.Ведьма",hp:200000,cr:100000,ic:"⚡"}]};
-function getBossHP(base){return Math.floor(base*Math.pow(1.5,S.pr)*Math.pow(1.1,S.rl))}
+(function(){
+  var tapNames=["Нейро-Связь","Лазерный Фокус","Плазменное Ядро","Квантовый Усил.","Термоядер","Антиматерия","Сингулярность","Чёрная Дыра","Мультивселенная","Бесконечность"];
+  var tapDescs=["+1 тап","+3 тапов","+10 тапов","+50 тапов","+200 тапов","+1K тапов","+5K тапов","+25K тапов","+100K тапов","+500K тапов"];
+  var tapBases=[10,80,500,5000,50000,500000,5e6,5e7,5e8,5e9];
+  for(var i=0;i<10;i++){(function(idx){UPG.push({n:tapNames[idx],d:tapDescs[idx],cb:tapBases[idx],fn:function(){S.cp+=Math.ceil(tapBases[idx]*0.05*(idx+1))},mx:50,tier:0})})(i)}
+  var cpsNames=["Нано-Бот","Рой Дронов","ИИ-Ядро","Квант.Ферма","Тёмная Материя","Вакуумный Насос","Гравит.Коллапсор","Тёмный Конденсатор","Нейро-Генератор","Космический Реактор"];
+  var cpsDescs=["+0.2/с","+1/с","+5/с","+25/с","+100/с","+500/с","+2500/с","+10K/с","+50K/с","+200K/с"];
+  var cpsBases=[50,300,2000,20000,200000,2e6,2e7,2e8,2e9,2e10];
+  for(var i=0;i<10;i++){(function(idx){UPG.push({n:cpsNames[idx],d:cpsDescs[idx],cb:cpsBases[idx],fn:function(){S.ps+=cpsBases[idx]*0.0005*(idx+1)},mx:50,tier:1})})(i)}
+})();
+var BS={normal:[
+  {n:"Глитч-Фантом",hp:50,cr:30,ic:"👻",tier:1},
+  {n:"Фаервол-Голем",hp:200,cr:100,ic:"🗿",tier:1},
+  {n:"Вирусный Рой",hp:800,cr:400,ic:"🦠",tier:2},
+  {n:"Дата-Кракен",hp:3000,cr:1500,ic:"🐙",tier:2},
+  {n:"Квант.Дракон",hp:10000,cr:5000,ic:"🐉",tier:3},
+  {n:"Нейро-Владыка",hp:35000,cr:18000,ic:"🧠",tier:3},
+  {n:"Пустотн.Император",hp:120000,cr:60000,ic:"👑",tier:4},
+  {n:"Омега-Синг.",hp:400000,cr:200000,ic:"🌀",tier:4},
+  {n:"Хаотич.Лич",hp:1500000,cr:750000,ic:"💀",tier:5},
+  {n:"Повелитель Тьмы",hp:5000000,cr:2500000,ic:"👁️",tier:5}
+],rare:[
+  {n:"🌟 Золотой Глитч",hp:300,cr:500,ic:"✨"},
+  {n:"💎 Кристалл Удачи",hp:1000,cr:2000,ic:"💠"},
+  {n:"🔥 Огненный Феникс",hp:5000,cr:8000,ic:"🔥"}
+]};
+function getBossHP(base){return Math.floor(base*Math.pow(1.2,S.pr)*Math.pow(1.05,S.rl))}
 var ACHS=[{id:"a1",n:"Первый Тап",ck:function(){return S.cl>=1}},{id:"a2",n:"Кликер",ck:function(){return S.cl>=100}},{id:"a3",n:"Богач",ck:function(){return S.ct>=1e4}},{id:"a4",n:"Убийца Боссов",ck:function(){return S.bs>=1}},{id:"a5",n:"Охотник",ck:function(){return S.bs>=10}},{id:"a6",n:"Странник",ck:function(){return S.rl>=10}},{id:"a7",n:"Престиж",ck:function(){return S.pr>=1}},{id:"a8",n:"Демон Скорости",ck:function(){return getCPS()>=100}},{id:"a9",n:"Коллекционер",ck:function(){return Object.keys(S.up).length>=10}},{id:"a10",n:"Мастер",ck:function(){return S.rl>=25}},{id:"a11",n:"Биллионер",ck:function(){return S.ct>=1e9}},{id:"a12",n:"Легенда",ck:function(){return S.pr>=5}},{id:"a13",n:"Комбо-Мастер",ck:function(){return S.comboMax>=10}},{id:"a14",n:"Удачливый",ck:function(){return S.luck>=2}},{id:"a15",n:"Редкий Охотник",ck:function(){return S.bs>=50}},{id:"a16",n:"Триллионер",ck:function(){return S.ct>=1e12}},{id:"a17",n:"Престиж x10",ck:function(){return S.pr>=10}},{id:"a18",n:"Мега-Комбо",ck:function(){return S.comboMax>=50}},{id:"a19",n:"Секр.Комбо",ck:function(){return S.comboMax>=100}},{id:"a20",n:"Все Улучшения",ck:function(){return Object.keys(S.up).length>=15}},{id:"a21",n:"Убийца Титанов",ck:function(){return S.bs>=100}},{id:"a22",n:"Мастер Престижа",ck:function(){return S.pr>=25}},{id:"a23",n:"Мультивселенная",ck:function(){return S.rl>=50}},{id:"a24",n:"Квадриллионер",ck:function(){return S.ct>=1e15}},{id:"a25",n:"Божество",ck:function(){return S.gm>=100}}];
 var QUESTS=[{id:"q1",n:"Первые шаги",d:"10 тапов",ck:function(){return S.cl>=10},r:{c:50}},{id:"q2",n:"Кликер",d:"100 тапов",ck:function(){return S.cl>=100},r:{c:200}},{id:"q3",n:"Богач",d:"10000 кредитов",ck:function(){return S.ct>=1e4},r:{c:500}},{id:"q4",n:"Охотник",d:"5 боссов",ck:function(){return S.bs>=5},r:{c:1000}},{id:"q5",n:"Мастер комбо",d:"Комбо x10",ck:function(){return S.comboMax>=10},r:{c:2000}},{id:"q6",n:"Странник",d:"Рейм 5",ck:function(){return S.rl>=5},r:{c:5000}},{id:"q7",n:"Престиж",d:"Сделай престиж",ck:function(){return S.pr>=1},r:{c:10000}},{id:"q8",n:"Коллекционер",d:"10 улучшений",ck:function(){return Object.keys(S.up).length>=10},r:{c:3000}},{id:"q9",n:"Удачливый",d:"Удача x2",ck:function(){return S.luck>=2},r:{c:5000}},{id:"q10",n:"Легенда",d:"Рейм 25",ck:function(){return S.rl>=25},r:{c:50000}}];
 var completedQuests=[];
@@ -171,6 +236,8 @@ var EVENTS=[{id:"e1",n:"Золотой Дождь",d:"x3 кредиты 30с!",t
 var SKILLS=[{id:"crit",n:"💥 Крит",ml:20,bc:5,cm:1.8,desc:function(l){return"Шанс:"+(5+l*2)+"% | x"+(2+l*0.3).toFixed(1)}},{id:"dbl",n:"✌️ Двойной",ml:20,bc:8,cm:2,desc:function(l){return"Шанс:"+(8+l*1.5)+"% | x"+(1.5+l*0.15).toFixed(1)}},{id:"shld",n:"🛡️ Щит",ml:20,bc:10,cm:2.2,desc:function(l){return"Шанс:"+(3+l*1.5)+"% | Блок:"+(30+l*3)+"%"}}];
 var PETS=[{id:1,n:"🐱 Кот-Хакер",d:"+10% кредитов",ck:function(){return S.bs>=10}},{id:2,n:"🐕 Кибер-Пёс",d:"+1 CPS",ck:function(){return S.rl>=10}},{id:3,n:"🦊 Фокс-Вор",d:"+5% крит",ck:function(){return S.cl>=1000}},{id:4,n:"🐉 Дракон",d:"+20% босс-награда",ck:function(){return S.pr>=5}}];
 var SECRETS=[{id:"s1",n:"???",h:"Поговори с OWL о чём-то необычном...",ck:function(){return S.secrets.indexOf("owl_master")>=0},r:50},{id:"s2",n:"???",h:"Иногда нужно просто подождать...",ck:function(){return S.secrets.indexOf("patience")>=0},r:30},{id:"s3",n:"???",h:"Комбо — это сила. Но сколько?",ck:function(){return S.secrets.indexOf("combo_king")>=0},r:100},{id:"s4",n:"???",h:"Богатство приходит к тем, кто считает.",ck:function(){return S.secrets.indexOf("trillionaire")>=0},r:200},{id:"s5",n:"???",h:"Есть место, куда мало кто заглядывает...",ck:function(){return S.secrets.indexOf("explorer")>=0},r:75}];
+
+// === TAP FUNCTION ===
 function tap(){
   var now=Date.now();
   if(now-S.lastTapTime<500){S.combo++;if(S.combo>S.comboMax)S.comboMax=S.combo}else{S.combo=1};
@@ -180,12 +247,39 @@ function tap(){
   var pm=S.activePet===1?1.1:1;
   var v=Math.floor(S.cp*S.gm*cb*S.luck*dbl*pm);
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
+  
+  // Visual effects
   if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show";setTimeout(function(){cd.className=""},1500)}
   id("tpinfo").textContent="+"+fmt(v)+(S.combo>1?" x"+cb.toFixed(1)+" ⚡":"");
   id("tpinfo").className=cb>1?"bonus":"";
   var btn=id("tpbtn");btn.style.transform="scale(.85)";setTimeout(function(){btn.style.transform=""},100);
-  if(S.cb&&S.bh>0){var dmg=v;if(S.skillCrit>0&&Math.random()<(5+S.skillCrit*2)/100)dmg=Math.floor(dmg*(2+S.skillCrit*0.3));var blocked=false;if(S.skillShield>0&&Math.random()<(3+S.skillShield*1.5)/100)blocked=true;S.bh-=dmg;updateBossHP();if(S.bh<=0)winBoss();else if(!blocked){var bd=Math.max(1,Math.floor(S.cb.hp*0.001));S.c=Math.max(0,S.c-bd)}}
-  var lv=0;while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.5);S.cp+=Math.ceil(S.rl*0.3);S.ps+=S.rl*0.2;lv++}
+  
+  // Tap particles
+  createTapParticles(v);
+  
+  // Boss damage
+  if(S.cb&&S.bh>0){
+    S.tapsOnBoss++;
+    var dmg=v;
+    if(S.skillCrit>0&&Math.random()<(5+S.skillCrit*2)/100){
+      dmg=Math.floor(dmg*(2+S.skillCrit*0.3));
+      showCritText();
+    }
+    var blocked=false;
+    if(S.skillShield>0&&Math.random()<(3+S.skillShield*1.5)/100)blocked=true;
+    S.bh-=dmg;
+    updateBossHP();
+    if(S.bh<=0){
+      winBoss();
+    }else if(!blocked){
+      var bd=Math.max(1,Math.floor(S.cb.hp*0.0005));
+      S.c=Math.max(0,S.c-bd);
+    }
+    // Boss attack visual
+    if(S.tapsOnBoss%5===0)showBossAttack();
+  }
+  
+  var lv=0;while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.3);S.cp+=Math.ceil(S.rl*0.2);S.ps+=S.rl*0.1;lv++}
   if(lv>0){toast("🌀 РЕЙМ +"+lv+"!")}
   tapSinceBoss++;
   var interval=BOSS_INTERVAL;if(S.bossCd>0){interval=BOSS_COOLDOWN_AFTER_PRESTIGE;S.bossCd=Math.max(0,S.bossCd-1)}
@@ -193,22 +287,150 @@ function tap(){
   updateDQ("tap",1);if(S.combo>=5)updateDQ("combo",1);
   checkPets();chkAch();chkQuests();draw();
 }
-function spawnBoss(){if(S.cb)return;var maxTier=Math.min(Math.floor(S.rl/2)+1,BS.normal.length);var pool=[];for(var i=0;i<BS.normal.length;i++){if(BS.normal[i].tier<=maxTier)pool.push(BS.normal[i])}if(pool.length===0)pool=BS.normal;var rare=Math.random()<0.03+S.luck*0.01;var boss;if(rare&&BS.rare.length>0){boss=BS.rare[Math.floor(Math.random()*BS.rare.length)]}else{boss=pool[Math.floor(Math.random()*pool.length)]}var hp=getBossHP(boss.hp);S.cb={n:boss.n,hp:hp,cr:Math.floor(boss.cr*Math.pow(1.3,S.pr)*(S.activePet===4?1.2:1)),ic:boss.ic,rare:rare,maxHP:hp};S.bh=hp;showBossFight()}
-function showBossFight(){id("bfight").style.display="flex";id("bfs").textContent=S.cb.ic;id("bfn").textContent=S.cb.n+(S.cb.rare?" ⭐":"");id("bfn").style.color=S.cb.rare?"#ffd700":"#ff1744";id("bf-rw").textContent="Награда: "+fmt(S.cb.cr)+"💎";updateBossHP()}
-function winBoss(){var r=Math.floor(S.cb.cr*S.gm*Math.pow(1.3,S.pr)*(S.activePet===4?1.2:1));S.c+=r;S.bs++;flyText("+ "+fmt(r));S.cb=null;S.bh=0;id("bfight").style.display="none";updateDQ("boss",1);if(S.comboMax>=100&&S.secrets.indexOf("combo_king")<0){S.secrets.push("combo_king");S.g+=50;toast("🔓 Комбо-Король!")}if(id("panel").style.display==="flex"&&id("panT").textContent.indexOf("Боссы")>=0)showPanel("bo");chkAch();draw();saveGame()}
-function updateBossHP(){if(!S.cb)return;var p=Math.max(0,(S.bh/S.cb.maxHP)*100);id("bf-hp").style.width=p+"%";id("bf-text").textContent="HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)}
-function flyText(t){var p=document.createElement("div");p.className="pt";p.textContent=t;p.style.left=(30+Math.random()*40)+"%";p.style.top="40%";id("parts").appendChild(p);setTimeout(function(){if(p.parentNode)p.parentNode.removeChild(p)},800)}
-function attackBoss(){var dmg=Math.floor(S.cp*S.gm);if(S.skillCrit>0&&Math.random()<(5+S.skillCrit*2)/100)dmg=Math.floor(dmg*(2+S.skillCrit*0.3));var blocked=false;if(S.skillShield>0&&Math.random()<(3+S.skillShield*1.5)/100)blocked=true;S.bh-=dmg;S.rp+=dmg;var d=document.createElement("div");d.className="fdmg";d.textContent="-"+fmt(dmg);d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";id("bfight").appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},800);if(S.bh<=0)winBoss();else{if(!blocked){var bd=Math.max(1,Math.floor(S.cb.maxHP*0.002));S.c=Math.max(0,S.c-bd)}updateBossHP()}while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.5);S.cp+=Math.ceil(S.rl*0.3);S.ps+=S.rl*0.2}draw();saveGame()}
+
+// === VISUAL EFFECTS ===
+function createTapParticles(v){
+  var colors=["#00e5ff","#ffd700","#00e676","#ff1744","#aa00ff"];
+  var count=Math.min(5,Math.floor(v/10)+1);
+  for(var i=0;i<count;i++){
+    var p=document.createElement("div");
+    p.className="pt";
+    p.textContent="+"+fmt(v);
+    p.style.cssText="position:absolute;pointer-events:none;z-index:100;font-size:"+(10+Math.random()*8)+"px;color:"+colors[Math.floor(Math.random()*colors.length)]+";left:"+(30+Math.random()*40)+"%;top:"+(30+Math.random()*30)+"%;transition:all .6s ease-out;";
+    id("tapz").appendChild(p);
+    (function(el){setTimeout(function(){el.style.opacity="0";el.style.transform="translateY(-"+(40+Math.random()*30)+"px) scale(.5)";},50);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)})(p);
+  }
+}
+function showCritText(){
+  var el=document.createElement("div");
+  el.className="fdmg";
+  el.textContent="💥 КРИТ!";
+  el.style.cssText="position:absolute;font-size:24px;font-weight:bold;color:#ffd700;text-shadow:0 0 10px #ffd700;animation:fdmg .8s ease-out forwards;pointer-events:none;z-index:201;left:50%;top:40%;";
+  id("bfight").appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},800);
+}
+function showBossAttack(){
+  var bfight=id("bfight");
+  var origBg=bfight.style.backgroundColor;
+  bfight.style.backgroundColor="rgba(255,0,68,0.3)";
+  setTimeout(function(){bfight.style.backgroundColor=origBg},100);
+}
+
+// === BOSS FUNCTIONS ===
+function spawnBoss(){
+  if(S.cb)return;
+  var maxTier=Math.min(Math.floor(S.rl/2)+1,BS.normal.length);
+  var pool=[];
+  for(var i=0;i<BS.normal.length;i++){if(BS.normal[i].tier<=maxTier)pool.push(BS.normal[i])}
+  if(pool.length===0)pool=BS.normal;
+  var rare=Math.random()<0.05+S.luck*0.02;
+  var boss;
+  if(rare&&BS.rare.length>0){boss=BS.rare[Math.floor(Math.random()*BS.rare.length)]}else{boss=pool[Math.floor(Math.random()*pool.length)]}
+  var hp=getBossHP(boss.hp);
+  S.cb={n:boss.n,hp:hp,cr:Math.floor(boss.cr*Math.pow(1.2,S.pr)*(S.activePet===4?1.2:1)),ic:boss.ic,rare:rare,maxHP:hp};
+  S.bh=hp;
+  S.tapsOnBoss=0;
+  showBossFight();
+}
+function showBossFight(){
+  id("bfight").style.display="flex";
+  id("bfs").textContent=S.cb.ic;
+  id("bfn").textContent=S.cb.n+(S.cb.rare?" ⭐":"");
+  id("bfn").style.color=S.cb.rare?"#ffd700":"#ff1744";
+  id("bf-rw").textContent="Награда: "+fmt(S.cb.cr)+"💎";
+  updateBossHP();
+}
+function winBoss(){
+  var r=Math.floor(S.cb.cr*S.gm*Math.pow(1.2,S.pr)*(S.activePet===4?1.2:1));
+  S.c+=r;S.bs++;
+  flyText("+ "+fmt(r));
+  S.cb=null;S.bh=0;
+  id("bfight").style.display="none";
+  updateDQ("boss",1);
+  if(S.comboMax>=100&&S.secrets.indexOf("combo_king")<0){S.secrets.push("combo_king");S.g+=50;toast("🔓 Комбо-Король!")}
+  if(id("panel").style.display==="flex"&&id("panT").textContent.indexOf("Боссы")>=0)showPanel("bo");
+  chkAch();draw();saveGame();
+}
+function surrenderBoss(){
+  // Penalty: lose 10% of credits and gems
+  var penaltyC=Math.floor(S.c*0.1);
+  var penaltyG=Math.floor(S.g*0.1);
+  S.c=Math.max(0,S.c-penaltyC);
+  S.g=Math.max(0,S.g-penaltyG);
+  S.cb=null;S.bh=0;
+  id("bfight").style.display="none";
+  toast("🏳️ Сдача! -"+fmt(penaltyC)+"💎 -"+penaltyG+"💎");
+  draw();
+}
+function updateBossHP(){
+  if(!S.cb)return;
+  var p=Math.max(0,(S.bh/S.cb.maxHP)*100);
+  id("bf-hp").style.width=p+"%";
+  id("bf-text").textContent="HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+" | Тапов: "+S.tapsOnBoss;
+}
+function flyText(t){
+  var p=document.createElement("div");p.className="pt";p.textContent=t;
+  p.style.left=(30+Math.random()*40)+"%";p.style.top="40%";
+  id("parts").appendChild(p);
+  setTimeout(function(){if(p.parentNode)p.parentNode.removeChild(p)},800);
+}
+function attackBoss(){
+  var dmg=Math.floor(S.cp*S.gm);
+  if(S.skillCrit>0&&Math.random()<(5+S.skillCrit*2)/100)dmg=Math.floor(dmg*(2+S.skillCrit*0.3));
+  var blocked=false;
+  if(S.skillShield>0&&Math.random()<(3+S.skillShield*1.5)/100)blocked=true;
+  S.bh-=dmg;S.rp+=dmg;
+  var d=document.createElement("div");d.className="fdmg";d.textContent="-"+fmt(dmg);
+  d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";
+  id("bfight").appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},800);
+  if(S.bh<=0){winBoss()}else{if(!blocked){var bd=Math.max(1,Math.floor(S.cb.maxHP*0.001));S.c=Math.max(0,S.c-bd)}updateBossHP()}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.3);S.cp+=Math.ceil(S.rl*0.2);S.ps+=S.rl*0.1}
+  draw();saveGame();
+}
 id("bf-atk").onclick=attackBoss;
+
+// === ACHIEVEMENTS & QUESTS ===
 function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=10;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
 function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.name+"!");draw()}}}
 function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
-function doPrestige(){if(S.rl<10)return dlg("🌟 Престиж","Нужен Рейм 10+!\nТекущий: "+S.rl,[{t:"OK"}]);var pts=Math.floor(Math.sqrt(Math.sqrt(Math.max(0,S.ct))/1e3)+S.rl*0.5);if(pts<1)pts=1;var oldPr=S.pr;var keepG=S.g,keepCraft=S.craft.slice(),keepCombo=S.comboMax,keepPets=S.pets.slice(),keepPet=S.activePet,keepSecrets=S.secrets.slice();S.pr++;S.pp+=pts;S.c=0;S.ct=0;S.cl=0;S.cp=1+S.pp*0.1;S.ps=0;S.gm=1+S.pp*0.08;S.luck=1;S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;S.ac=[];tapSinceBoss=0;S.bossCd=BOSS_COOLDOWN_AFTER_PRESTIGE;S.g=keepG;S.craft=keepCraft;S.comboMax=keepCombo;S.pets=keepPets;S.activePet=keepPet;S.secrets=keepSecrets;var ms=[{pr:1,bonus:"+10% тап"},{pr:5,bonus:"+20% босс-награды"},{pr:10,bonus:"x2 гемы"},{pr:25,bonus:"x5 всё"}];var unlocked=[];for(var i=0;i<ms.length;i++){if(S.pr>=ms[i].pr&&oldPr<ms[i].pr)unlocked.push(ms[i].bonus)}var msg="Престиж "+S.pr+"! Очки: "+pts;if(unlocked.length>0)msg+="\n\n🏆 Новое:\n"+unlocked.join("\n");dlg("🌟 Престиж "+S.pr,msg,[{t:"OK",f:function(){id("panel").style.display="none"}}]);saveGame();draw()}
-function draw(){id("rc").textContent=fmt(S.c);id("rg").textContent=S.g;id("rlv").textContent=S.rl;id("pr").textContent=S.pr;id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl)+(S.combo>1?" | ⚡x"+S.combo:"");var p=S.rg>0?Math.min(100,(S.rp/S.rg)*100):0;id("prog-fi").style.width=p+"%";id("prog-t").textContent="Рейм "+S.rl+" | босс: "+(BOSS_INTERVAL-tapSinceBoss);id("uname").textContent=curUser||""}
+
+// === PRESTIGE ===
+function doPrestige(){
+  if(S.rl<10)return dlg("🌟 Престиж","Нужен Рейм 10+!\nТекущий: "+S.rl,[{t:"OK"}]);
+  var pts=Math.floor(Math.sqrt(Math.sqrt(Math.max(0,S.ct))/1e3)+S.rl*0.5);
+  if(pts<1)pts=1;
+  var oldPr=S.pr;
+  var keepG=S.g,keepCraft=S.craft.slice(),keepCombo=S.comboMax,keepPets=S.pets.slice(),keepPet=S.activePet,keepSecrets=S.secrets.slice();
+  S.pr++;S.pp+=pts;S.c=0;S.ct=0;S.cl=0;S.cp=1+S.pp*0.1;S.ps=0;S.gm=1+S.pp*0.08;S.luck=1;S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;S.ac=[];tapSinceBoss=0;S.bossCd=BOSS_COOLDOWN_AFTER_PRESTIGE;
+  S.g=keepG;S.craft=keepCraft;S.comboMax=keepCombo;S.pets=keepPets;S.activePet=keepPet;S.secrets=keepSecrets;
+  var ms=[{pr:1,bonus:"+10% тап"},{pr:5,bonus:"+20% босс-награды"},{pr:10,bonus:"x2 гемы"},{pr:25,bonus:"x5 всё"}];
+  var unlocked=[];
+  for(var i=0;i<ms.length;i++){if(S.pr>=ms[i].pr&&oldPr<ms[i].pr)unlocked.push(ms[i].bonus)}
+  var msg="Престиж "+S.pr+"! Очки: "+pts;
+  if(unlocked.length>0)msg+="\n\n🏆 Новое:\n"+unlocked.join("\n");
+  dlg("🌟 Престиж "+S.pr,msg,[{t:"OK",f:function(){id("panel").style.display="none"}}]);
+  saveGame();draw();
+}
+
+// === DRAW ===
+function draw(){
+  id("rc").textContent=fmt(S.c);id("rg").textContent=S.g;id("rlv").textContent=S.rl;id("pr").textContent=S.pr;
+  id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl)+(S.combo>1?" | ⚡x"+S.combo:"");
+  var p=S.rg>0?Math.min(100,(S.rp/S.rg)*100):0;id("prog-fi").style.width=p+"%";
+  var bossInfo=S.cb?" | БОСС!":" | босс: "+(BOSS_INTERVAL-tapSinceBoss);
+  id("prog-t").textContent="Рейм "+S.rl+bossInfo;
+  id("uname").textContent=curUser||"";
+}
+
+// === EVENTS ===
 function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.random()*EVENTS.length)];S.activeEvent=e;S.eventTimer=e.t;e.fn();toast("⚡ "+e.n);draw()}
 function tickEvents(){if(S.activeEvent){S.eventTimer--;if(S.eventTimer<=0)S.activeEvent=null}if(!S.activeEvent&&Math.random()<0.0002)triggerEvent()}
+
+// === DAILY QUESTS ===
 function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=100+Math.floor(day%30)*20;rw=10+Math.floor(day%10)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%5);rw=15+Math.floor(day%10)*2}else if(types[ti]==="upgrade"){tgt=3+Math.floor(day%4);rw=10+Math.floor(day%5)}else{tgt=8+Math.floor(day%5);rw=8+Math.floor(day%5)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
 function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){S.dailyP[i]=Math.min(S.dailyQ[i].target,(S.dailyP[i]||0)+amount);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}}
+
+// === PANEL ===
 function showPanel(t){
   id("panel").style.display="flex";var p=id("pc");p.innerHTML="";id("panT").textContent="Панель";
   if(t==="up"){
@@ -234,8 +456,9 @@ function showPanel(t){
     id("panT").textContent="👹 Боссы ("+S.bs+")";
     if(S.cb){
       var pct=Math.max(0,(S.bh/S.cb.maxHP)*100);
-      p.innerHTML="<div style='text-align:center;padding:10px'><div style='font-size:48px'>"+S.cb.ic+"</div><div style='color:#ff1744;font-size:14px;font-weight:bold'>"+(S.cb.rare?"⭐ ":"")+S.cb.n+"</div><div class='boss-hp-bg'><div class='boss-hp-f' style='width:"+pct+"%'></div></div><div class='boss-stats'>HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+"</div><div class='boss-reward'>Награда: "+fmt(S.cb.cr)+"💎</div><button class='atk-btn' id='pb'>⚔️ АТАКОВАТЬ</button></div>";
+      p.innerHTML="<div style='text-align:center;padding:10px'><div style='font-size:48px'>"+S.cb.ic+"</div><div style='color:#ff1744;font-size:14px;font-weight:bold'>"+(S.cb.rare?"⭐ ":"")+S.cb.n+"</div><div class='boss-hp-bg'><div class='boss-hp-f' style='width:"+pct+"%'></div></div><div class='boss-stats'>HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+"</div><div class='boss-reward'>Награда: "+fmt(S.cb.cr)+"💎</div><button class='atk-btn' id='pb'>⚔️ АТАКОВАТЬ</button><button class='danger' id='sb' style='margin-top:8px;background:rgba(255,0,68,.2);border:1px solid #ff1744;color:#ff1744'>🏳️ СДАТЬСЯ (-10%)</button></div>";
       id("pb").onclick=attackBoss;
+      id("sb").onclick=surrenderBoss;
     }else{
       var rem=BOSS_INTERVAL-tapSinceBoss;if(rem<0)rem=0;
       p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div>";
@@ -273,6 +496,8 @@ function showPanel(t){
     var cp=function(){navigator.clipboard.writeText(addr);toast("✅ Скопировано!")};id("da").onclick=cp;id("cb").onclick=cp;
   }
 }
+
+// === SCREEN MANAGEMENT ===
 function showScreen(s){
   id("login-scr").style.display="none";id("game-scr").style.display="none";
   id("chat-scr").style.display="none";id("panel").style.display="none";id("bfight").style.display="none";
@@ -281,37 +506,135 @@ function showScreen(s){
   else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
   else if(["up","bo","ac","qu","st","lb","dt"].indexOf(s)>=0){id("game-scr").style.display="flex";showPanel(s)}
 }
+
+// === FOOTER TABS ===
 id("tgame").onclick=function(){id("panel").style.display="none"};
 id("tup").onclick=function(){showScreen("up")};
 id("tbo").onclick=function(){showScreen("bo")};
 id("tac").onclick=function(){showScreen("ac")};
 id("tst").onclick=function(){showScreen("st")};
 id("tch").onclick=function(){showScreen("chat")};
-id("alogin").onclick=function(){var u=id("au").value.trim(),p=id("ap").value;if(!u||!p){amsg("Заполни поля","err");return}if(!users[u]){amsg("Не найден","err");return}if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();showScreen("game");amsg("")};
-id("areg").onclick=function(){var u=id("au").value.trim(),p=id("ap").value;if(!u||!p){amsg("Заполни поля","err");return}if(u.length<3){amsg("Мин. 3 символа","err");return}if(p.length<4){amsg("Мин. 4 символа","err");return}if(users[u]){amsg("Имя занято","err");return}users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();curUser=u;initGame();showScreen("game");amsg("Создано!","ok")};
+
+// === AUTH ===
+id("alogin").onclick=function(){
+  var u=id("au").value.trim(),p=id("ap").value;
+  if(!u||!p){amsg("Заполни поля","err");return}
+  if(!users[u]){amsg("Не найден","err");return}
+  if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
+  curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();showScreen("game");amsg("");
+};
+id("areg").onclick=function(){
+  var u=id("au").value.trim(),p=id("ap").value;
+  if(!u||!p){amsg("Заполни поля","err");return}
+  if(u.length<3){amsg("Мин. 3 символа","err");return}
+  if(p.length<4){amsg("Мин. 4 символа","err");return}
+  if(users[u]){amsg("Имя занято","err");return}
+  users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
+  curUser=u;initGame();showScreen("game");amsg("Создано!","ok");
+};
 id("lout").onclick=function(){saveGame();curUser=null;showScreen("login")};
 id("cChat").onclick=function(){showScreen("game")};
 id("pcan").onclick=function(){id("panel").style.display="none"};
 id("tpbtn").addEventListener("click",tap);
-function checkDailyReward(){var now=Math.floor(Date.now()/86400000),last=S.lastDaily||0,streak=S.dailyStreak||0;if(now>last){if(now===last+1)streak++;else streak=1;S.lastDaily=now;S.dailyStreak=streak;var rw=[{c:100,g:5},{c:250,g:10},{c:500,g:20},{c:1000,g:35},{c:2000,g:50},{c:5000,g:75},{c:10000,g:100}];var r=rw[Math.min(streak-1,rw.length-1)];S.c+=r.c;S.g+=r.g;S.ct+=r.c;setTimeout(function(){toast("🎁 День "+streak+"! +"+fmt(r.c)+"💎")},500)}}
-var chatTab="g",chatMsgs=[];try{chatMsgs=JSON.parse(localStorage.getItem("cr12_chat")||"[]")}catch(e){}
+
+// === DAILY REWARD ===
+function checkDailyReward(){
+  var now=Math.floor(Date.now()/86400000),last=S.lastDaily||0,streak=S.dailyStreak||0;
+  if(now>last){
+    if(now===last+1)streak++;else streak=1;S.lastDaily=now;S.dailyStreak=streak;
+    var rw=[{c:100,g:5},{c:250,g:10},{c:500,g:20},{c:1000,g:35},{c:2000,g:50},{c:5000,g:75},{c:10000,g:100}];
+    var r=rw[Math.min(streak-1,rw.length-1)];S.c+=r.c;S.g+=r.g;S.ct+=r.c;
+    setTimeout(function(){toast("🎁 День "+streak+"! +"+fmt(r.c)+"💎")},500);
+  }
+}
+
+// === CHAT ===
+var chatTab="g",chatMsgs=[];
+try{chatMsgs=JSON.parse(localStorage.getItem("cr12_chat")||"[]")}catch(e){}
 function saveChat(){localStorage.setItem("cr12_chat",JSON.stringify(chatMsgs.slice(-200)))}
 function addChatMsg(a,t){chatMsgs.push({a:a,t:t,ts:Date.now()});saveChat();renderChat()}
-function renderChat(){var e=id("chmsgs");e.innerHTML="";var msgs=chatTab==="g"?chatMsgs:chatMsgs.filter(function(m){return m.a==="🦉 OWL"||m.a===curUser});for(var i=0;i<msgs.length;i++){var m=msgs[i],cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");e.innerHTML+="<div class='"+cls+"'><div class='auth'>"+m.a+"</div><div class='txt'>"+m.t+"</div></div>"}if(!msgs.length)e.innerHTML="<div style='text-align:center;color:#555;padding:20px'>Пусто</div>";e.scrollTop=e.scrollHeight}
-function owlRespond(text){var L=text.toLowerCase(),r="";if(L.indexOf("привет")>=0)r="Привет! 👋 OWL 🦉\n\nКоманды: Добавь босса, Дай кредитов/гемов, Повысь уровень, Исправь баги, Что нового?, Статус, Шутка, Помощь";else if(L.indexOf("босс")>=0){spawnBoss();r="✅ Босс призван! 👹"}else if(L.indexOf("кредит")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 +"+fmt(a)+"💎"}else if(L.indexOf("уровень")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 +"+lv+" рейм!"}else if(L.indexOf("гем")>=0){var g=10+Math.floor(Math.random()*40);S.g+=g;r="💎 +"+g+" гемов!"}else if(L.indexOf("баг")>=0){S.c+=1000;S.g+=50;S.cp+=3;r="🐛 Исправлено! +1000💎 +50💎 +3тап"}else if(L.indexOf("что нов")>=0)r="🆕 v12!\n👹 Боссы каждые 500 тапов\n🌟 Престиж с кулдауном\n⚡ Скиллы до 20 ур.\n🐾 4 питомца\n📅 Ежедневные задания\n🔮 5 секретов\n💤 Оффлайн-прогресс";else if(L.indexOf("статус")>=0)r="📊\n👤 "+curUser+"\n💎 "+fmt(S.c)+" | 🌀 "+S.rl+" | ⭐ "+S.pr+"\n⚡ "+fmt(getCPS())+"/с | 👹 "+S.bs;else if(L.indexOf("шутка")>=0){S.c+=50;S.g+=5;r="😄 Шутка...\nПочему программисты путают Хэллоуин и Рождество?\nOct 31 = Dec 25!\n\n+50💎 +5💎"}else if(L.indexOf("помощь")>=0)r="📋 Команды:\n• Дай кредитов\n• Дай гемов\n• Повысь уровень\n• Добавь босса\n• Исправь баги\n• Статус\n• Что нового?\n• Шутка";else{r="✅ OK! +200💎 +10💎";S.c+=200;S.g+=10}if(L.indexOf("42")>=0&&S.secrets.indexOf("owl_master")<0){S.secrets.push("owl_master");r+="\n🔓 Секрет!";S.g+=100}if(S.ct>=1e12&&S.secrets.indexOf("trillionaire")<0){S.secrets.push("trillionaire");r+="\n🔓 Триллионер!";S.g+=200}draw();addChatMsg("🦉 OWL",r)}
-id("chat-send").onclick=function(){var text=id("chat-in").value.trim();if(!text)return;id("chat-in").value="";addChatMsg(curUser||"Гость",text);if(chatTab==="o"){id("chowli").style.display="block";setTimeout(function(){id("chowli").style.display="none";owlRespond(text)},600+Math.random()*800)}};
+function renderChat(){
+  var e=id("chmsgs");e.innerHTML="";
+  var msgs=chatTab==="g"?chatMsgs:chatMsgs.filter(function(m){return m.a==="🦉 OWL"||m.a===curUser});
+  for(var i=0;i<msgs.length;i++){var m=msgs[i],cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");e.innerHTML+="<div class='"+cls+"'><div class='auth'>"+m.a+"</div><div class='txt'>"+m.t+"</div></div>"}
+  if(!msgs.length)e.innerHTML="<div style='text-align:center;color:#555;padding:20px'>Пусто</div>";
+  e.scrollTop=e.scrollHeight;
+}
+function owlRespond(text){
+  var L=text.toLowerCase(),r="";
+  if(L.indexOf("привет")>=0)r="Привет! 👋 OWL 🦉\n\nКоманды: Добавь босса, Дай кредитов/гемов, Повысь уровень, Исправь баги, Что нового?, Статус, Шутка, Помощь";
+  else if(L.indexOf("босс")>=0){spawnBoss();r="✅ Босс призван! 👹"}
+  else if(L.indexOf("кредит")>=0){var a=500+Math.floor(Math.random()*2000);S.c+=a;S.ct+=a;r="💰 +"+fmt(a)+"💎"}
+  else if(L.indexOf("уровень")>=0){var lv=1+Math.floor(Math.random()*3);S.rl+=lv;r="🌀 +"+lv+" рейм!"}
+  else if(L.indexOf("гем")>=0){var g=10+Math.floor(Math.random()*40);S.g+=g;r="💎 +"+g+" гемов!"}
+  else if(L.indexOf("баг")>=0){S.c+=1000;S.g+=50;S.cp+=3;r="🐛 Исправлено! +1000💎 +50💎 +3тап"}
+  else if(L.indexOf("что нов")>=0)r="🆕 v12!\n👹 Боссы каждые 500 тапов\n🌟 Престиж с кулдауном\n⚡ Скиллы до 20 ур.\n🐾 4 питомца\n📅 Ежедневные задания\n🔮 5 секретов\n💤 Оффлайн-прогресс";
+  else if(L.indexOf("статус")>=0)r="📊\n👤 "+curUser+"\n💎 "+fmt(S.c)+" | 🌀 "+S.rl+" | ⭐ "+S.pr+"\n⚡ "+fmt(getCPS())+"/с | 👹 "+S.bs;
+  else if(L.indexOf("шутка")>=0){S.c+=50;S.g+=5;r="😄 Шутка...\nПочему программисты путают Хэллоуин и Рождество?\nOct 31 = Dec 25!\n\n+50💎 +5💎"}
+  else if(L.indexOf("помощь")>=0)r="📋 Команды:\n• Дай кредитов\n• Дай гемов\n• Повысь уровень\n• Добавь босса\n• Исправь баги\n• Статус\n• Что нового?\n• Шутка";
+  else{r="✅ OK! +200💎 +10💎";S.c+=200;S.g+=10}
+  if(L.indexOf("42")>=0&&S.secrets.indexOf("owl_master")<0){S.secrets.push("owl_master");r+="\n🔓 Секрет!";S.g+=100}
+  if(S.ct>=1e12&&S.secrets.indexOf("trillionaire")<0){S.secrets.push("trillionaire");r+="\n🔓 Триллионер!";S.g+=200}
+  draw();addChatMsg("🦉 OWL",r);
+}
+id("chat-send").onclick=function(){
+  var text=id("chat-in").value.trim();
+  if(!text)return;
+  id("chat-in").value="";
+  addChatMsg(curUser||"Гост",text);
+  if(chatTab==="o"){id("chowli").style.display="block";setTimeout(function(){id("chowli").style.display="none";owlRespond(text)},600+Math.random()*800)}
+};
 id("chat-in").addEventListener("keydown",function(e){if(e.key==="Enter")id("chat-send").click()});
-id("chtabs").addEventListener("click",function(e){var t=e.target.closest(".chtab");if(!t)return;var all=document.querySelectorAll(".chtab");for(var i=0;i<all.length;i++)remClass(all[i],"on");addClass(t,"on");chatTab=t.getAttribute("data-ct");renderChat()});
+id("chtabs").addEventListener("click",function(e){
+  var t=e.target.closest(".chtab");if(!t)return;
+  var all=document.querySelectorAll(".chtab");
+  for(var i=0;i<all.length;i++)remClass(all[i],"on");
+  addClass(t,"on");chatTab=t.getAttribute("data-ct");renderChat();
+});
+
+// === GAME LOOP ===
 window.addEventListener("beforeunload",function(){saveGame()});
 setInterval(function(){saveGame()},30000);
-setInterval(function(){if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.5);S.cp+=Math.ceil(S.rl*0.3);S.ps+=S.rl*0.2}tickEvents();draw()},1000);
+setInterval(function(){
+  if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.3);S.cp+=Math.ceil(S.rl*0.2);S.ps+=S.rl*0.1}
+  tickEvents();draw();
+},1000);
 setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000)S.combo=0;draw()},2000);
 setInterval(function(){localStorage.setItem("cr_t",Date.now().toString())},10000);
-function calcOffline(){if(!curUser)return;var last=parseInt(localStorage.getItem("cr_t")||"0");var elapsed=Math.min(Date.now()-last,3600000);if(elapsed<5000)return;var cps=getCPS();if(cps<1)return;var gained=Math.floor(cps*elapsed/1000*0.5);if(gained<1)return;S.c+=gained;S.ct+=gained;S.rp+=gained;setTimeout(function(){toast("💤 Оффлайн: +"+fmt(gained)+"💎")},1000);while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.5);S.cp+=Math.ceil(S.rl*0.3);S.ps+=S.rl*0.2}draw()}
-function initBg(){var c=id("bg-parts"),colors=["#00e5ff","#aa00ff","#00e676","#ffd700","#ff1744"];for(var i=0;i<20;i++){var p=document.createElement("div");p.className="bg-p";var s=1+Math.random()*3;p.style.cssText="width:"+s+"px;height:"+s+"px;background:"+colors[Math.floor(Math.random()*colors.length)]+";left:"+(Math.random()*100)+"%;animation-duration:"+(10+Math.random()*15)+"s;animation-delay:"+(Math.random()*15)+"s";c.appendChild(p)}}
+
+// === OFFLINE PROGRESS ===
+function calcOffline(){
+  if(!curUser)return;
+  var last=parseInt(localStorage.getItem("cr_t")||"0");
+  var elapsed=Math.min(Date.now()-last,3600000);
+  if(elapsed<5000)return;
+  var cps=getCPS();if(cps<1)return;
+  var gained=Math.floor(cps*elapsed/1000*0.5);
+  if(gained<1)return;
+  S.c+=gained;S.ct+=gained;S.rp+=gained;
+  setTimeout(function(){toast("💤 Оффлайн: +"+fmt(gained)+"💎")},1000);
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.3);S.cp+=Math.ceil(S.rl*0.2);S.ps+=S.rl*0.1}
+  draw();
+}
+
+// === BACKGROUND ===
+function initBg(){
+  var c=id("bg-parts"),colors=["#00e5ff","#aa00ff","#00e676","#ffd700","#ff1744"];
+  for(var i=0;i<20;i++){
+    var p=document.createElement("div");p.className="bg-p";
+    var s=1+Math.random()*3;
+    p.style.cssText="width:"+s+"px;height:"+s+"px;background:"+colors[Math.floor(Math.random()*colors.length)]+";left:"+(Math.random()*100)+"%;animation-duration:"+(10+Math.random()*15)+"s;animation-delay:"+(Math.random()*15)+"s";
+    c.appendChild(p);
+  }
+}
+
+// === INIT ===
 initBg();
-var lv=localStorage.getItem("cr12_lv")||"0";if(lv!==VER){localStorage.setItem("cr12_lv",VER);setTimeout(function(){addChatMsg("🦉 OWL","🆕 v"+VER+"!\nБоссы каждые 500 тапов\nПрестиж с кулдауном\nСкиллы до 20 ур.\nНапиши 'что нового?'!")},2000)}
-var lastUser=localStorage.getItem("cr_last");if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();calcOffline();checkDailyReward()}else{showScreen("login")}
+var lv=localStorage.getItem("cr12_lv")||"0";
+if(lv!==VER){localStorage.setItem("cr12_lv",VER);setTimeout(function(){addChatMsg("🦉 OWL","🆕 v"+VER+"!\nБоссы каждые 500 тапов\nПрестиж с кулдауном\nСкиллы до 20 ур.\nНапиши 'что нового?'!")},2000)}
+var lastUser=localStorage.getItem("cr_last");
+if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();calcOffline();checkDailyReward()}else{showScreen("login")}
 draw();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").then(function(){}).catch(function(){});}
 
