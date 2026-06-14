@@ -150,7 +150,7 @@ footer .tab .tab-icon{display:block;font-size:14px;margin-bottom:2px}
 
 <script>
 
-"use strict";
+'use strict';
 var curUser=null,users={};
 try{users=JSON.parse(localStorage.getItem("cr_users")||"{}")}catch(e){}
 function saveUsers(){localStorage.setItem("cr_users",JSON.stringify(users))}
