@@ -205,20 +205,20 @@ function loadGame(){
     var d=JSON.parse(localStorage.getItem("cr13")||"{}");
     if(d[curUser]){var sv=d[curUser];for(var k in sv)S[k]=sv[k];}
   }catch(e){}
-  // Migration from v12 — if no cr13 data, try cr12
-  if(!S || Object.keys(S.up).length===0) {
-    try{
+  // Migration from v12 — only if cr13 data is missing
+  try{
+    var hasCr13=false;
+    try{var t=JSON.parse(localStorage.getItem("cr13")||"{}");if(t[curUser])hasCr13=true;}catch(e){}
+    if(!hasCr13){
       var d2=JSON.parse(localStorage.getItem("cr12")||"{}");
       if(d2[curUser]){
         var sv2=d2[curUser];
-        // Parse if it's a string
         if(typeof sv2==="string") sv2=JSON.parse(sv2);
         for(var k in sv2) S[k]=sv2[k];
-        // Save migrated data to cr13
         saveGame();
       }
-    }catch(e){}
-  }
+    }
+  }catch(e){}
   // Migration from v12 new fields
   if(!S.skills)S.skills=[];
   if(!S.pets)S.pets=[];
@@ -244,17 +244,17 @@ var UPG=[];
   var tNames=["Нейро-Связь","Лазерный Фокус","Плазменное Ядро","Квантовый Усил.","Термоядер","Антиматерия","Сингулярность","Чёрная Дыра","Мультивселенная","Бесконечность","Тёмная Энергия","Космический Разум","Нейросеть","Квантовый Рой","Астральный Удар"];
   var tDescs=["+1 тап","+3 тапов","+10 тапов","+50 тапов","+200 тапов","+1K тапов","+5K тапов","+25K тапов","+100K тапов","+500K тапов","+2.5M тапов","+12M тапов","+60M тапов","+300M тапов","+1.5B тапов"];
   var tBases=[10,80,500,5000,50000,500000,5e6,5e7,5e8,5e9,5e10,5e11,5e12,5e13,5e14];
-  for(var i=0;i<15;i++){(function(idx){UPG.push({n:tNames[idx],d:tDescs[idx],cb:tBases[idx],fn:function(){S.cp+=Math.ceil(tBases[idx]*0.08*(idx+1))},mx:100,tier:0})})(i)}
+  for(var i=0;i<15;i++){(function(idx){UPG.push({n:tNames[idx],d:tDescs[idx],cb:tBases[idx],fn:function(){S.cp+=Math.ceil(tBases[idx]*0.03*(idx+1))},mx:100,tier:0})})(i)}
   // Tier 1: CPS upgrades (15)
   var cNames=["Нано-Бот","Рой Дронов","ИИ-Ядро","Квант.Ферма","Тёмная Материя","Вакуумный Насос","Гравит.Коллапсор","Тёмный Конденсатор","Нейро-Генератор","Космический Реактор","Плазменный Генератор","Квантовый Синтез","Астральный Конвертер","Тёмный Сингулярность","Бесконечный Цикл"];
   var cDescs=["+0.2/с","+1/с","+5/с","+25/с","+100/с","+500/с","+2.5K/с","+10K/с","+50K/с","+200K/с","+1M/с","+5M/с","+25M/с","+125M/с","+625M/с"];
   var cBases=[50,300,2000,20000,200000,2e6,2e7,2e8,2e9,2e10,2e11,2e12,2e13,2e14,2e15];
-  for(var i=0;i<15;i++){(function(idx){UPG.push({n:cNames[idx],d:cDescs[idx],cb:cBases[idx],fn:function(){S.ps+=cBases[idx]*0.0004*(idx+1)},mx:100,tier:1})})(i)}
+  for(var i=0;i<15;i++){(function(idx){UPG.push({n:cNames[idx],d:cDescs[idx],cb:cBases[idx],fn:function(){S.ps+=cBases[idx]*0.00015*(idx+1)},mx:100,tier:1})})(i)}
   // Tier 2: Multiplier upgrades (10)
   var mNames=["Компрессор x1.5","Энтропия x2","Сингулярность x3","Мультипликатор x5","Амплификатор x10","Тёмный Множитель x25","Квантовый Буст x50","Астральный Разрыв x100","Бесконечный Цикл x250","Космический Взрыв x500"];
   var mDescs=["x1.5 всё","x2 всё","x3 всё","x5 всё","x10 всё","x25 всё","x50 всё","x100 всё","x250 всё","x500 всё"];
   var mBases=[1000,5000,25000,100000,500000,2500000,1e7,5e7,2.5e8,1e9];
-  for(var i=0;i<10;i++){(function(idx){UPG.push({n:mNames[idx],d:mDescs[idx],cb:mBases[idx],fn:function(){S.gm*=(1+0.15*(idx+1))},mx:20,tier:2})})(i)}
+  for(var i=0;i<10;i++){(function(idx){UPG.push({n:mNames[idx],d:mDescs[idx],cb:mBases[idx],fn:function(){S.gm*=(1+0.08*(idx+1))},mx:20,tier:2})})(i)}
   // Tier 3: Special upgrades (10)
   var sNames=["Удача +10%","Удача +25%","Удача +50%","Удача +100%","Крит шанс +5%","Крит шанс +10%","Крит шанс +15%","Крит урон +50%","Крит урон +100%","Крит урон +200%"];
   var sDescs=["+10% дроп","+25% дроп","+50% дроп","+100% дроп","+5% крит","+10% крит","+15% крит","+50% урон крита","+100% урон крита","+200% урон крита"];
@@ -653,7 +653,7 @@ function attackBoss(){
 id("bf-atk").onclick=attackBoss;
 
 // === ACHIEVEMENTS & QUESTS ===
-function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=2;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
+function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
 function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.name+"!");draw()}}}
 function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
 function unlockRandomPet(){var locked=[];for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0)locked.push(i+1);}if(locked.length>0){var r=locked[Math.floor(Math.random()*locked.length)];S.pets.push(r);toast("🐾 "+PETS[r-1].n+"!")}}
@@ -707,7 +707,7 @@ function showPanel(t){
       p.innerHTML+="<div style='color:#5a6a7a;font-size:9px;padding:4px 0;font-weight:bold'>"+tiers[tier]+"</div>";
       for(var i=0;i<UPG.length;i++){
         if(UPG[i].tier!==tier)continue;
-        var u=UPG[i],o=S.up[i]||0,mx=o>=u.mx,cost=Math.floor(u.cb*Math.pow(1.25,o)),ok=S.c>=cost&&!mx;
+        var u=UPG[i],o=S.up[i]||0,mx=o>=u.mx,cost=Math.floor(u.cb*Math.pow(1.4,o)),ok=S.c>=cost&&!mx;
         p.innerHTML+="<div class='"+(ok?"card can":"card")+(mx?" done":"")+"' data-idx='"+i+"'><div class='h'><span class='nm'>"+u.n+"</span><span class='lv'>"+o+"/"+u.mx+"</span></div><div class='d'>"+u.d+"</div><div class='c'>"+(mx?"МАКС ✓":cost+"💎")+"</div></div>";
       }
     }
@@ -715,7 +715,7 @@ function showPanel(t){
     for(var i=0;i<cards.length;i++){
       cards[i].onclick=function(){
         if(hasClass(this,"done"))return;
-        var idx=parseInt(ga(this,"data-idx")),u=UPG[idx],o=S.up[idx]||0,cost=Math.floor(u.cb*Math.pow(1.25,o));
+        var idx=parseInt(ga(this,"data-idx")),u=UPG[idx],o=S.up[idx]||0,cost=Math.floor(u.cb*Math.pow(1.4,o));
         if(S.c<cost)return;S.c-=cost;S.up[idx]=o+1;u.fn();updateDQ("upgrade",1);chkAch();showPanel("up");saveGame();draw();
       }
     }
@@ -727,7 +727,7 @@ function showPanel(t){
       id("pb").onclick=attackBoss;
       id("sb").onclick=surrenderBoss;
       var bfClose=id("bf-close");if(bfClose)bfClose.onclick=function(){S.cb=null;S.bh=0;id("bfight").style.display="none";showPanel("bo")};
-      var bfx=id("bf-x");if(bfx)bfx.onclick=function(){S.cb=null;S.bh=0;id("bfight").style.display="none";showPanel("bo")};
+      // bf-x bound globally in initAll
     }else{
       var rem=BOSS_INTERVAL-tapSinceBoss;if(rem<0)rem=0;
       p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div>";
@@ -821,7 +821,7 @@ function showScreen(s){
   if(s==="login")id("login-scr").style.display="flex";
   else if(s==="game")id("game-scr").style.display="flex";
   else if(s==="chat"){id("game-scr").style.display="flex";id("chat-scr").style.display="flex";renderChat()}
-  else if(["up","bo","ac","qu","sk","pt","st","lb","dt"].indexOf(s)>=0){id("game-scr").style.display="flex";showPanel(s)}
+  else if(["up","bo","ac","qu","cf","sk","pt","st","lb","dt"].indexOf(s)>=0){id("game-scr").style.display="flex";showPanel(s)}
 }
 
 // === FOOTER TABS ===
@@ -869,6 +869,12 @@ function bindAuth() {
   el = id("cChat"); if (el) el.onclick = function(){showScreen("game")};
   el = id("pcan"); if (el) el.onclick = function(){id("panel").style.display="none"};
   el = id("tpbtn"); if (el) el.addEventListener("click",tap);
+  // Global bf-x binding (close boss fight overlay)
+  var bfx=id("bf-x");if(bfx)bfx.onclick=function(){
+    S.cb=null;S.bh=0;id("bfight").style.display="none";
+    // Go back to game screen
+    id("panel").style.display="none";
+  };
 }
 
 // === DAILY REWARD ===
