@@ -203,10 +203,28 @@ function initGame(){
 }
 function loadGame(){
   if(!curUser)return;
+  var loaded=false;
+  // Try localStorage first
   try{
     var d=JSON.parse(localStorage.getItem("cr13")||"{}");
-    if(d[curUser]){var sv=d[curUser];for(var k in sv)S[k]=sv[k];}
+    if(d[curUser]){var sv=d[curUser];if(typeof sv==="string")sv=JSON.parse(sv);for(var k in sv)S[k]=sv[k];loaded=true;}
   }catch(e){}
+  // Try sessionStorage
+  if(!loaded){
+    try{
+      var d2=JSON.parse(sessionStorage.getItem("cr13")||"{}");
+      if(d2[curUser]){var sv2=d2[curUser];if(typeof sv2==="string")sv2=JSON.parse(sv2);for(var k in sv2)S[k]=sv2[k];loaded=true;}
+    }catch(e){}
+  }
+  // Try window.name
+  if(!loaded){
+    try{
+      if(window.name&&window.name.charAt(0)==="{"){
+        var d3=JSON.parse(window.name);
+        if(d3[curUser]){var sv3=d3[curUser];if(typeof sv3==="string")sv3=JSON.parse(sv3);for(var k in sv3)S[k]=sv3[k];loaded=true;}
+      }
+    }catch(e){}
+  }
   // Migration from v12 — only if cr13 data is missing
   try{
     var hasCr13=false;
@@ -232,10 +250,26 @@ function loadGame(){
 function saveGame(){
   if(!curUser)return;
   var d={};try{d=JSON.parse(localStorage.getItem("cr13")||"{}")}catch(e){}
-  d[curUser]=JSON.stringify(S);
+  d[curUser]=S;
   localStorage.setItem("cr13",JSON.stringify(d));
   localStorage.setItem("cr_last",curUser);
   localStorage.setItem("cr_t",Date.now().toString());
+  // Also save to sessionStorage and window.name for persistence
+  try{sessionStorage.setItem("cr13",JSON.stringify(d));}catch(e){}
+  try{window.name=JSON.stringify(d);}catch(e){}
+  // Save to leaderboard
+  saveToLeaderboard();
+}
+function saveToLeaderboard(){
+  if(!curUser)return;
+  var lb=[];try{var ld=localStorage.getItem("cr_lb13");if(ld)lb=JSON.parse(ld)}catch(e){}
+  var me={name:curUser,credits:S.ct,level:S.rl,bosses:S.bs,prestige:S.pr,taps:S.cl};
+  var found=false;
+  for(var i=0;i<lb.length;i++){if(lb[i].name===curUser){lb[i]=me;found=true;break;}}
+  if(!found)lb.push(me);
+  lb.sort(function(a,b){return b.credits-a.credits});
+  lb=lb.slice(0,50);
+  try{localStorage.setItem("cr_lb13",JSON.stringify(lb));}catch(e){}
 }
 function amsg(m,t){var e=id("amsg");e.textContent=m;e.className="msg "+(t||"")}
 
@@ -800,14 +834,59 @@ function showPanel(t){
   }else if(t==="lb"){
     id("panT").textContent="🏅 Рейтинг";
     p.innerHTML="<div style='text-align:center;padding:6px;color:#5a6a7a;font-size:10px;cursor:pointer' id='lbr'>🔄 Обновить</div>";
+    
+    // Local leaderboard
     var lb=[];try{var d=localStorage.getItem("cr_lb13");if(d)lb=JSON.parse(d)}catch(e){}
-    var me={name:curUser||"?",credits:S.ct,level:S.rl,bosses:S.bs,prestige:S.pr};
+    var me={name:curUser||"?",credits:S.ct,level:S.rl,bosses:S.bs,prestige:S.pr,taps:S.cl};
     var f=false;for(var i=0;i<lb.length;i++){if(lb[i].name===curUser){lb[i]=me;f=true;break}}if(!f)lb.push(me);
     lb.sort(function(a,b){return b.credits-a.credits});lb=lb.slice(0,50);
     try{localStorage.setItem("cr_lb13",JSON.stringify(lb))}catch(e){}
-    if(!lb.length){p.innerHTML+="<div style='text-align:center;color:#5a6a7a;padding:20px'>Будь первым! 🚀</div>"}
-    else{for(var i=0;i<Math.min(lb.length,20);i++){var r=lb[i],isMe=r.name===curUser;p.innerHTML+="<div class='strow"+(isMe?" me":"")+"'><span style='min-width:28px;font-weight:bold;color:#ffd700'>"+(i+1)+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>"}}
-    id("lbr").onclick=function(){showPanel("lb")}
+    
+    // Display with medals
+    if(!lb.length){
+      p.innerHTML+="<div style='text-align:center;color:#5a6a7a;padding:20px'>Будь первым! 🚀</div>";
+    }else{
+      var medals=["🥇","🥈","🥉"];
+      for(var i=0;i<Math.min(lb.length,20);i++){
+        var r=lb[i],isMe=r.name===curUser;
+        var medal=i<3?medals[i]:"#"+(i+1);
+        var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
+        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
+      }
+    }
+    
+    // Global leaderboard section
+    p.innerHTML+="<div style='margin-top:15px;border-top:1px solid rgba(0,255,255,.1);padding-top:10px'>";
+    p.innerHTML+="<div style='color:#0ff;font-size:11px;font-weight:bold;margin-bottom:5px'>🌍 Глобальный рейтинг</div>";
+    p.innerHTML+="<div id='global-lb' style='color:#5a6a7a;font-size:10px'>Загрузка...</div>";
+    p.innerHTML+="</div>";
+    
+    id("lbr").onclick=function(){showPanel("lb")};
+    
+    // Fetch global leaderboard from GitHub
+    try{
+      var xhr=new XMLHttpRequest();
+      xhr.open("GET","https://raw.githubusercontent.com/tommleebusiness/cyber-realm-game/master/leaderboard.json?t="+Date.now(),true);
+      xhr.onload=function(){
+        try{
+          var glb=JSON.parse(xhr.responseText);
+          if(glb&&glb.players){
+            glb.players.sort(function(a,b){return b.credits-a.credits});
+            var html="";
+            var gmedals=["🥇","🥈","🥉"];
+            for(var i=0;i<Math.min(glb.players.length,10);i++){
+              var r=glb.players[i];
+              var medal=i<3?gmedals[i]:"#"+(i+1);
+              html+="<div class='strow'><span style='min-width:28px'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+            }
+            var el=id("global-lb");
+            if(el)el.innerHTML=html;
+          }
+        }catch(e){var el=id("global-lb");if(el)el.innerHTML="Ошибка загрузки";}
+      };
+      xhr.onerror=function(){var el=id("global-lb");if(el)el.innerHTML="Нет подключения";};
+      xhr.send();
+    }catch(e){var el=id("global-lb");if(el)el.innerHTML="Недоступно";}
   }else if(t==="dt"){
     id("panT").textContent="💎 Поддержка";
     var addr="0xC3a92F52E39aaa4B86011d877b40B80Dc39313Ff";
