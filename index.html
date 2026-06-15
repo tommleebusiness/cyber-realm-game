@@ -512,7 +512,7 @@ function tap(){
     var critDmg=1.5+(critLvl||0)*0.3;
     if(critLvl>0&&Math.random()<critChance/100){
       dmg=Math.floor(dmg*critDmg);
-      showCritText();
+      showCritText();playSound("crit");
     }
     
     // Skill: Boss killer
@@ -625,7 +625,7 @@ function spawnBoss(){
   var rewardMult=S.bossRewardMult||1;
   S.cb={n:boss.n,hp:hp,cr:Math.floor(boss.cr*Math.pow(1.15,S.pr)*rewardMult*(S.activePet===4?1.25:1)),ic:boss.ic,rare:rare,maxHP:hp};
   S.bh=hp;S.tapsOnBoss=0;
-  showBossFight();
+  showBossFight();playSound("boss");
 }
 function showBossFight(){
   id("bfight").style.display="flex";
@@ -663,7 +663,7 @@ function updateBossHP(){
   id("bf-hp").style.width=p+"%";
   id("bf-text").textContent="HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+" | Тапов: "+S.tapsOnBoss;
 }
-function flyText(t){
+function flyText(t){playSound("coin");
   var p=document.createElement("div");p.className="pt";p.textContent=t;
   p.style.left=(30+Math.random()*40)+"%";p.style.top="40%";
   id("parts").appendChild(p);
@@ -683,7 +683,7 @@ function attackBoss(){
   d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";
   id("bfight").appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},800);
   if(S.bh<=0){winBoss()}else{if(!blocked){var bd=Math.max(1,Math.floor(S.cb.maxHP*0.0005));S.c=Math.max(0,S.c-bd)}updateBossHP()}
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
   draw();saveGame();
 }
 id("bf-atk").onclick=attackBoss;
@@ -1021,7 +1021,7 @@ window.addEventListener("beforeunload",function(){saveGame()});
 setInterval(function(){saveGame()},30000);
 setInterval(function(){
   if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
   tickEvents();draw();
 },1000);
 setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000)S.combo=0;draw()},2000);
@@ -1038,7 +1038,7 @@ function calcOffline(){
   if(gained<1)return;
   S.c+=gained;S.ct+=gained;S.rp+=gained;
   setTimeout(function(){toast("💤 Оффлайн: +"+fmt(gained)+"💎")},1000);
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08}
+  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
   draw();
 }
 
@@ -1064,65 +1064,81 @@ try {
   }
 } catch(e) {}
 
-// === BACKGROUND MUSIC ===
+// === BACKGROUND MUSIC & SOUND EFFECTS ===
 var bgMusic=null;
-var musicEnabled=false;
-function initMusic(){
-  // Create ambient cyberpunk music using Web Audio API
+var musicPlaying=false;
+var soundEnabled=true;
+var audioCtx=null;
+
+function getAudioCtx(){
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended")audioCtx.resume();
+  return audioCtx;
+}
+
+function playSound(type){
+  if(!soundEnabled)return;
   try{
-    var ctx=new (window.AudioContext||window.webkitAudioContext)();
-    var masterGain=ctx.createGain();
-    masterGain.gain.value=0.15;
-    masterGain.connect(ctx.destination);
-    
-    // Bass drone
-    var bass=ctx.createOscillator();
-    bass.type="sawtooth";
-    bass.frequency.value=55;
-    var bassGain=ctx.createGain();
-    bassGain.gain.value=0.3;
-    bass.connect(bassGain);
-    bassGain.connect(masterGain);
-    bass.start();
-    
-    // Pad
-    var pad=ctx.createOscillator();
-    pad.type="sine";
-    pad.frequency.value=220;
-    var padGain=ctx.createGain();
-    padGain.gain.value=0.1;
-    pad.connect(padGain);
-    padGain.connect(masterGain);
-    pad.start();
-    
-    // LFO for movement
-    var lfo=ctx.createOscillator();
-    lfo.frequency.value=0.2;
-    var lfoGain=ctx.createGain();
-    lfoGain.gain.value=30;
-    lfo.connect(lfoGain);
-    lfoGain.connect(pad.frequency);
-    lfo.start();
-    
-    bgMusic={ctx:ctx,bass:bass,pad:pad,lfo:lfo,master:masterGain};
-    musicEnabled=true;
+    var ctx=getAudioCtx();
+    var osc=ctx.createOscillator();
+    var g=ctx.createGain();
+    osc.connect(g);g.connect(ctx.destination);
+    var now=ctx.currentTime;
+    if(type==="tap"){osc.frequency.value=600;osc.type="sine";g.gain.value=0.08;g.gain.exponentialRampToValueAtTime(0.001,now+0.04);osc.start();osc.stop(now+0.04);
+    }else if(type==="coin"){osc.frequency.value=880;osc.type="sine";g.gain.value=0.1;g.gain.exponentialRampToValueAtTime(0.001,now+0.08);osc.start();osc.stop(now+0.08);
+      setTimeout(function(){try{var c2=getAudioCtx(),o2=c2.createOscillator(),g2=c2.createGain();o2.connect(g2);g2.connect(c2.destination);o2.frequency.value=1200;o2.type="sine";g2.gain.value=0.08;g2.gain.exponentialRampToValueAtTime(0.001,c2.currentTime+0.06);o2.start();o2.stop(c2.currentTime+0.06);}catch(e){}},60);
+    }else if(type==="boss"){osc.frequency.value=80;osc.type="sawtooth";g.gain.value=0.15;g.gain.exponentialRampToValueAtTime(0.001,now+0.4);osc.start();osc.stop(now+0.4);
+    }else if(type==="crit"){osc.frequency.value=400;osc.type="square";g.gain.value=0.12;osc.frequency.exponentialRampToValueAtTime(1000,now+0.08);g.gain.exponentialRampToValueAtTime(0.001,now+0.12);osc.start();osc.stop(now+0.12);
+    }else if(type==="level"){osc.frequency.value=523;osc.type="sine";g.gain.value=0.1;osc.start();osc.stop(now+0.15);
+      setTimeout(function(){try{var c2=getAudioCtx(),o2=c2.createOscillator(),g2=c2.createGain();o2.connect(g2);g2.connect(c2.destination);o2.frequency.value=659;o2.type="sine";g2.gain.value=0.1;o2.start();o2.stop(c2.currentTime+0.15);}catch(e){}},100);
+    }
   }catch(e){}
 }
-function toggleMusic(){
-  if(!bgMusic)return;
-  musicEnabled=!musicEnabled;
-  bgMusic.master.gain.value=musicEnabled?0.15:0;
-  toast(musicEnabled?"🎵 Музыка включена":"🔇 Музыка выключена");
+
+function initMusic(){
+  document.addEventListener("click",function musicStarter(){
+    if(!bgMusic){
+      try{
+        var ctx=getAudioCtx();
+        var master=ctx.createGain();
+        master.gain.value=0;
+        master.connect(ctx.destination);
+        var freqs=[55,110,165];
+        var types=["sawtooth","sine","triangle"];
+        var oscs=[];
+        for(var i=0;i<3;i++){
+          var o=ctx.createOscillator();o.type=types[i];o.frequency.value=freqs[i];
+          var g=ctx.createGain();g.gain.value=0.06/(i+1);
+          o.connect(g);g.connect(master);o.start();oscs.push(o);
+        }
+        var lfo=ctx.createOscillator();lfo.frequency.value=0.08;
+        var lfoG=ctx.createGain();lfoG.gain.value=15;
+        lfo.connect(lfoG);lfoG.connect(oscs[1].frequency);lfo.start();
+        bgMusic={ctx:ctx,master:master};
+        toast("\ud83c\udfb5 \u0417\u0432\u0443\u043a \u0430\u043a\u0442\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u043d! \u041d\u0430\u0436\u043c\u0438\u0442\u0435 \ud83c\udfb5 \u0434\u043b\u044f \u0432\u043a\u043b/\u0432\u044b\u043a\u043b");
+      }catch(e){}
+    }
+    document.removeEventListener("click",musicStarter);
+  });
 }
+
+function toggleMusic(){
+  if(!bgMusic){toast("\u26a0\ufe0f \u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u0422\u0410\u041f");return;}
+  musicPlaying=!musicPlaying;
+  bgMusic.master.gain.value=musicPlaying?0.1:0;
+  toast(musicPlaying?"\ud83c\udfb5 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u043a\u043b":"\ud83d\udd07 \u0432\u044b\u043a\u043b");
+}
+function toggleSound(){soundEnabled=!soundEnabled;toast(soundEnabled?"\ud83d\udd0a \u0417\u0432\u0443\u043a\u0438 \u0432\u043a\u043b":"\ud83d\udd08 \u0432\u044b\u043a\u043b");}
 
 // Bind all UI events after DOM is ready
 function initAll() {
   bindFooterTabs();
   bindAuth();
   initBg();
+  initMusic();
   
   var lv=localStorage.getItem("cr13_lv")||"0";
-  if(lv!==VER){localStorage.setItem("cr13_lv",VER);setTimeout(function(){addChatMsg("🦉 OWL","🆕 v"+VER+"!\n25 боссов\n8 скиллов\n10 питомцев\n50 достижений\n30 квестов\n15 крафтов\nНапиши 'что нового!'")},2000)}
+  if(lv!==VER){localStorage.setItem("cr13_lv",VER);setTimeout(function(){addChatMsg("\ud83e\udd89 OWL","\ud83c\udd95 v"+VER+"!\n\ud83d\udc79 25 \u0431\u043e\u0441\u0441\u043e\u0432\n\u26a1 8 \u0441\u043a\u0438\u043b\u043b\u043e\u0432\n\ud83d\udc3e 10 \u043f\u0438\u0442\u043e\u043c\u0446\u0435\u0432\n\ud83c\udfc6 50 \u0434\u043e\u0441\u0442\u0438\u0436\u0435\u043d\u0438\u0439\n\ud83d\udcc5 30 \u043a\u0432\u0435\u0441\u0442\u043e\u0432\n\ud83d\udd27 15 \u043a\u0440\u0430\u0444\u0442\u043e\u0432\n\ud83c\udfb5 \u0424\u043e\u043d\u043e\u0432\u0430\u044f \u043c\u0443\u0437\u044b\u043a\u0430\n\ud83d\udca4 \u041e\u0444\u0444\u043b\u0430\u0439\u043d-\u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441")},2000)}
   
   // Try to auto-login last user
   var lastUser=localStorage.getItem("cr_last");
