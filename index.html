@@ -949,7 +949,7 @@ function showPanel(t){
       var c=CRAFT_RECIPES[i],canAfford=S.c>=c.cost.credits&&S.g>=c.cost.gems;
       var cls=canAfford?' can':'';
       var costStr=canAfford?c.cost.credits+' кред':'Нужно: '+fmt(c.cost.credits)+' кред';
-      p.innerHTML+='<div class="card"+cls+"" data-cidx=""+i+""><div class="h"><span class="nm">"+c.n+"</span><span class="lv">"+c.cost.gems+" гемов</span></div><div class="d">"+c.d+"</div><div class="c">"+costStr+"</div></div>';
+      p.innerHTML+='<div class="card'+cls+'" data-cidx="'+i+'"><div class="h"><span class="nm">'+c.n+'</span><span class="lv">'+c.cost.gems+' гемов</span></div><div class="d">'+c.d+'</div><div class="c">'+costStr+'</div></div>';
     }
     var ccards=p.querySelectorAll(".card");
     for(var i=0;i<ccards.length;i++){ccards[i].onclick=function(){var idx=parseInt(ga(this,"data-cidx")),r=CRAFT_RECIPES[idx];if(S.c<r.cost.credits||S.g<r.cost.gems)return;S.c-=r.cost.credits;S.g-=r.cost.gems;r.fn();chkAch();chkQuests();showPanel("cf");saveGame();draw()}}
@@ -1101,7 +1101,7 @@ function renderLeaderboard(sortBy){
   };
 
   // Sync button
-  id("lb-sync").onclick(function(){syncLeaderboard(this)});
+  id("lb-sync").onclick=function(){syncLeaderboard(this)};
 }
 
 function doPrestige(){
@@ -1246,7 +1246,7 @@ window.addEventListener("beforeinstallprompt",function(e){
 });
 
 // === VERSION & UPDATE NOTIFICATIONS ===
-var GAME_VERSION="9.5";
+var GAME_VERSION="9.6";
 document.title += " v" + GAME_VERSION;
 document.getElementById('version-text').textContent = 'Футуристическая Idle Игра v' + GAME_VERSION;
 var LAST_SEEN_VERSION=localStorage.getItem("cr_lastVersion")||"0";
