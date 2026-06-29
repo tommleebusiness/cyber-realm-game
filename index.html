@@ -202,6 +202,14 @@ function fmt(n){if(n>=1e18)return(n/1e18).toFixed(1)+"Qi";if(n>=1e15)return(n/1e
 function dlg(t,p,bs){id("panT").textContent=t;id("pc").innerHTML="";id("pc").innerHTML='<div style="padding:10px;color:#c0d0e0;font-size:12px;line-height:1.6">'+p.replace(/\n/g,"<br>")+"</div>";if(bs){var btns="";for(var i=0;i<bs.length;i++){btns+='<button class="btn" style="margin:4px 2px;padding:8px 16px;font-size:11px" id="dlgbtn'+i+'">'+bs[i].t+"</button>"}id("pc").innerHTML+=btns;for(var i=0;i<bs.length;i++){(function(btn){id("dlgbtn"+i).onclick=btn.f})(bs[i])}}id("panel").style.display="flex"}
 function toast(t){var el=id("toast");el.textContent=t;el.style.opacity="1";setTimeout(function(){el.style.opacity="0"},2500)}
 var VER="13.0";
+var musicEnabled=false;
+var EVENTS=[
+  {n:"Двойные кредиты",t:30,fn:function(){var old=1;S.gm*=2;setTimeout(function(){S.gm=Math.max(1,S.gm/2)},30000);addChatMsg("🦉 OWL","⚡ Двойные кредиты на 30 сек!")}},
+  {n:"Босс-нашествие",t:60,fn:function(){spawnBoss();addChatMsg("🦉 OWL","👹 Близится босс!")}},
+  {n:"Золотой дождь",t:20,fn:function(){var g=10+Math.floor(Math.random()*50);S.g+=g;addChatMsg("🦉 OWL","💎 Золотой дождь! +"+g+" гемов")}},
+  {n:"Множитель x2",t:45,fn:function(){S.luck*=2;setTimeout(function(){S.luck=Math.max(1,S.luck/2)},45000);addChatMsg("🦉 OWL","🍀 Удача x2 на 45 сек!")}},
+  {n:"Свободный тап",t:30,fn:function(){S.c+=1000;S.ct+=1000;addChatMsg("🦉 OWL","💰 +1000 кредитов!")}}
+];
 var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
 var tapSinceBoss=0,BOSS_INTERVAL=300;
 
