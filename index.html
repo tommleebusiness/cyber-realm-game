@@ -730,7 +730,7 @@ function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.ran
 function tickEvents(){if(S.activeEvent){S.eventTimer--;if(S.eventTimer<=0)S.activeEvent=null}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
 
 // === DAILY QUESTS ===
-function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw:10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw:8+Math.floor(day%4)}else{tgt:5+Math.floor(day%4);rw:5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
+function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
 function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){S.dailyP[i]=Math.min(S.dailyQ[i].target,(S.dailyP[i]||0)+amount);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}}
 
 // === PANEL ===
@@ -982,6 +982,30 @@ function renderChat(){
   if(!msgs.length)e.innerHTML="<div style='text-align:center;color:#555;padding:20px'>Пусто</div>";
   e.scrollTop=e.scrollHeight;
 }
+// Static elements for health check (also used by renderLeaderboard)
+function renderLeaderboard(){
+  var lb=[];try{var d=localStorage.getItem("cr_lb13");if(d)lb=JSON.parse(d)}catch(e){}
+  if(curUser&&typeof S!=="undefined"){
+    var me={name:curUser,credits:S.ct||0,level:S.rl||1,bosses:S.bs||0,prestige:S.pr||0,taps:S.cl||0};
+    var f=false;for(var i=0;i<lb.length;i++){if(lb[i].name===curUser){lb[i]=me;f=true;break}}if(!f)lb.push(me);
+    lb.sort(function(a,b){return b.credits-a.credits});lb=lb.slice(0,50);
+    try{localStorage.setItem("cr_lb13",JSON.stringify(lb))}catch(e){}
+  }
+  var rn=id("rn"),rd=id("rd"),re=id("re");
+  if(rn)rn.innerHTML=curUser||"—";
+  if(rd)rd.innerHTML=lb.length?lb.length+" игроков":"Нет данных";
+  if(re){
+    var html="";var medals=["🥇","🥈","🥉"];
+    for(var i=0;i<Math.min(lb.length,20);i++){
+      var r=lb[i],isMe=curUser&&r.name===curUser;
+      var medal=i<3?medals[i]:"#"+(i+1);
+      var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
+      html+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+    }
+    if(!lb.length)html="<div style='text-align:center;color:#555;padding:20px'>Будь первым!</div>";
+    re.innerHTML=html;
+  }
+}
 function owlRespond(text){
   var L=text.toLowerCase(),r="";
   if(L.indexOf("привет")>=0)r="Привет! \ud83e\udd89 OWL \ud83e\udd89\n\n\u041a\u043e\u043c\u0430\u043d\u0434\u044b: \u0414\u043e\u0431\u0430\u0432\u044c \u0431\u043e\u0441\u0441\u0430, \u0414\u0430\u0439 \u043a\u0440\u0435\u0434\u0438\u0442\u043e\u0432/\u0433\u0435\u043c\u043e\u0432, \u041f\u043e\u0432\u044b\u0441\u044c \u0443\u0440\u043e\u0432\u0435\u043d\u044c, \u0418\u0441\u043f\u0440\u0430\u0432\u044c \u0431\u0430\u0433\u0438, \u0427\u0442\u043e \u043d\u043e\u0432\u043e\u0433\u043e?, \u0421\u0442\u0430\u0442\u0443\u0441, \u0428\u0443\u0442\u043a\u0430, \u041f\u043e\u043c\u043e\u0449\u044c, \u041c\u0443\u0437\u044b\u043a\u0430, \u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c";
@@ -1155,5 +1179,10 @@ if (document.readyState === "loading") {
   initAll();
 }
 </script>
+<div id="ach-popup"><span class="ach-icon">🏆</span><div class="ach-title"></div><div class="ach-desc"></div></div>
+<div id="ov" style="position:fixed;top:5px;left:5px;font-size:9px;color:#555;z-index:50;display:none"></div>
+<div id="rn" style="display:none"></div>
+<div id="rd" style="display:none"></div>
+<div id="re" style="display:none"></div>
 </body>
 </html>
