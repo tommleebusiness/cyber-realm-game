@@ -1123,8 +1123,19 @@ function getAudioCtx(){
   return audioCtx;
 }
 
-function playSound(type){
+function vibrate(pattern){
+  if(navigator.vibrate)navigator.vibrate(pattern);
+}
+function vibratePattern(type){
   if(!soundEnabled)return;
+  if(type==="tap")vibrate(15);
+  else if(type==="coin")vibrate([30,20,40]);
+  else if(type==="boss")vibrate([100,50,100,50,200]);
+  else if(type==="crit")vibrate([20,10,60]);
+  else if(type==="level")vibrate([30,40,30,40,80]);
+}
+function playSound(type){
+  vibratePattern(type);
   try{
     var ctx=getAudioCtx();
     var osc=ctx.createOscillator();
