@@ -499,8 +499,20 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
   
   // Visual effects
-  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50?" rainbow":"");setTimeout(function(){cd.className=""},1500)}
+  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50? " rainbow":"");setTimeout(function(){cd.className=""},1500)}
   if(S.combo>1){addClass(id("combo-bar"),"active");id("combo-bar-fill").style.width="100%"}
+  // Combo milestone rewards
+  var milestones=[10,25,50,100];
+  for(var mi=0;mi<milestones.length;mi++){
+    var m=milestones[mi];
+    if(S.combo===m){
+      var bonus=Math.floor(S.cp*S.gm*m*0.5);
+      S.c+=bonus;S.ct+=bonus;S.rp+=bonus;
+      toast("🔥 Комбо x"+m+"! +"+fmt(bonus)+"💎");
+      playSound("coin");
+      break;
+    }
+  }
   id("tpinfo").textContent="+"+fmt(v)+(S.combo>1?" x"+cb.toFixed(1)+" ⚡":"");
   id("tpinfo").className=cb>1?"bonus":"";
   var btn=id("tpbtn");btn.style.transform="scale(.85)";setTimeout(function(){btn.style.transform=""},100);
