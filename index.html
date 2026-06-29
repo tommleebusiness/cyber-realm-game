@@ -1113,7 +1113,7 @@ try {
 // === BACKGROUND MUSIC & SOUND EFFECTS ===
 var bgMusic=null;
 var musicPlaying=false;
-var soundEnabled=true;
+var soundEnabled=localStorage.getItem("cr13_sound")!=="0";
 var audioCtx=null;
 
 function getAudioCtx(){
@@ -1174,7 +1174,7 @@ function toggleMusic(){
   bgMusic.master.gain.value=musicPlaying?0.1:0;
   toast(musicPlaying?"\ud83c\udfb5 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u043a\u043b":"\ud83d\udd07 \u0432\u044b\u043a\u043b");
 }
-function toggleSound(){soundEnabled=!soundEnabled;toast(soundEnabled?"\ud83d\udd0a \u0417\u0432\u0443\u043a\u0438 \u0432\u043a\u043b":"\ud83d\udd08 \u0432\u044b\u043a\u043b");}
+function toggleSound(){soundEnabled=!soundEnabled;try{localStorage.setItem("cr13_sound",soundEnabled?"1":"0")}catch(e){}toast(soundEnabled?"\ud83d\udd0a \u0417\u0432\u0443\u043a\u0438 \u0432\u043a\u043b":"\ud83d\udd08 \u0432\u044b\u043a\u043b");}
 
 // Bind all UI events after DOM is ready
 function initAll() {
