@@ -801,6 +801,12 @@ function showPanel(t){
     for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+="<div class='ach"+(done?" done":"")+"'><span class='ic'>"+(done?"✅":"🔲")+"</span><div class='inf'><div class='an'>"+a.n+"</div></div><span class='ar'>"+(done?"Готово":"💎10")+"</span></div>"}
   }else if(t==="qu"){
     id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
+    p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания</div>";
+    for(var di=0;di<S.dailyQ.length;di++){
+      var dq=S.dailyQ[di],dp=S.dailyP[di]||0,pct=Math.min(100,Math.floor(dp/dq.target*100)),done=dq.done;
+      p.innerHTML+="<div style='background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.1);border-radius:4px;padding:5px 6px;margin-bottom:3px"+(done?";opacity:.5":"")+"'><div style='display:flex;justify-content:space-between;font-size:10px'><span style='color:#0ff'>"+dq.name+"</span><span style='color:#ffd700'>"+(done?"✅":dp+"/"+dq.target)+"</span></div><div style='background:#1a1a2e;border-radius:2px;height:4px;margin-top:3px;overflow:hidden'><div style='height:100%;width:"+pct+"%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:2px;transition:width .3s'></div></div><div style='font-size:8px;color:#555;margin-top:2px'>Награда: +"+dq.reward+"💎</div></div>";
+    }
+    p.innerHTML+="<div style='color:#0ff;font-size:10px;font-weight:bold;margin:8px 0 4px'>📋 Постоянные квесты</div>";
     for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i],done=completedQuests.indexOf(q.id)>=0;p.innerHTML+="<div class='ach"+(done?" done":"")+"'><span class='ic'>"+(done?"✅":"🎯")+"</span><div class='inf'><div class='an'>"+q.n+"</div><div style='color:#5a6a7a;font-size:8px'>"+q.d+"</div></div><span class='ar'>"+(done?"Готово":"+"+fmt(q.r.c)+"💎")+"</span></div>"}
   }else if(t==="cf"){
     id("panT").textContent="🔧 Крафт";
@@ -1152,6 +1158,7 @@ function vibratePattern(type){
   else if(type==="level")vibrate([30,40,30,40,80]);
 }
 function playSound(type){
+  if(!soundEnabled)return;
   vibratePattern(type);
   try{
     var ctx=getAudioCtx();

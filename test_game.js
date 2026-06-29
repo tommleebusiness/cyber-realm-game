@@ -31,7 +31,7 @@ function dlg(t,p,bs){id("panT").textContent=t;id("pc").innerHTML="";id("pc").inn
 function toast(t){var el=id("toast");el.textContent=t;el.style.opacity="1";setTimeout(function(){el.style.opacity="0"},2500)}
 var VER="13.0";
 var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
-var tapSinceBoss=0,BOSS_INTERVAL=300;
+var tapSinceBoss=0,BOSS_INTERVAL=300,comboTimer=null;
 
 function getCPS(){return Math.floor(S.ps*S.gm)}
 function initGame(){
@@ -330,8 +330,20 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
   
   // Visual effects
-  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50?" rainbow":"");setTimeout(function(){cd.className=""},1500)}
+  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50? " rainbow":"");if(comboTimer)clearTimeout(comboTimer);comboTimer=setTimeout(function(){cd.className="";comboTimer=null},1500)}
   if(S.combo>1){addClass(id("combo-bar"),"active");id("combo-bar-fill").style.width="100%"}
+  // Combo milestone rewards
+  var milestones=[10,25,50,100];
+  for(var mi=0;mi<milestones.length;mi++){
+    var m=milestones[mi];
+    if(S.combo===m){
+      var bonus=Math.floor(S.cp*S.gm*m*0.5);
+      S.c+=bonus;S.ct+=bonus;S.rp+=bonus;
+      toast("🔥 Комбо x"+m+"! +"+fmt(bonus)+"💎");
+      playSound("coin");
+      break;
+    }
+  }
   id("tpinfo").textContent="+"+fmt(v)+(S.combo>1?" x"+cb.toFixed(1)+" ⚡":"");
   id("tpinfo").className=cb>1?"bonus":"";
   var btn=id("tpbtn");btn.style.transform="scale(.85)";setTimeout(function(){btn.style.transform=""},100);
@@ -528,7 +540,7 @@ id("bf-atk").onclick=attackBoss;
 
 // === ACHIEVEMENTS & QUESTS ===
 function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
-function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.name+"!");draw()}}}
+function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.n+"!");draw()}}}
 function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
 function unlockRandomPet(){var locked=[];for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0)locked.push(i+1);}if(locked.length>0){var r=locked[Math.floor(Math.random()*locked.length)];S.pets.push(r);toast("🐾 "+PETS[r-1].n+"!")}}
 
@@ -557,6 +569,7 @@ function doPrestige(){
 function draw(){
   id("rc").textContent=fmt(S.c);id("rg").textContent=S.g;id("rlv").textContent=S.rl;id("pr").textContent=S.pr;
   id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl)+(S.combo>1?" | ⚡x"+S.combo:"");
+  var tt=id("ttaps");if(tt)tt.textContent="Всего тапов: "+fmt(S.cl);
   var p=S.rg>0?Math.min(100,(S.rp/S.rg)*100):0;id("prog-fi").style.width=p+"%";
   var bossInfo=S.cb?" | БОСС!":" | босс: "+(BOSS_INTERVAL-tapSinceBoss);
   id("prog-t").textContent="Рейм "+S.rl+bossInfo;
@@ -611,7 +624,7 @@ function showPanel(t){
       // bf-x bound globally in initAll
     }else{
       var rem=BOSS_INTERVAL-tapSinceBoss;if(rem<0)rem=0;
-      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div>";
+      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div><div style='margin-top:6px;color:#00e676;font-size:11px;font-weight:bold'>⚡ Урон тапа: "+fmt(S.cp*S.gm)+"</div></div>";
       if(S.rl>=3){p.innerHTML+="<button class='atk-btn' id='sb' style='margin-top:10px'>⚔️ Призвать</button>";id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}
     }
   }else if(t==="ac"){
@@ -619,6 +632,12 @@ function showPanel(t){
     for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+="<div class='ach"+(done?" done":"")+"'><span class='ic'>"+(done?"✅":"🔲")+"</span><div class='inf'><div class='an'>"+a.n+"</div></div><span class='ar'>"+(done?"Готово":"💎10")+"</span></div>"}
   }else if(t==="qu"){
     id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
+    p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания</div>";
+    for(var di=0;di<S.dailyQ.length;di++){
+      var dq=S.dailyQ[di],dp=S.dailyP[di]||0,pct=Math.min(100,Math.floor(dp/dq.target*100)),done=dq.done;
+      p.innerHTML+="<div style='background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.1);border-radius:4px;padding:5px 6px;margin-bottom:3px"+(done?";opacity:.5":"")+"'><div style='display:flex;justify-content:space-between;font-size:10px'><span style='color:#0ff'>"+dq.name+"</span><span style='color:#ffd700'>"+(done?"✅":dp+"/"+dq.target)+"</span></div><div style='background:#1a1a2e;border-radius:2px;height:4px;margin-top:3px;overflow:hidden'><div style='height:100%;width:"+pct+"%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:2px;transition:width .3s'></div></div><div style='font-size:8px;color:#555;margin-top:2px'>Награда: +"+dq.reward+"💎</div></div>";
+    }
+    p.innerHTML+="<div style='color:#0ff;font-size:10px;font-weight:bold;margin:8px 0 4px'>📋 Постоянные квесты</div>";
     for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i],done=completedQuests.indexOf(q.id)>=0;p.innerHTML+="<div class='ach"+(done?" done":"")+"'><span class='ic'>"+(done?"✅":"🎯")+"</span><div class='inf'><div class='an'>"+q.n+"</div><div style='color:#5a6a7a;font-size:8px'>"+q.d+"</div></div><span class='ar'>"+(done?"Готово":"+"+fmt(q.r.c)+"💎")+"</span></div>"}
   }else if(t==="cf"){
     id("panT").textContent="🔧 Крафт";
@@ -633,7 +652,7 @@ function showPanel(t){
         if(S.craft.indexOf(r.id)>=0)return;
         if(S.c<r.cost.c||S.g<r.cost.g){toast("Не хватает ресурсов!");return;}
         S.c-=r.cost.c;S.g-=r.cost.g;S.craft.push(r.id);r.fn();
-        toast("🔧 "+c.n+" создан!");
+        toast("🔧 "+r.n+" создан!");
         chkAch();showPanel("cf");saveGame();draw();
       }
     }
@@ -797,10 +816,14 @@ function bindAuth() {
   el = id("tpbtn"); if (el) el.addEventListener("click",tap);
   // Global bf-x binding (close boss fight overlay)
   var musicBtn=id("music-btn");if(musicBtn)musicBtn.onclick=function(){toggleMusic()};
+  var soundBtn=id("sound-btn");if(soundBtn)soundBtn.onclick=function(){toggleSound()};
   var bfx=id("bf-x");if(bfx)bfx.onclick=function(){
+    // Closing boss fight applies a cooldown penalty (anti-exploit)
+    S.bossCd=200;
     S.cb=null;S.bh=0;id("bfight").style.display="none";
-    // Go back to game screen
     id("panel").style.display="none";
+    toast("🏳️ Босс отступил! Кулдаун: 200 тапов");
+    draw();
   };
 }
 
@@ -895,7 +918,7 @@ setInterval(function(){
   if(S.rl>oldLvl){var rlvl=id("rlv");addClass(rlvl,"lvlflash");setTimeout(function(){remClass(rlvl,"lvlflash")},700);playSound("level");toast("РЕЙМ "+(S.rl-oldLvl>1?"+"+(S.rl-oldLvl):"")+"!")}
   tickEvents();draw();
 },1000);
-setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active")}draw()},2000);
+setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active");id("combo-display").className="";if(comboTimer){clearTimeout(comboTimer);comboTimer=null}}draw()},2000);
 setInterval(function(){localStorage.setItem("cr_t",Date.now().toString())},10000);
 setInterval(function(){
   if(S.combo>1&&S.lastTapTime>0){
@@ -954,8 +977,20 @@ function getAudioCtx(){
   return audioCtx;
 }
 
+function vibrate(pattern){
+  if(navigator.vibrate)navigator.vibrate(pattern);
+}
+function vibratePattern(type){
+  if(!soundEnabled)return;
+  if(type==="tap")vibrate(15);
+  else if(type==="coin")vibrate([30,20,40]);
+  else if(type==="boss")vibrate([100,50,100,50,200]);
+  else if(type==="crit")vibrate([20,10,60]);
+  else if(type==="level")vibrate([30,40,30,40,80]);
+}
 function playSound(type){
   if(!soundEnabled)return;
+  vibratePattern(type);
   try{
     var ctx=getAudioCtx();
     var osc=ctx.createOscillator();
