@@ -750,8 +750,8 @@ function draw(){
 }
 
 // === EVENTS ===
-function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.random()*EVENTS.length)];S.activeEvent=e;S.eventTimer=e.t;e.fn();toast("⚡ "+e.n);draw()}
-function tickEvents(){if(S.activeEvent){S.eventTimer--;if(S.eventTimer<=0)S.activeEvent=null}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
+function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.random()*EVENTS.length)];S.activeEvent=e;S.eventTimer=e.t;e.fn();var eb=id("event-bar");eb.textContent="⚡ "+e.n+" ("+e.t+"с)";eb.style.display="block";draw()}
+function tickEvents(){if(S.activeEvent){S.eventTimer--;var eb=id("event-bar");if(eb&&S.activeEvent)eb.textContent="⚡ "+S.activeEvent.n+" ("+S.eventTimer+"с)";if(S.eventTimer<=0){if(eb)eb.style.display="none";S.activeEvent=null}}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
 
 // === DAILY QUESTS ===
 function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
@@ -1177,10 +1177,11 @@ function initMusic(){
 }
 
 function toggleMusic(){
-  if(!bgMusic){toast("\u26a0\ufe0f \u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u0422\u0410\u041f");return;}
+  if(!bgMusic){toast("⚠️ Сначала нажми ТАП");return;}
   musicPlaying=!musicPlaying;
+  musicEnabled=musicPlaying;
   bgMusic.master.gain.value=musicPlaying?0.1:0;
-  toast(musicPlaying?"\ud83c\udfb5 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u043a\u043b":"\ud83d\udd07 \u0432\u044b\u043a\u043b");
+  toast(musicPlaying?"🎵 Музыка вкл":"🔇 вкл");
 }
 function toggleSound(){soundEnabled=!soundEnabled;try{localStorage.setItem("cr13_sound",soundEnabled?"1":"0")}catch(e){}toast(soundEnabled?"\ud83d\udd0a \u0417\u0432\u0443\u043a\u0438 \u0432\u043a\u043b":"\ud83d\udd08 \u0432\u044b\u043a\u043b");}
 
