@@ -781,7 +781,7 @@ function showPanel(t){
       // bf-x bound globally in initAll
     }else{
       var rem=BOSS_INTERVAL-tapSinceBoss;if(rem<0)rem=0;
-      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div>";
+      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div><div style='margin-top:6px;color:#00e676;font-size:11px;font-weight:bold'>⚡ Урон тапа: "+fmt(S.cp*S.gm)+"</div></div>";
       if(S.rl>=3){p.innerHTML+="<button class='atk-btn' id='sb' style='margin-top:10px'>⚔️ Призвать</button>";id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}
     }
   }else if(t==="ac"){
