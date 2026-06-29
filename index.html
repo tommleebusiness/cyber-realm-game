@@ -730,8 +730,15 @@ function draw(){
 }
 
 // === EVENTS ===
+var EVENTS=[
+  {n:"Кредитный Шторм",t:30,fn:function(){S.gm*=1.5;toast("⚡ x1.5 доход!")}},
+  {n:"Золотой Дождь",t:20,fn:function(){var g=Math.floor(S.g*0.1)+5;S.g+=g;toast("💎 +"+g+" гемов!")}},
+  {n:"Время Удачи",t:45,fn:function(){S.luck+=0.5;toast("🍀 Удача +50%!")}},
+  {n:"Множитель x2",t:25,fn:function(){S.gm*=2;toast("🔥 x2 множитель!")}},
+  {n:"Плитка Босса",t:15,fn:function(){spawnBoss();toast("👹 Босс призван!")}}
+];
 function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.random()*EVENTS.length)];S.activeEvent=e;S.eventTimer=e.t;e.fn();toast("⚡ "+e.n);draw()}
-function tickEvents(){if(S.activeEvent){S.eventTimer--;if(S.eventTimer<=0)S.activeEvent=null}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
+function tickEvents(){if(S.activeEvent){S.eventTimer--;id("event-bar").textContent=S.activeEvent.n+" ("+S.eventTimer+"с)";id("event-bar").style.display=S.eventTimer>0?"block":"none";if(S.eventTimer<=0){S.activeEvent=null;id("event-bar").style.display="none"}}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
 
 // === DAILY QUESTS ===
 function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
