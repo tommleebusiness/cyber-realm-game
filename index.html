@@ -200,7 +200,7 @@ function dlg(t,p,bs){id("panT").textContent=t;id("pc").innerHTML="";id("pc").inn
 function toast(t){var el=id("toast");el.textContent=t;el.style.opacity="1";setTimeout(function(){el.style.opacity="0"},2500)}
 var VER="13.0";
 var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
-var tapSinceBoss=0,BOSS_INTERVAL=300;
+var tapSinceBoss=0,BOSS_INTERVAL=300,comboTimer=null;
 
 function getCPS(){return Math.floor(S.ps*S.gm)}
 function initGame(){
@@ -499,7 +499,7 @@ function tap(){
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
   
   // Visual effects
-  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50? " rainbow":"");setTimeout(function(){cd.className=""},1500)}
+  if(S.combo>=5){var cd=id("combo-display");cd.textContent="⚡ COMBO x"+S.combo+"!";cd.className="show"+(S.combo>=50? " rainbow":"");if(comboTimer)clearTimeout(comboTimer);comboTimer=setTimeout(function(){cd.className="";comboTimer=null},1500)}
   if(S.combo>1){addClass(id("combo-bar"),"active");id("combo-bar-fill").style.width="100%"}
   // Combo milestone rewards
   var milestones=[10,25,50,100];
@@ -1081,7 +1081,7 @@ setInterval(function(){
   if(S.rl>oldLvl){var rlvl=id("rlv");addClass(rlvl,"lvlflash");setTimeout(function(){remClass(rlvl,"lvlflash")},700);playSound("level");toast("РЕЙМ "+(S.rl-oldLvl>1?"+"+(S.rl-oldLvl):"")+"!")}
   tickEvents();draw();
 },1000);
-setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active")}draw()},2000);
+setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active");id("combo-display").className="";if(comboTimer){clearTimeout(comboTimer);comboTimer=null}}draw()},2000);
 setInterval(function(){localStorage.setItem("cr_t",Date.now().toString())},10000);
 setInterval(function(){
   if(S.combo>1&&S.lastTapTime>0){
