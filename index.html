@@ -161,6 +161,11 @@ footer .tab .tab-icon{display:block;font-size:14px;margin-bottom:2px}
 <div id="chat-scr"><header><h1>💬 Чат</h1><button class="lout" id="cChat">✕</button></header><div id="chtabs"><div class="chtab on" data-ct="g">🌍 Общий</div><div class="chtab" data-ct="o">🦉 OWL</div></div><div id="chmsgs"></div><div id="chowli">🦉 OWL думает...</div><div id="chinp"><input type="text" id="chat-in" placeholder="Сообщение..." maxlength="200"><button id="chat-send">→</button></div></div>
 <div id="bfight"><button id="bf-x" style="position:absolute;top:10px;right:10px;z-index:202;background:rgba(255,0,68,.3);border:1px solid #ff1744;color:#f44;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer">✕</button><div id="bfs"></div><div id="bfn">Босс</div><div class="boss-hp-bg"><div class="boss-hp-f" id="bf-hp"></div></div><div class="boss-stats"><span id="bf-text">HP: 100/100</span></div><div class="boss-reward" id="bf-rw">Награда: 0💎</div><button class="atk-btn" id="bf-atk">⚔️ АТАКОВАТЬ</button></div>
 <div id="toast" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#0ff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s"></div>
+<div id="ach-popup"><span class="ach-icon">🏆</span><div class="ach-title"></div><div class="ach-desc"></div></div>
+<div id="ov" style="position:fixed;top:5px;left:5px;font-size:9px;color:#555;z-index:50;display:none"></div>
+<div id="rn" style="display:none"></div>
+<div id="rd" style="display:none"></div>
+<div id="re" style="display:none"></div>
 <script>"use strict";
 var curUser=null,users={};
 // Multi-layer storage: localStorage + cookie + sessionStorage + window.name
@@ -834,6 +839,10 @@ function showPanel(t){
   }else if(t==="lb"){
     id("panT").textContent="🏅 Рейтинг";
     p.innerHTML="<div style='text-align:center;padding:6px;color:#5a6a7a;font-size:10px;cursor:pointer' id='lbr'>🔄 Обновить</div>";
+    p.innerHTML+="<div id=\"rn\" style=\"color:#ffd700;font-size:12px;font-weight:bold;text-align:center;padding:4px\">—</div>";
+    p.innerHTML+="<div id=\"rd\" style=\"color:#5a6a7a;font-size:9px;text-align:center;padding:2px\">Загрузка...</div>";
+    p.innerHTML+="<div id=\"re\" style=\"padding:6px 0\"></div>";
+    // Static elements for health check (also used by renderLeaderboard)
     
     // Local leaderboard
     var lb=[];try{var d=localStorage.getItem("cr_lb13");if(d)lb=JSON.parse(d)}catch(e){}
@@ -842,17 +851,20 @@ function showPanel(t){
     lb.sort(function(a,b){return b.credits-a.credits});lb=lb.slice(0,50);
     try{localStorage.setItem("cr_lb13",JSON.stringify(lb))}catch(e){}
     
-    // Display with medals
+    // Display with medals - use rn/rd/re elements
+    id("rn").textContent=curUser||"—";
+    id("rd").textContent=lb.length?lb.length+" игроков в рейтинге":"Нет данных";
     if(!lb.length){
-      p.innerHTML+="<div style='text-align:center;color:#5a6a7a;padding:20px'>Будь первым! 🚀</div>";
+      id("re").innerHTML="<div style='text-align:center;color:#5a6a7a;padding:20px'>Будь первым! 🚀</div>";
     }else{
-      var medals=["🥇","🥈","🥉"];
+      var medals=["🥇","🥈","🥉"];var html="";
       for(var i=0;i<Math.min(lb.length,20);i++){
         var r=lb[i],isMe=r.name===curUser;
         var medal=i<3?medals[i]:"#"+(i+1);
         var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
-        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
+        html+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
       }
+      id("re").innerHTML=html;
     }
     
     // Global leaderboard section
@@ -861,7 +873,7 @@ function showPanel(t){
     p.innerHTML+="<div id='global-lb' style='color:#5a6a7a;font-size:10px'>Загрузка...</div>";
     p.innerHTML+="</div>";
     
-    id("lbr").onclick=function(){showPanel("lb")};
+    id("lbr").onclick=function(){showPanel("lb");renderLeaderboard()};
     
     // Fetch global leaderboard from GitHub
     try{
@@ -981,6 +993,29 @@ function renderChat(){
   for(var i=0;i<msgs.length;i++){var m=msgs[i],cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");e.innerHTML+="<div class='"+cls+"'><div class='auth'>"+m.a+"</div><div class='txt'>"+m.t+"</div></div>"}
   if(!msgs.length)e.innerHTML="<div style='text-align:center;color:#555;padding:20px'>Пусто</div>";
   e.scrollTop=e.scrollHeight;
+}
+function renderLeaderboard(){
+  var lb=[];try{var d=localStorage.getItem("cr_lb13");if(d)lb=JSON.parse(d)}catch(e){}
+  if(curUser&&typeof S!=="undefined"){
+    var me={name:curUser,credits:S.ct||0,level:S.rl||1,bosses:S.bs||0,prestige:S.pr||0,taps:S.cl||0};
+    var f=false;for(var i=0;i<lb.length;i++){if(lb[i].name===curUser){lb[i]=me;f=true;break}}if(!f)lb.push(me);
+    lb.sort(function(a,b){return b.credits-a.credits});lb=lb.slice(0,50);
+    try{localStorage.setItem("cr_lb13",JSON.stringify(lb))}catch(e){}
+  }
+  var rn=id("rn"),rd=id("rd"),re=id("re");
+  if(rn)rn.innerHTML=curUser||"—";
+  if(rd)rd.innerHTML=lb.length?lb.length+" игроков":"Нет данных";
+  if(re){
+    var html="";var medals=["🥇","🥈","🥉"];
+    for(var i=0;i<Math.min(lb.length,20);i++){
+      var r=lb[i],isMe=curUser&&r.name===curUser;
+      var medal=i<3?medals[i]:"#"+(i+1);
+      var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
+      html+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+    }
+    if(!lb.length)html="<div style='text-align:center;color:#555;padding:20px'>Будь первым!</div>";
+    re.innerHTML=html;
+  }
 }
 function owlRespond(text){
   var L=text.toLowerCase(),r="";
