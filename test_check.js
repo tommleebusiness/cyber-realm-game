@@ -549,7 +549,19 @@ function attackBoss(){
 id("bf-atk").onclick=attackBoss;
 
 // === ACHIEVEMENTS & QUESTS ===
-function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
+function showAchPopup(title,desc){
+  var pop=id("ach-popup");if(!pop)return;
+  var t=id("ach-title"),d=id("ach-desc");
+  if(t)t.textContent=title;
+  if(d)d.textContent=desc||"";
+  addClass(pop,"show");
+  clearTimeout(pop._t);
+  pop._t=setTimeout(function(){remClass(pop,"show")},2600);
+}
+function chkAch(){
+  for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!");showAchPopup("🏆 "+a.n,"+1 💎 гем");playSound("level")}}
+  for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!");showAchPopup("🔓 Секрет: "+s.n,"+"+s.r+" 💎 гемов");playSound("level")}}
+}
 function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.n+"!");draw()}}}
 function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
 function unlockRandomPet(){var locked=[];for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0)locked.push(i+1);}if(locked.length>0){var r=locked[Math.floor(Math.random()*locked.length)];S.pets.push(r);toast("🐾 "+PETS[r-1].n+"!")}}
@@ -902,7 +914,7 @@ function owlRespond(text){
   else if(L.indexOf("\u0441\u0442\u0430\u0442\u0443\u0441")>=0)r="\ud83d\udcca\n\ud83d\udc64 "+curUser+"\n\ud83d\udcb0 "+fmt(S.c)+" | \ud83c\udf00 "+S.rl+" | \u2b50 "+S.pr+"\n\u26a1 "+fmt(getCPS())+"/\u0441 | \ud83d\udc79 "+S.bs+"\n\ud83d\udc8e \u0433\u0435\u043c\u044b: "+S.g;
   else if(L.indexOf("\u0448\u0443\u0442\u043a\u0430")>=0){S.c+=10;S.g+=1;r="\ud83d\ude04 \u0428\u0443\u0442\u043a\u0430...\n\u041f\u043e\u0447\u0435\u043c\u0443 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0438\u0441\u0442\u044b \u043f\u0443\u0442\u0430\u044e\u0442 \u0425\u044d\u043b\u043b\u043e\u0443\u0438\u043d \u0438 \u0420\u043e\u0436\u0434\u0435\u0441\u0442\u0432\u043e?\nOct 31 = Dec 25!\n\n+10\ud83d\udcb0 +1\ud83d\udc8e"}
   else if(L.indexOf("\u043f\u043e\u043c\u043e\u0449\u044c")>=0)r="\ud83d\udccb \u041a\u043e\u043c\u0430\u043d\u0434\u044b:\n\u2022 \u0414\u0430\u0439 \u043a\u0440\u0435\u0434\u0438\u0442\u043e\u0432\n\u2022 \u0414\u0430\u0439 \u0433\u0435\u043c\u043e\u0432\n\u2022 \u041f\u043e\u0432\u044b\u0441\u044c \u0443\u0440\u043e\u0432\u0435\u043d\u044c\n\u2022 \u0414\u043e\u0431\u0430\u0432\u044c \u0431\u043e\u0441\u0441\u0430\n\u2022 \u0418\u0441\u043f\u0440\u0430\u0432\u044c \u0431\u0430\u0433\u0438\n\u2022 \u0421\u0442\u0430\u0442\u0443\u0441\n\u2022 \u0427\u0442\u043e \u043d\u043e\u0432\u043e\u0433\u043e?\n\u2022 \u0428\u0443\u0442\u043a\u0430\n\u2022 \u041c\u0443\u0437\u044b\u043a\u0430 (\u0432\u043a\u043b/\u0432\u044b\u043a\u043b)\n\u2022 \u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c";
-  else if(L.indexOf("\u043c\u0443\u0437\u044b\u043a")>=0){toggleMusic();r=musicEnabled?"\ud83c\udfb5 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u0430":"\ud83d\udd07 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u044b\u043a\u043b\u044e\u0447\u0435\u043d\u0430"}
+  else if(L.indexOf("\u043c\u0443\u0437\u044b\u043a")>=0){toggleMusic();r=musicPlaying?"\ud83c\udfb5 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u0430":"\ud83d\udd07 \u041c\u0443\u0437\u044b\u043a\u0430 \u0432\u044b\u043a\u043b\u044e\u0447\u0435\u043d\u0430"}
   else if(L.indexOf("\u0441\u043e\u0445\u0440\u0430\u043d")>=0){saveGame();saveUsers();r="\ud83d\udcbe \u0414\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b!"}
   else{r="\u2705 OK! +20\ud83d\udcb0 +1\ud83d\udc8e";S.c+=20;S.g+=1}
   if(L.indexOf("42")>=0&&S.secrets.indexOf("owl_master")<0){S.secrets.push("owl_master");r+="\n\ud83d\udd13 \u0421\u0435\u043a\u0440\u0435\u0442!";S.g+=10}

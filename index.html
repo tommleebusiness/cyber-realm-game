@@ -68,7 +68,7 @@ header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
 #combo-display.show{opacity:1}
 #event-bar{position:fixed;top:42px;left:50%;transform:translateX(-50%);background:rgba(255,215,0,.15);border:1px solid #ffd700;border-radius:4px;padding:3px 10px;font-size:10px;color:#ffd700;z-index:5;display:none;white-space:nowrap}
 #ach-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0d1025,#1a1a3e);border:2px solid #ffd700;border-radius:12px;padding:15px 20px;text-align:center;z-index:300;transition:all .4s;pointer-events:none;opacity:0}
-#ach-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+#ach-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:none}
 #ach-popup .ach-icon{font-size:32px;margin-bottom:5px}
 #ach-popup .ach-title{color:#ffd700;font-size:14px;font-weight:bold}
 #ach-popup .ach-desc{color:#888;font-size:11px;margin-top:3px}
@@ -725,7 +725,19 @@ function attackBoss(){
 id("bf-atk").onclick=attackBoss;
 
 // === ACHIEVEMENTS & QUESTS ===
-function chkAch(){for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!")}}for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!")}}}
+function showAchPopup(title,desc){
+  var pop=id("ach-popup");if(!pop)return;
+  var t=id("ach-title"),d=id("ach-desc");
+  if(t)t.textContent=title;
+  if(d)d.textContent=desc||"";
+  addClass(pop,"show");
+  clearTimeout(pop._t);
+  pop._t=setTimeout(function(){remClass(pop,"show")},2600);
+}
+function chkAch(){
+  for(var i=0;i<ACHS.length;i++){var a=ACHS[i];if(S.ac.indexOf(a.id)<0&&a.ck()){S.ac.push(a.id);S.g+=1;toast("🏆 "+a.n+"!");showAchPopup("🏆 "+a.n,"+1 💎 гем");playSound("level")}}
+  for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!");showAchPopup("🔓 Секрет: "+s.n,"+"+s.r+" 💎 гемов");playSound("level")}}
+}
 function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);S.c+=q.r.c;toast("🎯 "+q.n+"!");draw()}}}
 function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
 function unlockRandomPet(){var locked=[];for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0)locked.push(i+1);}if(locked.length>0){var r=locked[Math.floor(Math.random()*locked.length)];S.pets.push(r);toast("🐾 "+PETS[r-1].n+"!")}}
@@ -1261,7 +1273,7 @@ if (document.readyState === "loading") {
   initAll();
 }
 </script>
-<div id="ach-popup"><span class="ach-icon">🏆</span><div class="ach-title"></div><div class="ach-desc"></div></div>
+<div id="ach-popup"><span class="ach-icon">🏆</span><div class="ach-title" id="ach-title"></div><div class="ach-desc" id="ach-desc"></div></div>
 <div id="ov" style="position:fixed;top:5px;left:5px;font-size:9px;color:#555;z-index:50;display:none"></div>
 <div id="rn" style="display:none"></div>
 <div id="rd" style="display:none"></div>
