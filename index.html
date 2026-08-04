@@ -210,6 +210,14 @@ var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,u
 var tapSinceBoss=0,BOSS_INTERVAL=300,comboTimer=null;
 
 function getCPS(){return Math.floor(S.ps*S.gm)}
+// Actual boss spawn interval: base minus Speed skill, x3 during boss cooldown
+function getBossInterval(){
+  var interval=BOSS_INTERVAL;
+  var speedLvl=getSkillLvl("speed");
+  if(speedLvl>0)interval=Math.floor(interval*(1-(5+speedLvl*2)/100));
+  if(S.bossCd>0)interval=Math.floor(interval*3);
+  return interval;
+}
 function initGame(){
   S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
   tapSinceBoss=0;genDaily();
@@ -570,11 +578,9 @@ function tap(){
   if(lv>0){toast("РЕЙМ +"+lv+"!");var rlvl=id("rlv");addClass(rlvl,"lvlflash");setTimeout(function(){remClass(rlvl,"lvlflash")},700);playSound("level");flashScreen()}
   tapSinceBoss++;
   
-  // Skill: Speed (reduce boss interval)
-  var speedLvl=getSkillLvl("speed");
-  var interval=BOSS_INTERVAL;
-  if(speedLvl>0)interval=Math.floor(interval*(1-(5+speedLvl*2)/100));
-  if(S.bossCd>0){interval=Math.floor(interval*3);S.bossCd=Math.max(0,S.bossCd-1)}
+  // Skill: Speed (reduce boss interval) — shared logic in getBossInterval()
+  var interval=getBossInterval();
+  if(S.bossCd>0)S.bossCd=Math.max(0,S.bossCd-1);
   
   if(!S.cb&&tapSinceBoss>=interval){spawnBoss();tapSinceBoss=0}
   updateDQ("tap",1);if(S.combo>=5)updateDQ("combo",1);
@@ -769,7 +775,7 @@ function draw(){
   id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl)+(S.combo>1?" | ⚡x"+S.combo:"");
   var tt=id("ttaps");if(tt)tt.textContent="Всего тапов: "+fmt(S.cl);
   var p=S.rg>0?Math.min(100,(S.rp/S.rg)*100):0;id("prog-fi").style.width=p+"%";
-  var bossInfo=S.cb?" | БОСС!":" | босс: "+(BOSS_INTERVAL-tapSinceBoss);
+  var bossInfo=S.cb?" | БОСС!":" | босс: "+Math.max(0,getBossInterval()-tapSinceBoss);
   id("prog-t").textContent="Рейм "+S.rl+bossInfo;
   id("uname").textContent=curUser||"";
 }
@@ -821,8 +827,8 @@ function showPanel(t){
       var bfClose=id("bf-close");if(bfClose)bfClose.onclick=function(){S.cb=null;S.bh=0;id("bfight").style.display="none";showPanel("bo")};
       // bf-x bound globally in initAll
     }else{
-      var rem=BOSS_INTERVAL-tapSinceBoss;if(rem<0)rem=0;
-      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+BOSS_INTERVAL+" тапов</div><div style='margin-top:6px;color:#00e676;font-size:11px;font-weight:bold'>⚡ Урон тапа: "+fmt(S.cp*S.gm)+"</div></div>";
+      var rem=Math.max(0,getBossInterval()-tapSinceBoss);
+      p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+getBossInterval()+" тапов</div><div style='margin-top:6px;color:#00e676;font-size:11px;font-weight:bold'>⚡ Урон тапа: "+fmt(S.cp*S.gm)+"</div></div>";
       if(S.rl>=3){p.innerHTML+="<button class='atk-btn' id='sb' style='margin-top:10px'>⚔️ Призвать</button>";id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}
     }
   }else if(t==="ac"){
