@@ -220,7 +220,7 @@ function getBossInterval(){
 }
 function initGame(){
   S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],completedQuests:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
-  tapSinceBoss=0;genDaily();
+  completedQuests=[];tapSinceBoss=0;genDaily();
 }
 function loadGame(){
   if(!curUser)return;
