@@ -903,7 +903,7 @@ function showPanel(t){
     }
   }else if(t==="st"){
     id("panT").textContent="📊 Статистика";
-    var rows=[["Игрок",curUser||"?"],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Гемы",S.g],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Секреты",S.secrets.length]];
+    var rows=[["Игрок",esc(curUser||"?")],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Гемы",S.g],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Секреты",S.secrets.length]];
     for(var i=0;i<rows.length;i++)p.innerHTML+="<div class='strow'><span class='sl'>"+rows[i][0]+"</span><span class='sv'>"+rows[i][1]+"</span></div>";
     p.innerHTML+="<button class='btn' id='prBtn' style='margin-top:8px;background:linear-gradient(135deg,#ff8f00,#ffd700);color:#000'"+(S.rl<10?" disabled":"")+">🌟 Престиж"+(S.rl<10?" (Рейм 10+)":"")+"</button>";
     p.innerHTML+="<button class='danger' id='delBtn' style='margin-top:4px'>🗑️ Удалить</button>";
@@ -929,7 +929,7 @@ function showPanel(t){
         var r=lb[i],isMe=r.name===curUser;
         var medal=i<3?medals[i]:"#"+(i+1);
         var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
-        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
+        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
       }
     }
     
@@ -955,7 +955,7 @@ function showPanel(t){
             for(var i=0;i<Math.min(glb.players.length,10);i++){
               var r=glb.players[i];
               var medal=i<3?gmedals[i]:"#"+(i+1);
-              html+="<div class='strow'><span style='min-width:28px'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+              html+="<div class='strow'><span style='min-width:28px'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
             }
             var el=id("global-lb");
             if(el)el.innerHTML=html;
@@ -1092,7 +1092,7 @@ function renderLeaderboard(){
       var r=lb[i],isMe=curUser&&r.name===curUser;
       var medal=i<3?medals[i]:"#"+(i+1);
       var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
-      html+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+r.name+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+      html+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
     }
     if(!lb.length)html="<div style='text-align:center;color:#555;padding:20px'>Будь первым!</div>";
     re.innerHTML=html;
