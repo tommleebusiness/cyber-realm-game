@@ -198,6 +198,7 @@ function saveUsers(){
 }
 function hv(p){var h=0;for(var i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0}return h.toString(36)}
 function id(s){return document.getElementById(s)}
+function esc(s){s=String(s);return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
 function ga(e,a){return e?e.getAttribute(a):null}
 function hasClass(e,c){return e&&e.className&&e.className.indexOf(c)>=0}
 function addClass(e,c){if(e&&!hasClass(e,c))e.className=e.className+" "+c}
@@ -1069,7 +1070,7 @@ function addChatMsg(a,t){chatMsgs.push({a:a,t:t,ts:Date.now()});saveChat();rende
 function renderChat(){
   var e=id("chmsgs");e.innerHTML="";
   var msgs=chatTab==="g"?chatMsgs:chatMsgs.filter(function(m){return m.a==="🦉 OWL"||m.a===curUser});
-  for(var i=0;i<msgs.length;i++){var m=msgs[i],cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");e.innerHTML+="<div class='"+cls+"'><div class='auth'>"+m.a+"</div><div class='txt'>"+m.t+"</div></div>"}
+  for(var i=0;i<msgs.length;i++){var m=msgs[i],cls="chmsg"+(m.a===curUser?" me":"")+(m.a==="🦉 OWL"?" owl":"");e.innerHTML+="<div class='"+cls+"'><div class='auth'>"+esc(m.a)+"</div><div class='txt'>"+esc(m.t)+"</div></div>"}
   if(!msgs.length)e.innerHTML="<div style='text-align:center;color:#555;padding:20px'>Пусто</div>";
   e.scrollTop=e.scrollHeight;
 }
