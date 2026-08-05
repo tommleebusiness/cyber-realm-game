@@ -682,7 +682,7 @@ function showBossFight(){
   updateBossHP();
 }
 function winBoss(){
-  var r=Math.floor(S.cb.cr*S.gm*Math.pow(1.15,S.pr)*((S.bossRewardMult||1))*(S.activePet===4?1.25:1));
+  var r=Math.floor(S.cb.cr*S.gm);
   S.c+=r;S.bs++;S.bossKills++;
   flyText("+ "+fmt(r));
   S.cb=null;S.bh=0;
