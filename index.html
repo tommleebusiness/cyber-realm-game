@@ -1142,6 +1142,21 @@ setInterval(function(){
   }
 },50);
 
+// === KEYBOARD SUPPORT ===
+// Desktop players can tap with Space/Enter (same as tapping the button).
+document.addEventListener("keydown",function(e){
+  // Never hijack keys while the user is typing in a text field/password.
+  var t=e.target&&e.target.tagName;
+  if(t==="INPUT"||t==="TEXTAREA")return;
+  if(e.key!==" "&&e.key!=="Enter")return;
+  // Only tap while logged in and on the game screen.
+  if(!curUser)return;
+  if(id("game-scr").style.display!=="flex")return;
+  if(e.key===" "){e.preventDefault();}
+  tap();
+  vibratePattern("tap");
+});
+
 // === OFFLINE PROGRESS ===
 function calcOffline(){
   if(!curUser)return;
