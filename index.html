@@ -1022,7 +1022,7 @@ function bindAuth() {
     if(p.length<4){amsg("Мин. 4 символа","err");return}
     if(users[u]){amsg("Имя занято","err");return}
     users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
-    curUser=u;initGame();showScreen("game");amsg("Создано!","ok");
+    curUser=u;initGame();checkDailyReward();draw();showScreen("game");amsg("Создано!","ok");
   };
   // Enter in login fields submits login (mobile "Go"/"Done" keys fire keydown Enter)
   var auEl=id("au"),apEl=id("ap");
