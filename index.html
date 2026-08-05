@@ -266,8 +266,11 @@ function loadGame(){
   if(!S.bossKills)S.bossKills=S.bs||0;
   if(!S.totalPrestige)S.totalPrestige=S.pr||0;
   var t=Math.floor(Date.now()/86400000);
-  if(S.dailyDay!==t)genDaily();
-}
+    if(S.dailyDay!==t)genDaily();
+    // Restore persisted sound setting (survives reloads) and sync the toggle button
+    if(typeof S.soundEnabled!=="undefined")soundEnabled=!!S.soundEnabled;
+    var sb=id("sound-btn");if(sb)sb.textContent=soundEnabled?"🔊":"🔇";
+  }
 function saveGame(){
   if(!curUser)return;
   var d={};try{d=JSON.parse(localStorage.getItem("cr13")||"{}")}catch(e){}
@@ -1252,7 +1255,12 @@ function toggleMusic(){
   var mb=id("music-btn");if(mb)mb.textContent=musicPlaying?"🎶":"🎵";
   toast(musicPlaying?"🎵 Музыка вкл":"🔇 Выкл");
 }
-function toggleSound(){soundEnabled=!soundEnabled;var sb=id("sound-btn");if(sb)sb.textContent=soundEnabled?"🔊":"🔇";toast(soundEnabled?"🔊 Звуки вкл":"🔈 Выключено");}
+function toggleSound(){
+  soundEnabled=!soundEnabled;
+  if(typeof S!=="undefined"&&S){S.soundEnabled=soundEnabled;saveGame();}
+  var sb=id("sound-btn");if(sb)sb.textContent=soundEnabled?"🔊":"🔇";
+  toast(soundEnabled?"🔊 Звуки вкл":"🔈 Выключено");
+}
 
 // Bind all UI events after DOM is ready
 function initAll() {
