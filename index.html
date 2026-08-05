@@ -494,7 +494,7 @@ var SECRETS=[
 // === TAP FUNCTION ===
 function tap(){
   var now=Date.now();
-  if(now-S.lastTapTime<500){S.combo++;if(S.combo>S.comboMax)S.comboMax=S.combo}else{S.combo=1};
+  if(S.lastTapTime>0&&now-S.lastTapTime<2000){S.combo++;if(S.combo>S.comboMax)S.comboMax=S.combo}else{S.combo=1};
   S.lastTapTime=now;
   
   // Skill: Double tap
