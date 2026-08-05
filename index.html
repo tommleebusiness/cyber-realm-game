@@ -779,7 +779,7 @@ function doPrestige(){
 
 // === DRAW ===
 function draw(){
-  id("rc").textContent=fmt(S.c);id("rg").textContent=S.g;id("rlv").textContent=S.rl;id("pr").textContent=S.pr;
+  id("rc").textContent=fmt(S.c);id("rg").textContent=fmt(S.g);id("rlv").textContent=S.rl;id("pr").textContent=S.pr;
   id("tcps").textContent="в сек: "+fmt(getCPS())+" | тапов: "+fmt(S.cl)+(S.combo>1?" | ⚡x"+S.combo:"");
   var tt=id("ttaps");if(tt)tt.textContent="Всего тапов: "+fmt(S.cl);
   var p=S.rg>0?Math.min(100,(S.rp/S.rg)*100):0;id("prog-fi").style.width=p+"%";
