@@ -1018,6 +1018,10 @@ function bindAuth() {
     users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
     curUser=u;initGame();showScreen("game");amsg("Создано!","ok");
   };
+  // Enter in login fields submits login (mobile "Go"/"Done" keys fire keydown Enter)
+  var auEl=id("au"),apEl=id("ap");
+  if(auEl)auEl.addEventListener("keydown",function(e){if(e.key==="Enter"){var lb=id("alogin");if(lb)lb.click()}});
+  if(apEl)apEl.addEventListener("keydown",function(e){if(e.key==="Enter"){var lb=id("alogin");if(lb)lb.click()}});
   el = id("lout"); if (el) el.onclick = function(){saveGame();curUser=null;showScreen("login")};
   el = id("cChat"); if (el) el.onclick = function(){showScreen("game")};
   el = id("pcan"); if (el) el.onclick = function(){id("panel").style.display="none"};
