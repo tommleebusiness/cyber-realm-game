@@ -206,7 +206,7 @@ function fmt(n){if(n>=1e18)return(n/1e18).toFixed(1)+"Qi";if(n>=1e15)return(n/1e
 function dlg(t,p,bs){id("panT").textContent=t;id("pc").innerHTML="";id("pc").innerHTML='<div style="padding:10px;color:#c0d0e0;font-size:12px;line-height:1.6">'+p.replace(/\n/g,"<br>")+"</div>";if(bs){var btns="";for(var i=0;i<bs.length;i++){btns+='<button class="btn" style="margin:4px 2px;padding:8px 16px;font-size:11px" id="dlgbtn'+i+'">'+bs[i].t+"</button>"}id("pc").innerHTML+=btns;for(var i=0;i<bs.length;i++){(function(btn){id("dlgbtn"+i).onclick=btn.f})(bs[i])}}id("panel").style.display="flex"}
 function toast(t){var el=id("toast");el.textContent=t;el.style.opacity="1";setTimeout(function(){el.style.opacity="0"},2500)}
 var VER="13.0";
-var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
+var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0,dailyAllBonus:false};
 var tapSinceBoss=0,BOSS_INTERVAL=300,comboTimer=null;
 
 function getCPS(){return Math.floor(S.ps*S.gm)}
@@ -219,7 +219,7 @@ function getBossInterval(){
   return interval;
 }
 function initGame(){
-  S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],completedQuests:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0};
+  S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],completedQuests:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0,dailyAllBonus:false};
   completedQuests=[];tapSinceBoss=0;genDaily();
 }
 function loadGame(){
@@ -796,8 +796,8 @@ function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.ran
 function tickEvents(){if(S.activeEvent){S.eventTimer--;id("event-bar").textContent=S.activeEvent.n+" ("+S.eventTimer+"с)";id("event-bar").style.display=S.eventTimer>0?"block":"none";if(S.eventTimer<=0){S.activeEvent=null;id("event-bar").style.display="none"}}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
 
 // === DAILY QUESTS ===
-function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
-function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){S.dailyP[i]=Math.min(S.dailyQ[i].target,(S.dailyP[i]||0)+amount);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}}
+function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];S.dailyAllBonus=false;var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
+function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){S.dailyP[i]=Math.min(S.dailyQ[i].target,(S.dailyP[i]||0)+amount);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}var all=true;for(var i=0;i<S.dailyQ.length;i++){if(!S.dailyQ[i].done){all=false;break}}if(all&&S.dailyQ.length&&!S.dailyAllBonus){S.dailyAllBonus=true;S.c+=5000;S.ct+=5000;S.g+=50;toast("🏆 Все ежедневные выполнены! +5000💎 +50💎г")}}
 
 // === PANEL ===
 function showPanel(t){
@@ -841,6 +841,8 @@ function showPanel(t){
   }else if(t==="qu"){
     id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
     p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания · 🔥 Стрик: "+(S.dailyStreak||0)+" дн.</div>";
+    var dqDone=0;for(var dci=0;dci<S.dailyQ.length;dci++){if(S.dailyQ[dci].done)dqDone++}
+    p.innerHTML+="<div style='color:#00e676;font-size:9px;margin-bottom:4px'>🏆 Бонус за все задания: "+(S.dailyAllBonus?"ПОЛУЧЕН ✓":"+5000💎 +50💎г · Выполнено "+dqDone+"/"+S.dailyQ.length)+"</div>";
     for(var di=0;di<S.dailyQ.length;di++){
       var dq=S.dailyQ[di],dp=S.dailyP[di]||0,pct=Math.min(100,Math.floor(dp/dq.target*100)),done=dq.done;
       p.innerHTML+="<div style='background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.1);border-radius:4px;padding:5px 6px;margin-bottom:3px"+(done?";opacity:.5":"")+"'><div style='display:flex;justify-content:space-between;font-size:10px'><span style='color:#0ff'>"+dq.name+"</span><span style='color:#ffd700'>"+(done?"✅":dp+"/"+dq.target)+"</span></div><div style='background:#1a1a2e;border-radius:2px;height:4px;margin-top:3px;overflow:hidden'><div style='height:100%;width:"+pct+"%;background:linear-gradient(90deg,#0ff,#0f0);border-radius:2px;transition:width .3s'></div></div><div style='font-size:8px;color:#555;margin-top:2px'>Награда: +"+dq.reward+"💎</div></div>";
