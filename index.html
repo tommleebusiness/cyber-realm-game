@@ -881,9 +881,11 @@ function showPanel(t){
     var scards=p.querySelectorAll(".card");
     for(var i=0;i<scards.length;i++){
       scards[i].onclick=function(){
-        var sid=ga(this,"data-skill");
-        upgradeSkill(sid);
-      }
+              var sid=ga(this,"data-skill");
+              upgradeSkill(sid);
+              // Re-render the panel so level/cost reflect the purchase immediately
+              showPanel("sk");
+            }
     }
   }else if(t==="pt"){
     id("panT").textContent="🐾 Питомцы ("+S.pets.length+"/"+PETS.length+")";
