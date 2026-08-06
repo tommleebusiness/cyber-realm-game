@@ -903,7 +903,7 @@ function showPanel(t){
     }
   }else if(t==="st"){
     id("panT").textContent="📊 Статистика";
-    var rows=[["Игрок",esc(curUser||"?")],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Гемы",S.g],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Секреты",S.secrets.length]];
+    var rows=[["Игрок",esc(curUser||"?")],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Гемы",fmt(S.g)],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Секреты",S.secrets.length]];
     for(var i=0;i<rows.length;i++)p.innerHTML+="<div class='strow'><span class='sl'>"+rows[i][0]+"</span><span class='sv'>"+rows[i][1]+"</span></div>";
     p.innerHTML+="<button class='btn' id='prBtn' style='margin-top:8px;background:linear-gradient(135deg,#ff8f00,#ffd700);color:#000'"+(S.rl<10?" disabled":"")+">🌟 Престиж"+(S.rl<10?" (Рейм 10+)":"")+"</button>";
     p.innerHTML+="<button class='danger' id='delBtn' style='margin-top:4px'>🗑️ Удалить</button>";
