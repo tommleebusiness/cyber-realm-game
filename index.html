@@ -1013,7 +1013,7 @@ function bindAuth() {
     if(!u||!p){amsg("Заполни поля","err");return}
     if(!users[u]){amsg("Не найден","err");return}
     if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
-    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();showScreen("game");amsg("");
+    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();showScreen("game");amsg("");
   };
   el = id("areg"); if (el) el.onclick = function(){
     var u=id("au").value.trim(),p=id("ap").value;
@@ -1049,6 +1049,18 @@ function bindAuth() {
     toast("🏳️ Босс отступил! Кулдаун: 200 тапов");
     draw();
   };
+}
+
+// === OFFLINE PROGRESS ===
+function claimOffline(){
+  var last=parseInt(localStorage.getItem("cr_t")||"0",10);
+  if(!last){localStorage.setItem("cr_t",Date.now().toString());return;}
+  var min=Math.floor((Date.now()-last)/60000);
+  if(min<1)return;
+  if(min>480)min=480; // cap at 8h
+  var inc=Math.floor(getCPS()*0.5*min);
+  if(inc>0){S.c+=inc;S.ct+=inc;S.rp+=inc;draw();setTimeout(function(){toast("⏳ Офлайн "+min+" мин: +"+fmt(inc)+"💎")},900);}
+  localStorage.setItem("cr_t",Date.now().toString());
 }
 
 // === DAILY REWARD ===
