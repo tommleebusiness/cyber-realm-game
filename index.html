@@ -682,7 +682,7 @@ function showBossFight(){
   id("bfs").textContent=S.cb.ic;
   id("bfn").textContent=S.cb.n+(S.cb.rare?" ⭐":"");
   id("bfn").style.color=S.cb.rare?"#ffd700":"#ff1744";
-  id("bf-rw").textContent="Награда: "+fmt(S.cb.cr)+"💎";
+  id("bf-rw").textContent="Награда: "+fmt(Math.floor(S.cb.cr*S.gm))+"💎";
   updateBossHP();
 }
 function winBoss(){
@@ -829,7 +829,7 @@ function showPanel(t){
     id("panT").textContent="👹 Боссы ("+S.bs+")";
     if(S.cb){
       var pct=Math.max(0,(S.bh/S.cb.maxHP)*100);
-      p.innerHTML="<div style='text-align:center;padding:10px'><div style='font-size:48px'>"+S.cb.ic+"</div><div style='color:#ff1744;font-size:14px;font-weight:bold'>"+(S.cb.rare?"⭐ ":"")+S.cb.n+"</div><div class='boss-hp-bg'><div class='boss-hp-f' style='width:"+pct+"%'></div></div><div class='boss-stats'>HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+"</div><div class='boss-reward'>Награда: "+fmt(S.cb.cr)+"💎</div><button class='atk-btn' id='pb'>⚔️ АТАКОВАТЬ</button><button class='danger' id='sb' style='margin-top:8px;background:rgba(255,0,68,.2);border:1px solid #ff1744;color:#ff1744'>🏳️ СДАТЬСЯ (-10%)</button></div>";
+      p.innerHTML="<div style='text-align:center;padding:10px'><div style='font-size:48px'>"+S.cb.ic+"</div><div style='color:#ff1744;font-size:14px;font-weight:bold'>"+(S.cb.rare?"⭐ ":"")+S.cb.n+"</div><div class='boss-hp-bg'><div class='boss-hp-f' style='width:"+pct+"%'></div></div><div class='boss-stats'>HP: "+fmt(S.bh)+" / "+fmt(S.cb.maxHP)+"</div><div class='boss-reward'>Награда: "+fmt(Math.floor(S.cb.cr*S.gm))+"💎</div><button class='atk-btn' id='pb'>⚔️ АТАКОВАТЬ</button><button class='danger' id='sb' style='margin-top:8px;background:rgba(255,0,68,.2);border:1px solid #ff1744;color:#ff1744'>🏳️ СДАТЬСЯ (-10%)</button></div>";
       id("pb").onclick=attackBoss;
       id("sb").onclick=surrenderBoss;
       var bfClose=id("bf-close");if(bfClose)bfClose.onclick=function(){S.cb=null;S.bh=0;id("bfight").style.display="none";showPanel("bo")};
