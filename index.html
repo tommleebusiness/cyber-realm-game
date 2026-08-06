@@ -1179,21 +1179,6 @@ document.addEventListener("keydown",function(e){
   vibratePattern("tap");
 });
 
-// === OFFLINE PROGRESS ===
-function calcOffline(){
-  if(!curUser)return;
-  var last=parseInt(localStorage.getItem("cr_t")||"0");
-  var elapsed=Math.min(Date.now()-last,3600000);
-  if(elapsed<5000)return;
-  var cps=getCPS();if(cps<1)return;
-  var gained=Math.floor(cps*elapsed/1000*0.5);
-  if(gained<1)return;
-  S.c+=gained;S.ct+=gained;S.rp+=gained;
-  setTimeout(function(){toast("💤 Оффлайн: +"+fmt(gained)+"💎")},1000);
-  while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
-  draw();
-}
-
 // === BACKGROUND ===
 function initBg(){
   var c=id("bg-parts"),colors=["#00e5ff","#aa00ff","#00e676","#ffd700","#ff1744"];
@@ -1314,7 +1299,7 @@ function initAll() {
   
   // Try to auto-login last user
   var lastUser=localStorage.getItem("cr_last");
-  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();calcOffline();checkDailyReward();showScreen("game")}
+  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();checkDailyReward();claimOffline();showScreen("game")}
   else{showScreen("login")}
   
   draw();
