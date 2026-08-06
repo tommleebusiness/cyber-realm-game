@@ -591,7 +591,7 @@ function tap(){
   if(S.bossCd>0)S.bossCd=Math.max(0,S.bossCd-1);
   
   if(!S.cb&&tapSinceBoss>=interval){spawnBoss();tapSinceBoss=0}
-  updateDQ("tap",1);if(S.combo>=5)updateDQ("combo",1);
+  updateDQ("tap",1);if(S.combo>=5)updateDQ("combo",S.combo);
   checkPets();chkAch();chkQuests();draw();
 }
 
@@ -801,7 +801,7 @@ function tickEvents(){if(S.activeEvent){S.eventTimer--;id("event-bar").textConte
 
 // === DAILY QUESTS ===
 function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];S.dailyAllBonus=false;var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
-function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){S.dailyP[i]=Math.min(S.dailyQ[i].target,(S.dailyP[i]||0)+amount);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}var all=true;for(var i=0;i<S.dailyQ.length;i++){if(!S.dailyQ[i].done){all=false;break}}if(all&&S.dailyQ.length&&!S.dailyAllBonus){S.dailyAllBonus=true;S.c+=5000;S.ct+=5000;S.g+=50;toast("🏆 Все ежедневные выполнены! +5000💎 +50💎г")}}
+function updateDQ(type,amount){for(var i=0;i<S.dailyQ.length;i++){if(S.dailyQ[i].type===type){var adv=(type==="combo")?Math.max(S.dailyP[i]||0,amount):((S.dailyP[i]||0)+amount);S.dailyP[i]=Math.min(S.dailyQ[i].target,adv);if(S.dailyP[i]>=S.dailyQ[i].target&&!S.dailyQ[i].done){S.dailyQ[i].done=true;S.g+=S.dailyQ[i].reward;toast("🎯 "+S.dailyQ[i].name+"!")}}}var all=true;for(var i=0;i<S.dailyQ.length;i++){if(!S.dailyQ[i].done){all=false;break}}if(all&&S.dailyQ.length&&!S.dailyAllBonus){S.dailyAllBonus=true;S.c+=5000;S.ct+=5000;S.g+=50;toast("🏆 Все ежедневные выполнены! +5000💎 +50💎г")}}
 
 // === PANEL ===
 function showPanel(t){
