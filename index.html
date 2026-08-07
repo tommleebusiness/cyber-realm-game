@@ -871,7 +871,7 @@ function showPanel(t){
       }
     }
   }else if(t==="sk"){
-    id("panT").textContent="⚡ Скиллы (💎"+S.g+")";
+    id("panT").textContent="⚡ Скиллы (💎"+fmt(S.g)+")";
     for(var i=0;i<SKILLS.length;i++){
       var s=SKILLS[i],lvl=0;
       for(var j=0;j<S.skills.length;j++){if(S.skills[j].id===s.id){lvl=S.skills[j].lvl;break;}}
