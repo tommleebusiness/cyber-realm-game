@@ -213,12 +213,13 @@ var VER="13.0";
 var S={c:0,ct:0,g:0,cl:0,bs:0,pr:0,pp:0,cp:1,ps:0,gm:1,luck:1,rl:1,rp:0,rg:100,up:{},ac:[],craft:[],cb:null,bh:0,lastDaily:0,dailyStreak:0,combo:0,comboMax:0,lastTapTime:0,activeEvent:null,eventTimer:0,skills:[],pets:[],activePet:null,dailyQ:[],dailyP:[],dailyDay:0,secrets:[],bossCd:0,tapsOnBoss:0,totalPrestige:0,bossKills:0,dailyAllBonus:false,musicEnabled:false,playSec:0};
 var tapSinceBoss=0,BOSS_INTERVAL=300,comboTimer=null;
 
-function getCPS(){return Math.floor(S.ps*S.gm)}
+function getCPS(){var c=S.ps*S.gm;if(S.activePet===2)c+=2;if(S.activePet===7)c*=1.2;return Math.floor(c)}
 // Actual boss spawn interval: base minus Speed skill, x3 during boss cooldown
 function getBossInterval(){
   var interval=BOSS_INTERVAL;
   var speedLvl=getSkillLvl("speed");
   if(speedLvl>0)interval=Math.floor(interval*(1-(5+speedLvl*2)/100));
+  if(S.activePet===5)interval=Math.floor(interval*0.9);
   if(S.bossCd>0)interval=Math.floor(interval*3);
   return interval;
 }
@@ -522,7 +523,10 @@ function tap(){
   
   var cb=1+Math.floor((S.combo+comboAdd)/5)*0.5;
   var pm=S.activePet===1?1.1:1;
-  var v=Math.floor(S.cp*S.gm*cb*S.luck*dbl*pm*goldMult);
+  if(S.activePet===7)pm*=1.2;
+  var petLuck=S.activePet===9?5:0;
+  var v=Math.floor(S.cp*S.gm*cb*(S.luck+petLuck)*dbl*pm*goldMult);
+  if(S.activePet===8)v*=2;
   S.c+=v;S.ct+=v;S.cl++;S.rp+=v;
   
   // Visual effects
@@ -559,9 +563,9 @@ function tap(){
     
     // Skill: Crit
     var critLvl=getSkillLvl("crit");
-    var critChance=3+(critLvl||0)*2;
+    var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0);
     var critDmg=1.5+(critLvl||0)*0.3;
-    if(critLvl>0&&Math.random()<critChance/100){
+    if((critLvl>0||S.activePet===3)&&Math.random()<critChance/100){
       dmg=Math.floor(dmg*critDmg);
       showCritText();playSound("crit");
     }
@@ -569,6 +573,7 @@ function tap(){
     // Skill: Boss killer
     var bossLvl=getSkillLvl("boss");
     if(bossLvl>0)dmg=Math.floor(dmg*(1+(10+bossLvl*5)/100));
+    if(S.activePet===6)dmg=Math.floor(dmg*1.15);
     
     // Skill: Shield
     var shieldLvl=getSkillLvl("shld");
@@ -579,7 +584,7 @@ function tap(){
     updateBossHP();
     if(S.bh<=0){
       winBoss();
-    }else if(!blocked){
+    }else if(!blocked&&S.activePet!==10){
       var bd=Math.max(1,Math.floor(S.cb.hp*0.0003));
       S.c=Math.max(0,S.c-bd);
     }
@@ -726,9 +731,11 @@ function flyText(t){playSound("coin");
 function attackBoss(){
   var dmg=Math.floor(S.cp*S.gm);
   var critLvl=getSkillLvl("crit");
-  if(critLvl>0&&Math.random()<(3+critLvl*2)/100)dmg=Math.floor(dmg*(1.5+critLvl*0.3));
+  var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0);
+  if((critLvl>0||S.activePet===3)&&Math.random()<critChance/100)dmg=Math.floor(dmg*(1.5+critLvl*0.3));
   var bossLvl=getSkillLvl("boss");
   if(bossLvl>0)dmg=Math.floor(dmg*(1+(10+bossLvl*5)/100));
+  if(S.activePet===6)dmg=Math.floor(dmg*1.15);
   var shieldLvl=getSkillLvl("shld");
   var blocked=false;
   if(shieldLvl>0&&Math.random()<(2+shieldLvl*1.5)/100)blocked=true;
@@ -736,7 +743,7 @@ function attackBoss(){
   var d=document.createElement("div");d.className="fdmg";d.textContent="-"+fmt(dmg);
   d.style.left=(30+Math.random()*40)+"%";d.style.top="30%";
   id("bfight").appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},800);
-  if(S.bh<=0){winBoss()}else{if(!blocked){var bd=Math.max(1,Math.floor(S.cb.maxHP*0.0005));S.c=Math.max(0,S.c-bd)}updateBossHP()}
+  if(S.bh<=0){winBoss()}else{if(!blocked&&S.activePet!==10){var bd=Math.max(1,Math.floor(S.cb.maxHP*0.0005));S.c=Math.max(0,S.c-bd)}updateBossHP()}
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
   draw();saveGame();
 }
@@ -931,7 +938,7 @@ function showPanel(t){
     }
   }else if(t==="st"){
     id("panT").textContent="📊 Статистика";
-    var rows=[["Игрок",esc(curUser||"?")],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Тапов",fmt(S.cl)],["Гемы",fmt(S.g)],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Урон/тап",fmt(S.cp*S.gm)],["Множитель","x"+S.gm.toFixed(2)],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Питомец",(function(){for(var pi=0;pi<PETS.length;pi++)if(PETS[pi].id===S.activePet)return PETS[pi].n;return "—"})()],["Секреты",S.secrets.length],["Достижения",S.ac.length],["Квесты дня",(function(){var qs=S.dailyQ||[];var dqc=0;for(var dqi=0;dqi<qs.length;dqi++)if(qs[dqi].done)dqc++;return dqc+"/"+qs.length})()],["Престиж-очки",fmt(S.pp||0)],["Всего престижей",S.totalPrestige||0],["Стрик дн.",S.dailyStreak||0],["Офлайн 1ч",fmt(Math.floor(getCPS()*0.5*60))],["Офлайн 8ч",fmt(Math.floor(getCPS()*0.5*480))],["В игре",fmtTime(S.playSec||0)]];
+    var rows=[["Игрок",esc(curUser||"?")],["Кредиты",fmt(S.c)],["Всего",fmt(S.ct)],["Тапов",fmt(S.cl)],["Гемы",fmt(S.g)],["Рейм",S.rl],["Престиж",S.pr],["Боссы",S.bs],["Урон/тап",fmt(S.cp*S.gm)],["Множитель","x"+S.gm.toFixed(2)],["Тап/сек",fmt(getCPS())],["Удача",Math.round((S.luck+(S.activePet===9?5:0)-1)*100)+"%"],["Комбо макс",S.comboMax],["Крафт",S.craft.length],["Скиллы",S.skills.length],["Питомцы",S.pets.length],["Питомец",(function(){for(var pi=0;pi<PETS.length;pi++)if(PETS[pi].id===S.activePet)return PETS[pi].n;return "—"})()],["Секреты",S.secrets.length],["Достижения",S.ac.length],["Квесты дня",(function(){var qs=S.dailyQ||[];var dqc=0;for(var dqi=0;dqi<qs.length;dqi++)if(qs[dqi].done)dqc++;return dqc+"/"+qs.length})()],["Престиж-очки",fmt(S.pp||0)],["Всего престижей",S.totalPrestige||0],["Стрик дн.",S.dailyStreak||0],["Офлайн 1ч",fmt(Math.floor(getCPS()*0.5*60))],["Офлайн 8ч",fmt(Math.floor(getCPS()*0.5*480))],["В игре",fmtTime(S.playSec||0)]];
     for(var i=0;i<rows.length;i++)p.innerHTML+="<div class='strow'><span class='sl'>"+rows[i][0]+"</span><span class='sv'>"+rows[i][1]+"</span></div>";
     p.innerHTML+="<button class='btn' id='prBtn' style='margin-top:8px;background:linear-gradient(135deg,#ff8f00,#ffd700);color:#000'"+(S.rl<10?" disabled":"")+">🌟 Престиж"+(S.rl<10?" (Рейм 10+)":"")+"</button>";
     p.innerHTML+="<button class='danger' id='delBtn' style='margin-top:4px'>🗑️ Удалить</button>";
