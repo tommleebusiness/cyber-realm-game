@@ -696,7 +696,7 @@ function showBossFight(){
 }
 function winBoss(){
   var r=Math.floor(S.cb.cr*S.gm);
-  S.c+=r;S.bs++;S.bossKills++;
+  S.c+=r;S.ct+=r;S.rp+=r;S.bs++;S.bossKills++;
   flyText("+ "+fmt(r));
   S.cb=null;S.bh=0;
   id("bfight").style.display="none";
