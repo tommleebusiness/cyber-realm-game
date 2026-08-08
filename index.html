@@ -990,7 +990,7 @@ function showPanel(t){
             for(var i=0;i<Math.min(glb.players.length,10);i++){
               var r=glb.players[i];
               var medal=i<3?gmedals[i]:"#"+(i+1);
-              html+="<div class='strow'><span style='min-width:28px'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
+              var gIsMe=curUser&&r.name===curUser;html+="<div class='strow' style='"+(gIsMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"")+"'><span style='min-width:28px'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+(gIsMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎</span></div>";
             }
             var el=id("global-lb");
             if(el)el.innerHTML=html;
