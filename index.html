@@ -776,7 +776,7 @@ function doPrestige(){
   var oldPr=S.pr;
   var keepG=S.g,keepCraft=S.craft.slice(),keepCombo=S.comboMax,keepPets=S.pets.slice(),keepPet=S.activePet,keepSecrets=S.secrets.slice(),keepSkills=S.skills.slice();
   S.pr++;S.pp+=pts;S.totalPrestige++;
-  S.c=0;S.ct=0;S.cl=0;S.cp=1+S.pp*0.08;S.ps=0;S.gm=1+S.pp*0.05;S.luck=1;S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;S.ac=[];tapSinceBoss=0;S.bossCd=500;
+  S.c=0;S.ct=0;S.cl=0;S.cp=1+S.pp*0.08;S.ps=0;S.gm=1+S.pp*0.05;S.luck=1;S.rl=1;S.rp=0;S.rg=100;S.up={};S.cb=null;S.bh=0;S.ac=[];tapSinceBoss=0;S.bossCd=500;S.activeEvent=null;S.eventTimer=0;id("event-bar").style.display="none";
   S.g=keepG;S.craft=keepCraft;S.comboMax=keepCombo;S.pets=keepPets;S.activePet=keepPet;S.secrets=keepSecrets;S.skills=keepSkills;
   var ms=[{pr:1,bonus:"+8% тап"},{pr:3,bonus:"+15% доход"},{pr:5,bonus:"+20% босс-награды"},{pr:10,bonus:"x2 гемы"},{pr:25,bonus:"x5 всё"},{pr:50,bonus:"x10 всё"}];
   var unlocked=[];
@@ -801,14 +801,14 @@ function draw(){
 
 // === EVENTS ===
 var EVENTS=[
-  {n:"Кредитный Шторм",t:30,fn:function(){S.gm*=1.5;toast("⚡ x1.5 доход!")}},
+  {n:"Кредитный Шторм",t:30,fn:function(){S.gm*=1.5;toast("⚡ x1.5 доход!")},rv:function(){S.gm/=1.5}},
   {n:"Золотой Дождь",t:20,fn:function(){var g=Math.floor(S.g*0.1)+5;S.g+=g;toast("💎 +"+g+" гемов!")}},
-  {n:"Время Удачи",t:45,fn:function(){S.luck+=0.5;toast("🍀 Удача +50%!")}},
-  {n:"Множитель x2",t:25,fn:function(){S.gm*=2;toast("🔥 x2 множитель!")}},
+  {n:"Время Удачи",t:45,fn:function(){S.luck+=0.5;toast("🍀 Удача +50%!")},rv:function(){S.luck-=0.5}},
+  {n:"Множитель x2",t:25,fn:function(){S.gm*=2;toast("🔥 x2 множитель!")},rv:function(){S.gm/=2}},
   {n:"Плитка Босса",t:15,fn:function(){spawnBoss();toast("👹 Босс призван!")}}
 ];
 function triggerEvent(){if(S.activeEvent)return;var e=EVENTS[Math.floor(Math.random()*EVENTS.length)];S.activeEvent=e;S.eventTimer=e.t;e.fn();toast("⚡ "+e.n);draw()}
-function tickEvents(){if(S.activeEvent){S.eventTimer--;id("event-bar").textContent=S.activeEvent.n+" ("+S.eventTimer+"с)";id("event-bar").style.display=S.eventTimer>0?"block":"none";if(S.eventTimer<=0){S.activeEvent=null;id("event-bar").style.display="none"}}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
+function tickEvents(){if(S.activeEvent){S.eventTimer--;id("event-bar").textContent=S.activeEvent.n+" ("+S.eventTimer+"с)";id("event-bar").style.display=S.eventTimer>0?"block":"none";if(S.eventTimer<=0){var evn=S.activeEvent.n;if(S.activeEvent.rv)S.activeEvent.rv();S.activeEvent=null;id("event-bar").style.display="none";toast("⏳ "+evn+" закончился!")}}if(!S.activeEvent&&Math.random()<0.0003)triggerEvent()}
 
 // === DAILY QUESTS ===
 function genDaily(){var day=Math.floor(Date.now()/86400000);S.dailyDay=day;S.dailyQ=[];S.dailyP=[];S.dailyAllBonus=false;var types=["tap","boss","upgrade","combo"];var used={};for(var i=0;i<3;i++){var ti;do{ti=Math.floor(Math.random()*types.length)}while(used[ti]&&Object.keys(used).length<types.length);used[ti]=true;var tgt,rw;if(types[ti]==="tap"){tgt=50+Math.floor(day%20)*10;rw=5+Math.floor(day%7)}else if(types[ti]==="boss"){tgt=1+Math.floor(day%3);rw=10+Math.floor(day%5)*2}else if(types[ti]==="upgrade"){tgt=2+Math.floor(day%3);rw=8+Math.floor(day%4)}else{tgt=5+Math.floor(day%4);rw=5+Math.floor(day%3)}var nm=types[ti]==="tap"?"Тапни "+tgt+" раз":types[ti]==="boss"?"Убей "+tgt+" босса":types[ti]==="upgrade"?"Купи "+tgt+" улучш.":"Комбо x"+tgt;S.dailyQ.push({type:types[ti],name:nm,target:tgt,reward:rw});S.dailyP.push(0)}}
