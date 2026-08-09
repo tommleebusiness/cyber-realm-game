@@ -563,9 +563,9 @@ function tap(){
     
     // Skill: Crit
     var critLvl=getSkillLvl("crit");
-    var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0);
-    var critDmg=1.5+(critLvl||0)*0.3;
-    if((critLvl>0||S.activePet===3)&&Math.random()<critChance/100){
+    var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0)+((S.critChance||5)-5);
+    var critDmg=1.5+(critLvl||0)*0.3+((S.critDmg||2)-2);
+    if((critLvl>0||S.activePet===3||(S.critChance||5)>5)&&Math.random()<critChance/100){
       dmg=Math.floor(dmg*critDmg);
       showCritText();playSound("crit");
     }
@@ -731,8 +731,8 @@ function flyText(t){playSound("coin");
 function attackBoss(){
   var dmg=Math.floor(S.cp*S.gm);
   var critLvl=getSkillLvl("crit");
-  var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0);
-  if((critLvl>0||S.activePet===3)&&Math.random()<critChance/100)dmg=Math.floor(dmg*(1.5+critLvl*0.3));
+  var critChance=3+(critLvl||0)*2+(S.activePet===3?10:0)+((S.critChance||5)-5);
+  if((critLvl>0||S.activePet===3||(S.critChance||5)>5)&&Math.random()<critChance/100)dmg=Math.floor(dmg*((1.5+critLvl*0.3)+((S.critDmg||2)-2)));
   var bossLvl=getSkillLvl("boss");
   if(bossLvl>0)dmg=Math.floor(dmg*(1+(10+bossLvl*5)/100));
   if(S.activePet===6)dmg=Math.floor(dmg*1.15);
