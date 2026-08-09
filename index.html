@@ -1048,7 +1048,7 @@ function bindAuth() {
     if(!u||!p){amsg("Заполни поля","err");return}
     if(!users[u]){amsg("Не найден","err");return}
     if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
-    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();showScreen("game");amsg("");
+    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");amsg("");
   };
   el = id("areg"); if (el) el.onclick = function(){
     var u=id("au").value.trim(),p=id("ap").value;
@@ -1057,7 +1057,7 @@ function bindAuth() {
     if(p.length<4){amsg("Мин. 4 символа","err");return}
     if(users[u]){amsg("Имя занято","err");return}
     users[u]={pass:hv(p),created:Date.now(),lastLogin:Date.now()};saveUsers();
-    curUser=u;initGame();checkDailyReward();draw();showScreen("game");amsg("Создано!","ok");
+    curUser=u;initGame();checkDailyReward();saveGame();draw();showScreen("game");amsg("Создано!","ok");
   };
   // Enter in login fields submits login (mobile "Go"/"Done" keys fire keydown Enter)
   var auEl=id("au"),apEl=id("ap");
@@ -1335,7 +1335,7 @@ function initAll() {
   
   // Try to auto-login last user
   var lastUser=localStorage.getItem("cr_last");
-  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();checkDailyReward();claimOffline();showScreen("game")}
+  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game")}
   else{showScreen("login")}
   
   draw();
