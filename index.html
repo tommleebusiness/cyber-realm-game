@@ -964,7 +964,7 @@ function showPanel(t){
         var r=lb[i],isMe=r.name===curUser;
         var medal=i<3?medals[i]:"#"+(i+1);
         var bg=isMe?"background:rgba(255,215,0,.08);border-left:2px solid #ffd700":"";
-        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+r.pr+"</span></span></div>";
+        p.innerHTML+="<div class='strow' style='"+bg+"'><span style='min-width:32px;font-weight:bold;color:"+(i<3?"#ffd700":"#888")+"'>"+medal+"</span><span class='sv' style='text-align:left'>"+esc(r.name)+(isMe?" (ты)":"")+"</span><span class='sv' style='text-align:right'>"+fmt(r.credits)+"💎<br><span style='font-size:8px;color:#555'>🌀"+r.level+" ⭐"+(r.prestige||r.pr||0)+"</span></span></div>";
       }
     }
     
