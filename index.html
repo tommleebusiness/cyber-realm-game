@@ -694,6 +694,7 @@ function showBossFight(){
   id("bf-rw").textContent="Награда: "+fmt(Math.floor(S.cb.cr*S.gm))+"💎";
   updateBossHP();
 }
+function restoreBossFight(){if(S.cb&&S.bh>0){showBossFight()}else if(S.cb){S.cb=null;S.bh=0;draw()}}
 function winBoss(){
   var r=Math.floor(S.cb.cr*S.gm);
   S.c+=r;S.ct+=r;S.rp+=r;S.bs++;S.bossKills++;
@@ -1048,7 +1049,7 @@ function bindAuth() {
     if(!u||!p){amsg("Заполни поля","err");return}
     if(!users[u]){amsg("Не найден","err");return}
     if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
-    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");amsg("");
+    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");restoreBossFight();amsg("");
   };
   el = id("areg"); if (el) el.onclick = function(){
     var u=id("au").value.trim(),p=id("ap").value;
@@ -1342,7 +1343,7 @@ function initAll() {
   
   // Try to auto-login last user
   var lastUser=localStorage.getItem("cr_last");
-  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game")}
+  if(lastUser&&users[lastUser]){curUser=lastUser;loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");restoreBossFight()}
   else{showScreen("login")}
   
   draw();
