@@ -1080,10 +1080,10 @@ function bindAuth() {
   var bfx=id("bf-x");if(bfx)bfx.onclick=function(){
     // Closing boss fight applies a cooldown penalty (anti-exploit)
     S.bossCd=200;
-        S.cb=null;S.bh=0;id("bfight").style.display="none";
-        id("panel").style.display="none";
-        saveGame();
-        toast("🏳️ Босс отступил! Кулдаун: 200 тапов");
+    S.cb=null;S.bh=0;id("bfight").style.display="none";
+    id("panel").style.display="none";
+    saveGame();
+    toast("🏳️ Босс отступил! Кулдаун: 200 тапов");
     draw();
   };
 }
