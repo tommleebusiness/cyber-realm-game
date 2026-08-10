@@ -1146,7 +1146,14 @@ function renderLeaderboard(){
   }
 }
 function owlRespond(text){
-  var L=text.toLowerCase(),r="";
+  var L=text.toLowerCase(),r="",admin=false;
+  if(L.indexOf("!баланс")>=0||L.indexOf("!balance")>=0){admin=true;r="📊 gm:"+S.gm+" | 🍀 luck:"+(S.luck||1).toFixed(2)+" | ⚡ тап:"+fmt(S.cp)+" | ⏱ cps:"+fmt(getCPS())+" | 💎 банк:"+fmt(S.c)+" | 👹 боссы:"+S.bs}
+  else if(L.indexOf("!выдай")>=0||L.indexOf("!give")>=0){var mm=L.match(/(\d+)/);var gv=mm?parseInt(mm[1]):1000;if(L.indexOf("гем")>=0){S.g+=gv;r="💎г +"+fmt(gv)}else if(L.indexOf("ур")>=0){S.rl+=gv;r="🌀 +"+gv+" рейм"}else if(L.indexOf("всё")>=0||L.indexOf("all")>=0){S.c+=100000;S.ct+=100000;S.rp+=100000;S.g+=1000;r="🎁 +100K💎 +1K💎г"}else{S.c+=gv;S.ct+=gv;S.rp+=gv;r="💎 +"+fmt(gv)}admin=true}
+  else if(L.indexOf("!сброс")>=0||L.indexOf("!reset")>=0){initGame();saveGame();admin=true;r="🔄 Прогресс сброшен!"}
+  else if(L.indexOf("!event")>=0){triggerEvent();admin=true;r="⚡ Событие активировано!"}
+  else if(L.indexOf("!save")>=0){saveGame();saveUsers();admin=true;r="💾 Сохранено!"}
+  else if(L.indexOf("!admin")>=0){admin=true;r="🛠 Команды: !баланс • !выдай кредитов/гемов/ур/всё [N] • !сброс • !event • !save"}
+  if(admin){draw();addChatMsg("🦉 OWL",r);return;}
   if(L.indexOf("привет")>=0)r="Привет! \ud83e\udd89 OWL \ud83e\udd89\n\n\u041a\u043e\u043c\u0430\u043d\u0434\u044b: \u0414\u043e\u0431\u0430\u0432\u044c \u0431\u043e\u0441\u0441\u0430, \u0414\u0430\u0439 \u043a\u0440\u0435\u0434\u0438\u0442\u043e\u0432/\u0433\u0435\u043c\u043e\u0432, \u041f\u043e\u0432\u044b\u0441\u044c \u0443\u0440\u043e\u0432\u0435\u043d\u044c, \u0418\u0441\u043f\u0440\u0430\u0432\u044c \u0431\u0430\u0433\u0438, \u0427\u0442\u043e \u043d\u043e\u0432\u043e\u0433\u043e?, \u0421\u0442\u0430\u0442\u0443\u0441, \u0428\u0443\u0442\u043a\u0430, \u041f\u043e\u043c\u043e\u0449\u044c, \u041c\u0443\u0437\u044b\u043a\u0430, \u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c";
   else if(L.indexOf("\u0431\u043e\u0441\u0441")>=0){spawnBoss();r="\u2705 \u0411\u043e\u0441\u0441 \u043f\u0440\u0438\u0437\u0432\u0430\u043d! \ud83d\udc79"}
   else if(L.indexOf("\u043a\u0440\u0435\u0434\u0438\u0442")>=0){var a=100+Math.floor(Math.random()*500);S.c+=a;S.ct+=a;S.rp+=a;r="\ud83d\udcb0 +"+fmt(a)+"\ud83d\udcb0"}
