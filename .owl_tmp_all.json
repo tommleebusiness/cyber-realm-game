@@ -1,0 +1,88 @@
+[
+  {
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1",
+    "repository_url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game",
+    "labels_url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1/labels{/name}",
+    "comments_url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1/comments",
+    "events_url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1/events",
+    "html_url": "https://github.com/tommleebusiness/cyber-realm-game/issues/1",
+    "id": 4606665491,
+    "node_id": "I_kwDOSwOJAM8AAAABEpQjEw",
+    "number": 1,
+    "title": "🦉 OWL Chat — Задачи для разработчика",
+    "user": {
+      "login": "tommleebusiness",
+      "id": 263088394,
+      "node_id": "U_kgDOD65pCg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/263088394?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/tommleebusiness",
+      "html_url": "https://github.com/tommleebusiness",
+      "followers_url": "https://api.github.com/users/tommleebusiness/followers",
+      "following_url": "https://api.github.com/users/tommleebusiness/following{/other_user}",
+      "gists_url": "https://api.github.com/users/tommleebusiness/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/tommleebusiness/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/tommleebusiness/subscriptions",
+      "organizations_url": "https://api.github.com/users/tommleebusiness/orgs",
+      "repos_url": "https://api.github.com/users/tommleebusiness/repos",
+      "events_url": "https://api.github.com/users/tommleebusiness/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/tommleebusiness/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "labels": [
+      {
+        "id": 11172654699,
+        "node_id": "LA_kwDOSwOJAM8AAAACmfEuaw",
+        "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/replied",
+        "name": "replied",
+        "color": "ededed",
+        "default": false,
+        "description": null
+      }
+    ],
+    "state": "open",
+    "locked": false,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 6,
+    "created_at": "2026-06-07T08:19:06Z",
+    "updated_at": "2026-08-04T06:08:44Z",
+    "closed_at": null,
+    "assignee": null,
+    "author_association": "OWNER",
+    "active_lock_reason": null,
+    "sub_issues_summary": {
+      "total": 0,
+      "completed": 0,
+      "percent_completed": 0
+    },
+    "issue_dependencies_summary": {
+      "blocked_by": 0,
+      "total_blocked_by": 0,
+      "blocking": 0,
+      "total_blocking": 0
+    },
+    "body": "## 🦉 OWL Chat\n\nЭто issue для ставления задач разработчику (OWL).\n\n### Как ставить задачи:\nНапишите комментарий с вашим запросом, например:\n- \"Добавь новое достижение за 1000 тапов\"\n- \"Исправь баг с кнопкой\"\n- \"Добавь нового босса\"\n\n### Текущая версия: v7.30\n### Игра: https://tommleebusiness.github.io/cyber-realm-game/\n\n_OWL ответит на вашу задачу в течение нескольких минут!_ 🦉",
+    "closed_by": null,
+    "reactions": {
+      "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "timeline_url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/issues/1/timeline",
+    "performed_via_github_app": null,
+    "state_reason": null,
+    "pinned_comment": null
+  }
+]

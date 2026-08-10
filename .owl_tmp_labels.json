@@ -1,0 +1,101 @@
+[
+  {
+    "id": 11133941065,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1SQ",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/bug",
+    "name": "bug",
+    "color": "d73a4a",
+    "default": true,
+    "description": "Something isn't working"
+  },
+  {
+    "id": 11133941105,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1cQ",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation"
+  },
+  {
+    "id": 11133941124,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1hA",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/duplicate",
+    "name": "duplicate",
+    "color": "cfd3d7",
+    "default": true,
+    "description": "This issue or pull request already exists"
+  },
+  {
+    "id": 11133941151,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1nw",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/enhancement",
+    "name": "enhancement",
+    "color": "a2eeef",
+    "default": true,
+    "description": "New feature or request"
+  },
+  {
+    "id": 11133941185,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1wQ",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/good%20first%20issue",
+    "name": "good first issue",
+    "color": "7057ff",
+    "default": true,
+    "description": "Good for newcomers"
+  },
+  {
+    "id": 11133941167,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J1rw",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/help%20wanted",
+    "name": "help wanted",
+    "color": "008672",
+    "default": true,
+    "description": "Extra attention is needed"
+  },
+  {
+    "id": 11133941205,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J11Q",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/invalid",
+    "name": "invalid",
+    "color": "e4e669",
+    "default": true,
+    "description": "This doesn't seem right"
+  },
+  {
+    "id": 11164599625,
+    "node_id": "LA_kwDOSwOJAM8AAAACmXZFSQ",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/owl-chat",
+    "name": "owl-chat",
+    "color": "ededed",
+    "default": false,
+    "description": null
+  },
+  {
+    "id": 11133941221,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J15Q",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/question",
+    "name": "question",
+    "color": "d876e3",
+    "default": true,
+    "description": "Further information is requested"
+  },
+  {
+    "id": 11172654699,
+    "node_id": "LA_kwDOSwOJAM8AAAACmfEuaw",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/replied",
+    "name": "replied",
+    "color": "ededed",
+    "default": false,
+    "description": null
+  },
+  {
+    "id": 11133941235,
+    "node_id": "LA_kwDOSwOJAM8AAAACl6J18w",
+    "url": "https://api.github.com/repos/tommleebusiness/cyber-realm-game/labels/wontfix",
+    "name": "wontfix",
+    "color": "ffffff",
+    "default": true,
+    "description": "This will not be worked on"
+  }
+]
