@@ -894,7 +894,7 @@ function showPanel(t){
     id("panT").textContent="🔧 Крафт";
     for(var i=0;i<CRAFT.length;i++){
       var c=CRAFT[i],owned=S.craft.indexOf(c.id)>=0,can=!owned&&S.c>=c.cost.c&&S.g>=c.cost.g;
-      p.innerHTML+="<div class='"+(can?"card can":"card")+(owned?" done":"")+"' data-ci='"+i+"'><div class='h'><span class='nm'>"+c.n+"</span><span class='lv'>"+c.cost.g+"💎</span></div><div class='d'>"+c.d+"</div><div class='c'>"+(owned?"СДЕЛАНО ✓":(can?fmt(c.cost.c)+"💎":"Нужно: "+fmt(c.cost.c)+"💎"))+"</div></div>";
+      p.innerHTML+="<div class='"+(can?"card can":"card")+(owned?" done":"")+"' data-ci='"+i+"'><div class='h'><span class='nm'>"+c.n+"</span><span class='lv'>"+fmt(c.cost.g)+"💎г</span></div><div class='d'>"+c.d+"</div><div class='c'>"+(owned?"СДЕЛАНО ✓":(can?fmt(c.cost.c)+"💎":"Нужно: "+fmt(c.cost.c)+"💎"))+"</div></div>";
     }
     var cc=p.querySelectorAll(".card");
     for(var i=0;i<cc.length;i++){
@@ -908,12 +908,12 @@ function showPanel(t){
       }
     }
   }else if(t==="sk"){
-    id("panT").textContent="⚡ Скиллы (💎"+fmt(S.g)+")";
+    id("panT").textContent="⚡ Скиллы ("+fmt(S.g)+"💎г)";
     for(var i=0;i<SKILLS.length;i++){
       var s=SKILLS[i],lvl=0;
       for(var j=0;j<S.skills.length;j++){if(S.skills[j].id===s.id){lvl=S.skills[j].lvl;break;}}
       var cost=Math.floor(s.bc*Math.pow(s.cm,lvl)),can=lvl<s.maxLv&&S.g>=cost;
-      p.innerHTML+="<div class='"+(can?"card can":"card")+(lvl>=s.maxLv?" done":"")+"' data-skill='"+s.id+"'><div class='h'><span class='nm'>"+s.n+"</span><span class='lv'>Ур."+lvl+"/"+s.maxLv+"</span></div><div class='d'>"+s.desc(lvl)+"</div><div class='c'>"+(lvl>=s.maxLv?"МАКС ✓":cost+"💎")+"</div></div>";
+      p.innerHTML+="<div class='"+(can?"card can":"card")+(lvl>=s.maxLv?" done":"")+"' data-skill='"+s.id+"'><div class='h'><span class='nm'>"+s.n+"</span><span class='lv'>Ур."+lvl+"/"+s.maxLv+"</span></div><div class='d'>"+s.desc(lvl)+"</div><div class='c'>"+(lvl>=s.maxLv?"МАКС ✓":cost+"💎г")+"</div></div>";
     }
     var scards=p.querySelectorAll(".card");
     for(var i=0;i<scards.length;i++){
