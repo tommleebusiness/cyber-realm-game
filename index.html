@@ -52,7 +52,7 @@ header h1{font-size:14px;letter-spacing:3px;text-shadow:0 0 8px #0ff}
 #parts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10}
 .pt{position:absolute;font-size:14px;font-weight:bold;animation:fly .8s ease-out forwards;pointer-events:none}
 @keyframes fly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
-#tpbtn{width:150px;height:150px;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2);touch-action:manipulation}
+#tpbtn{width:150px;height:150px;border-radius:50%;border:3px solid #0ff;background:radial-gradient(circle at 35% 35%,rgba(0,255,255,.2),#0a0a2a 70%);color:#0ff;font-size:16px;cursor:pointer;box-shadow:0 0 20px rgba(0,255,255,.2);touch-action:manipulation;-webkit-touch-callout:none}
 #tpbtn:active{transform:scale(.9)}
 #tpinfo{font-size:13px;color:#0f0;margin:8px 0;min-height:18px;text-align:center}
 #tpinfo.bonus{color:#ffd700}
@@ -1230,6 +1230,22 @@ document.addEventListener("keydown",function(e){
   tap();
   vibratePattern("tap");
 });
+
+// === HOLD-TO-TAP ===
+// Hold the tap button to keep tapping (mobile long-press; quick taps unchanged).
+(function(){
+  var tp=id("tpbtn");if(!tp)return;
+  var holdTimer=null,holdIv=null;
+  function stopHold(){if(holdTimer){clearTimeout(holdTimer);holdTimer=null}if(holdIv){clearInterval(holdIv);holdIv=null}}
+  function holdTick(){if(curUser&&id("game-scr").style.display==="flex")tap()}
+  tp.addEventListener("pointerdown",function(){
+    if(holdTimer||holdIv)return;
+    holdTimer=setTimeout(function(){holdTimer=null;holdIv=setInterval(holdTick,70)},250);
+  });
+  tp.addEventListener("pointerup",stopHold);
+  tp.addEventListener("pointercancel",stopHold);
+  tp.addEventListener("pointerleave",stopHold);
+})();
 
 // === BACKGROUND ===
 function initBg(){
