@@ -1207,7 +1207,7 @@ setInterval(function(){
     tickEvents();draw();
   },1000);
 setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active");id("combo-display").className="";if(comboTimer){clearTimeout(comboTimer);comboTimer=null}}draw()},2000);
-setInterval(function(){localStorage.setItem("cr_t",Date.now().toString())},10000);
+setInterval(function(){if(curUser)localStorage.setItem("cr_t",Date.now().toString())},10000);
 setInterval(function(){
   if(S.combo>1&&S.lastTapTime>0){
     var elapsed=Date.now()-S.lastTapTime;
