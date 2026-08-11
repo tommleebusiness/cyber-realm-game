@@ -876,6 +876,8 @@ function showPanel(t){
   }else if(t==="ac"){
     id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
     for(var i=0;i<ACHS.length;i++){var a=ACHS[i],done=S.ac.indexOf(a.id)>=0;p.innerHTML+="<div class='ach"+(done?" done":"")+"'><span class='ic'>"+(done?"✅":"🔲")+"</span><div class='inf'><div class='an'>"+a.n+"</div></div><span class='ar'>"+(done?"Готово":"💎1")+"</span></div>"}
+    p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin:10px 0 4px'>🔓 Секреты ("+S.secrets.length+"/"+SECRETS.length+")</div>";
+    for(var si=0;si<SECRETS.length;si++){var s=SECRETS[si],sFound=S.secrets.indexOf(s.id)>=0;p.innerHTML+="<div class='ach"+(sFound?" done":"")+"'><span class='ic'>"+(sFound?"🔓":"🔒")+"</span><div class='inf'><div class='an'>Секрет "+(si+1)+"</div><div style='color:#5a6a7a;font-size:8px'>"+s.h+"</div></div><span class='ar'>"+(sFound?"+"+s.r+"💎г":"?")+"</span></div>"}
   }else if(t==="qu"){
     id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
     p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания · 🔥 Стрик: "+(S.dailyStreak||0)+" дн.</div>";
