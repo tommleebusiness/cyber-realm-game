@@ -1226,6 +1226,10 @@ document.addEventListener("keydown",function(e){
   // Only tap while logged in and on the game screen.
   if(!curUser)return;
   if(id("game-scr").style.display!=="flex")return;
+  // Never tap through full-screen overlays (panel/chat/boss fight).
+  if(id("panel").style.display==="flex")return;
+  if(id("chat-scr").style.display==="flex")return;
+  if(id("bfight").style.display==="flex")return;
   if(e.key===" "||e.key==="Enter"){e.preventDefault();}
   tap();
   vibratePattern("tap");
