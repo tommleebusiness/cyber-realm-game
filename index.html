@@ -881,7 +881,7 @@ function showPanel(t){
     for(var si=0;si<SECRETS.length;si++){var s=SECRETS[si],sFound=S.secrets.indexOf(s.id)>=0;p.innerHTML+="<div class='ach"+(sFound?" done":"")+"'><span class='ic'>"+(sFound?"🔓":"🔒")+"</span><div class='inf'><div class='an'>Секрет "+(si+1)+"</div><div style='color:#5a6a7a;font-size:8px'>"+s.h+"</div></div><span class='ar'>"+(sFound?"+"+s.r+"💎г":"?")+"</span></div>"}
   }else if(t==="qu"){
     id("panT").textContent="🎯 Квесты ("+completedQuests.length+"/"+QUESTS.length+")";
-    p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания · 🔥 Стрик: "+(S.dailyStreak||0)+" дн.</div>";
+    p.innerHTML+="<div style='color:#ffd700;font-size:10px;font-weight:bold;margin-bottom:4px'>📅 Ежедневные задания · 🔥 Стрик: "+(S.dailyStreak||0)+" дн. · ⏳ До сброса: "+(function(){var m=86400000-Date.now()%86400000;return Math.floor(m/3600000)+"ч "+Math.floor(m%3600000/60000)+"м"})()+"</div>";
     var dqDone=0;for(var dci=0;dci<S.dailyQ.length;dci++){if(S.dailyQ[dci].done)dqDone++}
     p.innerHTML+="<div style='color:#00e676;font-size:9px;margin-bottom:4px'>🏆 Бонус за все задания: "+(S.dailyAllBonus?"ПОЛУЧЕН ✓":"+5000💎 +50💎г · Выполнено "+dqDone+"/"+S.dailyQ.length)+"</div>";
     for(var di=0;di<S.dailyQ.length;di++){
