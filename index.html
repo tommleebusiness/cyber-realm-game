@@ -871,7 +871,7 @@ function showPanel(t){
     }else{
       var rem=Math.max(0,getBossInterval()-tapSinceBoss);
       p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:40px;opacity:.3'>👹</div><div style='color:#ffd700;font-size:18px;font-weight:bold;margin:8px 0'>"+rem+" тапов</div><div style='color:#5a6a7a;font-size:10px'>Каждые "+getBossInterval()+" тапов</div><div style='margin-top:6px;color:#00e676;font-size:11px;font-weight:bold'>⚡ Урон тапа: "+fmt(S.cp*S.gm)+"</div></div>";
-      if(S.rl>=3){p.innerHTML+="<button class='atk-btn' id='sb' style='margin-top:10px'>⚔️ Призвать</button>";id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}
+      if(S.rl>=3){if(S.bossCd>0){p.innerHTML+="<div style='margin-top:10px;color:#5a6a7a;font-size:10px'>⏳ Кулдаун: "+S.bossCd+" тапов</div>"}else{p.innerHTML+="<button class='atk-btn' id='sb' style='margin-top:10px'>⚔️ Призвать</button>";id("sb").onclick=function(){spawnBoss();id("panel").style.display="none";saveGame()}}}
     }
   }else if(t==="ac"){
     id("panT").textContent="🏆 Достижения ("+S.ac.length+"/"+ACHS.length+")";
