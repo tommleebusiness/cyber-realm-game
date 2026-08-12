@@ -1200,6 +1200,7 @@ id("chtabs").addEventListener("click",function(e){
 window.addEventListener("beforeunload",function(){saveGame()});
 setInterval(function(){saveGame()},30000);
 setInterval(function(){
+  if(!curUser||id("game-scr").style.display!=="flex")return;
   if(getCPS()>0){var inc=Math.floor(getCPS()*0.3);S.c+=inc;S.ct+=inc;S.rp+=inc}
   var oldLvl=S.rl;
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
