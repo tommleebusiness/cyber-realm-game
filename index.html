@@ -1071,7 +1071,7 @@ function bindAuth() {
   el = id("lout"); if (el) el.onclick = function(){saveGame();curUser=null;showScreen("login")};
   el = id("cChat"); if (el) el.onclick = function(){showScreen("game")};
   el = id("pcan"); if (el) el.onclick = function(){id("panel").style.display="none"};
-  el = id("tpbtn"); if (el) el.addEventListener("click",tap);
+  el = id("tpbtn"); if (el) el.addEventListener("click",function(){if(holdSuppressTap){holdSuppressTap=false;return}tap()});
   // Password show/hide toggle
   el = id("pw-toggle"); if (el) el.onclick = function(){
     var pw=id("ap");
@@ -1246,6 +1246,7 @@ document.addEventListener("keydown",function(e){
 
 // === HOLD-TO-TAP ===
 // Hold the tap button to keep tapping (mobile long-press; quick taps unchanged).
+var holdSuppressTap=false; // set on hold-release so the release click is swallowed (no extra tap)
 (function(){
   var tp=id("tpbtn");if(!tp)return;
   var holdTimer=null,holdIv=null;
@@ -1255,7 +1256,7 @@ document.addEventListener("keydown",function(e){
     if(holdTimer||holdIv)return;
     holdTimer=setTimeout(function(){holdTimer=null;holdIv=setInterval(holdTick,70)},250);
   });
-  tp.addEventListener("pointerup",stopHold);
+  tp.addEventListener("pointerup",function(){var h=!!holdIv;stopHold();if(h)holdSuppressTap=true});
   tp.addEventListener("pointercancel",stopHold);
   tp.addEventListener("pointerleave",stopHold);
 })();
