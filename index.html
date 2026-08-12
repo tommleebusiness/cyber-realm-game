@@ -1052,7 +1052,7 @@ function bindAuth() {
     if(!u||!p){amsg("Заполни поля","err");return}
     if(!users[u]){amsg("Не найден","err");return}
     if(users[u].pass!==hv(p)){amsg("Неверный пароль","err");return}
-    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");restoreBossFight();amsg("");
+    curUser=u;users[u].lastLogin=Date.now();saveUsers();loadGame();checkDailyReward();claimOffline();saveGame();showScreen("game");restoreBossFight();draw();amsg("");
   };
   el = id("areg"); if (el) el.onclick = function(){
     var u=id("au").value.trim(),p=id("ap").value;
