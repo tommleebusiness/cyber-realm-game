@@ -1221,6 +1221,13 @@ setInterval(function(){
 // === KEYBOARD SUPPORT ===
 // Desktop players can tap with Space/Enter (same as tapping the button).
 document.addEventListener("keydown",function(e){
+  // Escape closes the topmost overlay (boss fight > chat > panel) via its own close button.
+  if(e.key==="Escape"){
+    if(id("bfight").style.display==="flex"){id("bf-x").click();return;}
+    if(id("chat-scr").style.display==="flex"){id("cChat").click();return;}
+    if(id("panel").style.display==="flex"){id("pcan").click();return;}
+    return;
+  }
   // Never hijack keys while the user is typing in a text field/password.
   var t=e.target&&e.target.tagName;
   if(t==="INPUT"||t==="TEXTAREA")return;
