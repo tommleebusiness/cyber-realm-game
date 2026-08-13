@@ -705,7 +705,7 @@ function winBoss(){
   updateDQ("boss",1);
   if(S.comboMax>=100&&S.secrets.indexOf("combo_king")<0){S.secrets.push("combo_king");S.g+=50;toast("🔓 Комбо-Король!")}
   if(id("panel").style.display==="flex"&&id("panT").textContent.indexOf("Боссы")>=0)showPanel("bo");
-  chkAch();draw();saveGame();
+  checkPets();chkAch();draw();saveGame();
 }
 function surrenderBoss(){
   var penaltyC=Math.floor(S.c*0.1);
@@ -767,7 +767,7 @@ function chkAch(){
   for(var i=0;i<SECRETS.length;i++){var s=SECRETS[i];if(S.secrets.indexOf(s.id)<0&&s.ck()){S.secrets.push(s.id);S.g+=s.r;toast("🔓 Секрет: "+s.n+"!");showAchPopup("🔓 Секрет: "+s.n,"+"+s.r+"💎г");playSound("level")}}
 }
 function chkQuests(){for(var i=0;i<QUESTS.length;i++){var q=QUESTS[i];if(completedQuests.indexOf(q.id)>=0)continue;if(q.ck()){completedQuests.push(q.id);if(!S.completedQuests)S.completedQuests=[];S.completedQuests.push(q.id);S.c+=q.r.c;S.ct+=q.r.c;S.rp+=q.r.c;toast("🎯 "+q.n+"!");draw()}}}
-function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}}
+function checkPets(){for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0&&PETS[i].ck()){S.pets.push(i+1);toast("🐾 "+PETS[i].n+"!")}}if(S.pets.length>=PETS.length&&S.secrets.indexOf("pet_master")<0){S.secrets.push("pet_master")}}
 function unlockRandomPet(){var locked=[];for(var i=0;i<PETS.length;i++){if(S.pets.indexOf(i+1)<0)locked.push(i+1);}if(locked.length>0){var r=locked[Math.floor(Math.random()*locked.length)];S.pets.push(r);toast("🐾 "+PETS[r-1].n+"!")}}
 
 // === PRESTIGE ===
@@ -1010,6 +1010,7 @@ function showPanel(t){
     var addr="0xC3a92F52E39aaa4B86011d877b40B80Dc39313Ff";
     p.innerHTML="<div style='text-align:center;padding:15px'><div style='font-size:32px'>💎</div><div style='color:#ffd700;font-size:13px;font-weight:bold'>Крипто-донат</div><div style='background:rgba(0,0,0,.3);border-radius:6px;padding:6px;margin:6px 0;color:#00e5ff;font-size:9px;word-break:break-all;cursor:pointer' id='da'>"+addr+"</div><button class='btn' id='cb' style='background:linear-gradient(135deg,#00b8d4,#00e5ff);color:#000'>📋 Копировать</button></div>";
     var cp=function(){navigator.clipboard.writeText(addr);toast("✅ Скопировано!")};id("da").onclick=cp;id("cb").onclick=cp;
+  if(S.secrets.indexOf("explorer")<0){S.secrets.push("explorer");chkAch();}
   }
 }
 
@@ -1206,6 +1207,7 @@ setInterval(function(){
   while(S.rp>=S.rg){S.rp-=S.rg;S.rl++;S.rg=Math.floor(S.rg*1.2);S.cp+=Math.ceil(S.rl*0.15);S.ps+=S.rl*0.08;}
   if(S.rl>oldLvl){var rlvl=id("rlv");addClass(rlvl,"lvlflash");setTimeout(function(){remClass(rlvl,"lvlflash")},700);playSound("level");toast("РЕЙМ "+(S.rl-oldLvl>1?"+"+(S.rl-oldLvl):"")+"!")}
   if(curUser&&id("game-scr").style.display==="flex")S.playSec=(S.playSec||0)+1;
+    if((S.playSec||0)>=600&&S.secrets.indexOf("patience")<0){S.secrets.push("patience");chkAch();}
     tickEvents();draw();
   },1000);
 setInterval(function(){if(S.combo>0&&Date.now()-S.lastTapTime>2000){S.combo=0;remClass(id("combo-bar"),"active");id("combo-display").className="";if(comboTimer){clearTimeout(comboTimer);comboTimer=null}}draw()},2000);
